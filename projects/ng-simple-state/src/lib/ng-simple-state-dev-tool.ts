@@ -3,12 +3,12 @@ import { NgSimpleStateConfig, NG_SIMPLE_STORE_CONFIG } from "./ng-simple-state-m
 
 
 @Injectable({ providedIn: 'root' })
-export abstract class NgSimpleStateDevTool {
+export class NgSimpleStateDevTool {
 
     private globalDevtools: any = window["__REDUX_DEVTOOLS_EXTENSION__"] || window["devToolsExtension"];
     private localDevTool: any;
 
-    constructor(@Inject(NG_SIMPLE_STORE_CONFIG) @Optional() private config: NgSimpleStateConfig) {
+    constructor(@Inject(NG_SIMPLE_STORE_CONFIG) @Optional() private config?: NgSimpleStateConfig) {
         if (this.config && this.config.enableDevTool && this.globalDevtools) {
             this.localDevTool = this.globalDevtools.connect({
                 name: 'NgSimpleState'
