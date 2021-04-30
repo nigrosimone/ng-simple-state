@@ -6,6 +6,7 @@ import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 class DevToolsExtension {
     name = null;
     state = null;
+    
     connect() {
         const self = this;
         return {
@@ -16,7 +17,6 @@ class DevToolsExtension {
         }
     }
 };
-window["devToolsExtension"] = new DevToolsExtension();
 
 export interface CounterState {
     count: number;
@@ -50,7 +50,8 @@ describe('NgSimpleState', () => {
     let service: CounterStore;
 
     beforeEach(() => {
-         service = new CounterStore(new NgSimpleStateDevTool({enableDevTool: true}));
+        window["devToolsExtension"] = new DevToolsExtension();
+        service = new CounterStore(new NgSimpleStateDevTool({enableDevTool: true}));
     });
 
 
@@ -110,6 +111,18 @@ describe('NgSimpleState', () => {
 
     it('no dev tool', (done) => {
         const _service = new CounterStore(new NgSimpleStateDevTool({enableDevTool: false}));
+        _service.setState(() => ({ count: 5 }), 'test');
+        _service.selectState(state => state.count).subscribe(value => {
+            expect(value).toBe(5);
+            expect(_service.getCurrentState()).toEqual({count: 5});
+            expect(window["devToolsExtension"].name).toEqual(null);
+            expect(window["devToolsExtension"].state).toEqual(null);
+            done();
+        });
+    });
+
+    it('no dev tool 2', (done) => {
+        const _service = new CounterStore(new NgSimpleStateDevTool());
         _service.setState(() => ({ count: 5 }), 'test');
         _service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
