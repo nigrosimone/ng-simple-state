@@ -1,6 +1,6 @@
 {
   "name": "ng-simple-state",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Angular simple state manager.",
   "repository": {
     "type": "git",
