@@ -91,4 +91,15 @@ describe('NgSimpleState', () => {
             done();
         });
     });
+
+    it('decrement -> setState', (done) => {
+        service.setState(() => ({ count: 5 }), 'test');
+        service.selectState(state => state.count).subscribe(value => {
+            expect(value).toBe(5);
+            expect(service.getCurrentState()).toEqual({count: 5});
+            expect(window["devToolsExtension"].name).toBe('test');
+            expect(window["devToolsExtension"].state).toEqual({count: 5});
+            done();
+        });
+    });
 });
