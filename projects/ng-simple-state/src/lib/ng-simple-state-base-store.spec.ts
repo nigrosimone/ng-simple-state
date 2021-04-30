@@ -102,4 +102,22 @@ describe('NgSimpleState', () => {
             done();
         });
     });
+
+    it('completeState', () => {
+        service.completeState();
+        expect(service.getCurrentState()).toEqual({count: 1});
+    });
+
+    it('no dev tool', (done) => {
+        const _service = new CounterStore(new NgSimpleStateDevTool({enableDevTool: false}));
+        _service.setState(() => ({ count: 5 }), 'test');
+        _service.selectState(state => state.count).subscribe(value => {
+            expect(value).toBe(5);
+            expect(_service.getCurrentState()).toEqual({count: 5});
+            expect(window["devToolsExtension"].name).toEqual(null);
+            expect(window["devToolsExtension"].state).toEqual(null);
+            done();
+        });
+    });
+
 });
