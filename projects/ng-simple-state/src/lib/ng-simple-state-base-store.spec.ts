@@ -146,15 +146,20 @@ describe('NgSimpleState', () => {
     });
 
     it('no dev tool 4', (done) => {
-        window["devToolsExtension"] = { connect: () => {
-            return null;
-        }};
+        window["devToolsExtension"] = { 
+            name: null,
+            state: null,
+            connect: () => {
+                return null;
+            }
+        };
         const _service = new CounterStore(new NgSimpleStateDevTool());
         _service.setState(() => ({ count: 5 }), 'test');
         _service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
             expect(_service.getCurrentState()).toEqual({count: 5});
-            expect(window["devToolsExtension"]).toEqual(null);
+            expect(window["devToolsExtension"].name).toEqual(null);
+            expect(window["devToolsExtension"].state).toEqual(null);
             done();
         });
     });
