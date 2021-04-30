@@ -153,7 +153,7 @@ describe('NgSimpleState', () => {
                 return null;
             }
         };
-        const _service = new CounterStore(new NgSimpleStateDevTool());
+        const _service = new CounterStore(new NgSimpleStateDevTool({enableDevTool: true}));
         _service.setState(() => ({ count: 5 }), 'test');
         _service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
