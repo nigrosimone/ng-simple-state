@@ -3,6 +3,21 @@ import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 
+class DevToolsExtension {
+    name = null;
+    state = null;
+    connect() {
+        const self = this;
+        return {
+            send: (name: string, state: any) => {
+                self.name = name;
+                self.state = state;
+            }
+        }
+    }
+};
+window["devToolsExtension"] = new DevToolsExtension();
+
 export interface CounterState {
     count: number;
 }
@@ -52,6 +67,8 @@ describe('NgSimpleState', () => {
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(2);
             expect(service.getCurrentState()).toEqual({count: 2});
+            expect(window["devToolsExtension"].name).toBe('CounterStore.increment');
+            expect(window["devToolsExtension"].state).toEqual({count: 2});
             done();
         });
     });
@@ -61,8 +78,17 @@ describe('NgSimpleState', () => {
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(0);
             expect(service.getCurrentState()).toEqual({count: 0});
+            expect(window["devToolsExtension"].name).toBe('CounterStore.decrement');
+            expect(window["devToolsExtension"].state).toEqual({count: 0});
             done();
         });
     });
 
+    it('get state', (done) => {
+        service.state.subscribe(state => {
+            expect(state.count).toBe(1);
+            expect(service.getCurrentState()).toEqual({count: 1});
+            done();
+        });
+    });
 });
