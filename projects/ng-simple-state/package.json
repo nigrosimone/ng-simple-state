@@ -1,0 +1,25 @@
+{
+  "name": "ng-simple-state",
+  "version": "1.0.0",
+  "description": "Angular simple state manager.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nigrosimone/ng-simple-state.git"
+  },
+  "keywords": [
+    "angular"
+  ],
+  "author": "Simone Nigro <nigro.simone@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nigrosimone/ng-simple-state/issues"
+  },
+  "homepage": "https://github.com/nigrosimone/ng-simple-state",
+  "peerDependencies": {
+    "@angular/common": "^10.0.6",
+    "@angular/core": "^10.0.6"
+  },
+  "dependencies": {
+    "tslib": "^2.0.0"
+  }
+}
