@@ -123,7 +123,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
 ```ts
 import { Injectable } from "@angular/core";
-import { NgSimpleStateBaseStore } from "ng-simple-statei";
+import { NgSimpleStateBaseStore } from "ng-simple-state";
 import { Observable } from "rxjs";
 
 export interface CounterState {
