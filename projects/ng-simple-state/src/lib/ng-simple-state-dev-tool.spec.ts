@@ -1,6 +1,6 @@
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 
-class DevToolsExtension {
+export class DevToolsExtension {
     name = null;
     state = null;
     

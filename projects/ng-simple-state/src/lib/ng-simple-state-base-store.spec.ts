@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
-
 export interface CounterState {
     count: number;
 }
@@ -74,7 +73,7 @@ describe('NgSimpleStateBaseStore', () => {
     });
 
     it('decrement -> setState', (done) => {
-        service.setState(() => ({ count: 5 }), 'test');
+        service.setState(() => ({ count: 5 }));
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
             expect(service.getCurrentState()).toEqual({count: 5});
