@@ -10,13 +10,13 @@ See the [stackblitz demo](https://stackblitz.com/edit/demo-ng-simple-state?file=
 
 ## Get Started
 
-*Step 1*: install `ng-simple-state`
+### Step 1: install `ng-simple-state`
 
 ```bash
 npm i ng-simple-state
 ```
 
-*Step 2*: Import `NgConditionModule` into your app module, eg.:
+### Step 2: Import `NgConditionModule` into your app module, eg.:
 
 ```ts
 import { BrowserModule } from '@angular/platform-browser';
@@ -38,7 +38,7 @@ import { environment } from '../environments/environment';
 export class AppModule {}
 ```
 
-*Step 3*: Create your store
+### Step 3: Create your store
 
 This is an example for a counter store in a `src/app/counter-store.ts` file.
 
@@ -148,7 +148,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 ```
 
-*Step 3*: Inject your store into the providers of the module you want (or the providers of component), eg.:
+### Step 3: Inject your store into the providers of the module you want (or the providers of component), eg.:
 
 ```ts
 import { BrowserModule } from '@angular/platform-browser';
@@ -172,7 +172,7 @@ import { CounterStore } from './counter-store';
 export class AppModule {}
 ```
 
-*Step 4*: Use your store into the component, eg.:
+### Step 4: Use your store into the component, eg.:
 
 ```ts
 import { Component } from '@angular/core';
