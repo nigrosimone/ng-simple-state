@@ -22,7 +22,7 @@ export abstract class NgSimpleStateBaseStore<S> {
     }
 
     /**
-    * Set the store initial state
+    * Set into the store the initial state
     * @returns The state object
     */
     protected abstract initialState(): S;
