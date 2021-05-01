@@ -45,7 +45,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 
 
-describe('NgSimpleState', () => {
+describe('NgSimpleStateBaseStore', () => {
 
     let service: CounterStore;
 
