@@ -55,7 +55,7 @@ export interface CounterState {
 }
 ```
 
-2) Define yuor store service by extending `NgSimpleStateBaseStore`, eg.:
+2) Define your store service by extending `NgSimpleStateBaseStore`, eg.:
 
 ```ts
 import { Injectable } from "@angular/core";
