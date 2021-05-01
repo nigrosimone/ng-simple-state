@@ -173,7 +173,7 @@ import { CounterStore } from './counter-store';
 export class AppModule {}
 ```
 
-### Step 4: Use your store into the component, eg.:
+### Step 4: Use your store into the components, eg.:
 
 ```ts
 import { Component } from '@angular/core';
