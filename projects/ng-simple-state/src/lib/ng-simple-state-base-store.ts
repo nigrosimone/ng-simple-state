@@ -3,7 +3,97 @@ import { BehaviorSubject, Observable, asyncScheduler } from "rxjs";
 import { map, distinctUntilChanged, observeOn } from "rxjs/operators";
 import { NgSimpleStateDevTool } from "./ng-simple-state-dev-tool";
 
-
+/**
+ * ### Implementation
+ * 
+ * 1) Define yuor state interface:
+ * 
+ * ```ts
+ * export interface MyState {
+ *  myprop: string;
+ * }
+ * ```
+ * 
+ * 2) Define yuor store service by `NgSimpleStateBaseStore`, eg.:
+ * 
+ * ```ts
+ * export interface MyState {
+ *  myprop: string;
+ * }
+ * 
+ * @Injectable()
+ * export class MyStore extends NgSimpleStateBaseStore<MyState> {
+ * 
+ * }
+ * ```
+ * 
+ * 3) Implement `initialState()` method, eg.:
+ * 
+ * ```ts
+ * export interface MyState {
+ *  myprop: string;
+ * }
+ * 
+ * @Injectable()
+ * export class MyStore extends NgSimpleStateBaseStore<MyState> {
+ * 
+ *  initialState(): MyState {
+ *    return {
+ *      myprop: 'hello!'
+ *    };
+ *  }
+ *
+ * }
+ * ```
+ * 
+ * 4) Implement a selector, eg.:
+ * 
+ * ```ts
+ * export interface MyState {
+ *  myprop: string;
+ * }
+ * 
+ * @Injectable()
+ * export class MyStore extends NgSimpleStateBaseStore<MyState> {
+ * 
+ *  initialState(): MyState {
+ *    return {
+ *      myprop: 'hello!'
+ *    };
+ *  }
+ *
+ *  selectMyprop(): Observable<string> {
+ *    return this.selectState(state => state.myprop);
+ *  }
+ * }
+ * ```
+ * 
+ * 5) Implement a action for change the state, eg.:
+ * 
+ * ```ts
+ * export interface MyState {
+ *  myprop: string;
+ * }
+ * 
+ * @Injectable()
+ * export class MyStore extends NgSimpleStateBaseStore<MyState> {
+ * 
+ *  initialState(): MyState {
+ *    return {
+ *      myprop: 'hello!'
+ *    };
+ *  }
+ *
+ *  selectMyprop(): Observable<string> {
+ *    return this.selectState(state => state.myprop);
+ *  }
+ * 
+ *  setMyprop(myprop: string): void {
+ *    this.setState(state => ({ myprop: myprop }));
+ *  }
+ * }
+ * ```
+ */
 @Injectable()
 export abstract class NgSimpleStateBaseStore<S> {
     private _state$: BehaviorSubject<S>;
