@@ -6,27 +6,33 @@ import { NgSimpleStateDevTool } from "./ng-simple-state-dev-tool";
 
 @Injectable()
 export abstract class NgSimpleStateBaseStore<S> {
-    private _state$: BehaviorSubject<S> = new BehaviorSubject<S>(
-        Object.assign({}, this.initialState())
-    );
+    private _state$: BehaviorSubject<S>;
 
     /**
     * Return the observable state
+    * @returns Observable of the state
     */
     public get state(): BehaviorSubject<S> {
         return this._state$;
     }
 
-    constructor(private ngSimpleStateDevTool: NgSimpleStateDevTool) { }
+    constructor(private ngSimpleStateDevTool: NgSimpleStateDevTool) {
+        const initialState = this.initialState();
+        this.devToolSend(initialState, `${this.constructor.name}.initialState`);
+        this._state$ = new BehaviorSubject<S>(Object.assign({}, initialState));
+    }
 
     /**
     * Set the store initial state
+    * @returns The state object
     */
     protected abstract initialState(): S;
 
     /**
-    * Select a store state
-    */
+     * Select a store state
+     * @param selectFn State selector
+     * @returns Observable of the selected state
+     */
     selectState<K>(selectFn: (state: Readonly<S>) => K): Observable<K> {
         return this._state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
@@ -37,6 +43,7 @@ export abstract class NgSimpleStateBaseStore<S> {
 
     /**
     * Return the current store state (snapshot)
+    * @returns The current state
     */
     getCurrentState(): S {
         return this._state$.value;
@@ -44,6 +51,7 @@ export abstract class NgSimpleStateBaseStore<S> {
 
     /**
     * Set a new state
+    * @param selectFn State reducer
     */
     setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): void {
         const currState = this.getCurrentState();
@@ -61,6 +69,8 @@ export abstract class NgSimpleStateBaseStore<S> {
 
     /**
     * Send to dev tool a new state
+    * @param newState new state
+    * @param actionName The action name
     */
     private devToolSend(newState: Partial<S>, actionName?: string): boolean {
         if (!this.ngSimpleStateDevTool.isEnabled()) {

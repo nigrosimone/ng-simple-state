@@ -16,17 +16,20 @@ export class NgSimpleStateDevTool {
         }
     }
 
-
     /**
      * Return true if dev tool are enabled
-     */    
+     * @returns True if dev tool is enabled
+     */
     isEnabled(): boolean {
         return !!this.localDevTool;
     }
 
     /**
-     * Send a new state to dev tool
-     */
+    * Send to dev tool a new state
+    * @param newState new state
+    * @param actionName The action name
+    * @returns True if dev tool is enabled
+    */
     send(name: string, state: any): boolean {
         if (this.localDevTool) {
             this.localDevTool.send(name, state);
