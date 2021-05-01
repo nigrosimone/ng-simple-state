@@ -16,7 +16,7 @@ See the [stackblitz demo](https://stackblitz.com/edit/demo-ng-simple-state?file=
 npm i ng-simple-state
 ```
 
-### Step 2: Import `NgConditionModule` into your `AppModule`
+### Step 2: Import `NgSimpleStateModule` into your `AppModule`
 
 `ng-simple-state` support `Redux DevTools` browser extension for inspect the state of the store.
 The `Redux DevTools` is enabled only if `enableDevTool` option is true. 
