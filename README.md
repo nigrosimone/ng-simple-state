@@ -210,7 +210,7 @@ export class AppComponent {
 Aren't you satisfied? there are some valid alternatives:
 
  - [@tinystate](https://www.npmjs.com/package/@tinystate/core)
- - [@ngxs/store](https://www.npmjs.com/package/@ngxs/store)
+ - [@ngxs](https://www.npmjs.com/package/@ngxs/store)
 ## Support
 
 This is an open-source project. Star this [repository](https://github.com/nigrosimone/ng-simple-state), if you like it, or even [donate](https://www.paypal.com/paypalme/snwp). Thank you so much!
