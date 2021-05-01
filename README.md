@@ -47,7 +47,7 @@ export class AppModule {}
 This is an example for a counter store in a `src/app/counter-store.ts` file. 
 Obviously, you can create every store you want with every complexity you need.
 
-1) Define yuor state interface:
+1) Define yuor state interface, eg.:
 
 ```ts
 export interface CounterState {
