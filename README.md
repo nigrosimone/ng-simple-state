@@ -167,7 +167,7 @@ import { CounterStore } from './counter-store';
     NgSimpleStateModule.forRoot({enableDevTool: !environment.production}) // enable dev tool only in developing
   ],
   bootstrap: [AppComponent],
-  providers: [CounterStore]  // The CounterStore state is sharet at AppModule level
+  providers: [CounterStore]  // The CounterStore state is shared at AppModule level
 })
 export class AppModule {}
 ```
