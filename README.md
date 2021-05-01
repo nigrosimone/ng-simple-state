@@ -16,7 +16,7 @@ See the [stackblitz demo](https://stackblitz.com/edit/demo-ng-simple-state?file=
 npm i ng-simple-state
 ```
 
-### Step 2: Import `NgConditionModule` into your app module, eg.:
+### Step 2: Import `NgConditionModule` into your `AppModule`, eg.:
 
 ```ts
 import { BrowserModule } from '@angular/platform-browser';
@@ -40,7 +40,8 @@ export class AppModule {}
 
 ### Step 3: Create your store
 
-This is an example for a counter store in a `src/app/counter-store.ts` file.
+This is an example for a counter store in a `src/app/counter-store.ts` file. 
+Obviously, you can create every store you want with every complexity you need.
 
 1) Define yuor state interface:
 
