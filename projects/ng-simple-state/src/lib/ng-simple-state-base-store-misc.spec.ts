@@ -45,8 +45,12 @@ describe('NgSimpleStateBaseStore', () => {
             ]
         });
         window["devToolsExtension"] = new DevToolsExtension();
-        service = new CounterStore(TestBed, {enableDevTool: true});
+        service = new CounterStore(TestBed, { enableDevTool: true, enableLocalStorage: true });
     });
+
+    afterEach(() => {
+        localStorage.clear();
+    })
 
     it('dev tool', (done) => {
         expect(window["devToolsExtension"].name).toBe('CounterStore.initialState');
