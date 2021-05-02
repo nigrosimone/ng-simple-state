@@ -45,7 +45,12 @@ describe('NgSimpleStateBaseStore', () => {
             ]
         });
         window["devToolsExtension"] = new DevToolsExtension();
-        service = new CounterStore(TestBed, { enableDevTool: true, enableLocalStorage: true });
+        service = new CounterStore(TestBed, { 
+            enableDevTool: true, 
+            enableLocalStorage: true,
+            storageKey: 'storageKey',
+            storeName: 'storeName'
+        });
     });
 
     afterEach(() => {
@@ -53,26 +58,26 @@ describe('NgSimpleStateBaseStore', () => {
     })
 
     it('dev tool', (done) => {
-        expect(window["devToolsExtension"].name).toBe('CounterStore.initialState');
+        expect(window["devToolsExtension"].name).toBe('storeName.initialState');
         expect(window["devToolsExtension"].state).toEqual({ count: 1 });
 
         service.increment();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(2);
-            expect(window["devToolsExtension"].name).toBe('CounterStore.increment');
+            expect(window["devToolsExtension"].name).toBe('storeName.increment');
             expect(window["devToolsExtension"].state).toEqual({ count: 2 });
             done();
         });
     });
 
     it('dev tool action name', (done) => {
-        expect(window["devToolsExtension"].name).toBe('CounterStore.initialState');
+        expect(window["devToolsExtension"].name).toBe('storeName.initialState');
         expect(window["devToolsExtension"].state).toEqual({ count: 1 });
 
         service.setState(() => ({ count: 5 }), 'test');
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
-            expect(window["devToolsExtension"].name).toBe('CounterStore.test');
+            expect(window["devToolsExtension"].name).toBe('storeName.test');
             expect(window["devToolsExtension"].state).toEqual({ count: 5 });
             done();
         });
