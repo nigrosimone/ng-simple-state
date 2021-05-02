@@ -3,7 +3,7 @@ import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 export class DevToolsExtension {
     name = null;
     state = null;
-    
+
     connect() {
         const self = this;
         return {
