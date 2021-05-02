@@ -15,7 +15,7 @@ export class DevToolsExtension {
     }
 };
 
-describe('NgSimpleState', () => {
+describe('NgSimpleStateDevTool', () => {
 
     it('enableDevTool true', () => {
         window["devToolsExtension"] = new DevToolsExtension();

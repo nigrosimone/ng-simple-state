@@ -33,7 +33,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 
 
-fdescribe('NgSimpleStateBaseStore', () => {
+describe('NgSimpleStateBaseStore misc', () => {
 
     let service: CounterStore;
 
@@ -52,8 +52,8 @@ fdescribe('NgSimpleStateBaseStore', () => {
             count: 2
         }));
 
-        service = new CounterStore(TestBed, { 
-            enableDevTool: true, 
+        service = new CounterStore(TestBed, {
+            enableDevTool: true,
             enableLocalStorage: true,
             storageKey: 'storageKey',
             storeName: 'storeName'
