@@ -100,6 +100,7 @@ export abstract class NgSimpleStateBaseStore<S> {
     * Send to dev tool a new state
     * @param newState new state
     * @param actionName The action name
+    * @returns True if fìdev tools are enabled
     */
     private devToolSend(newState: S, actionName?: string): boolean {
         if (!this._devToolIsEnabled) {
