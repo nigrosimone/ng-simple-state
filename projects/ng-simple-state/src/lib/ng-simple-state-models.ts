@@ -4,7 +4,16 @@ import { InjectionToken } from "@angular/core";
  * NgSimpleState config option
  */
 export interface NgSimpleStateConfig {
-    enableDevTool: boolean;
+    enableDevTool?: boolean;
+    enableLocalStorage?: boolean;
+}
+
+/**
+ * NgSimpleState config option for store
+ */
+ export interface NgSimpleStateStoreConfig extends NgSimpleStateConfig {
+    storageKey?: string;
+    storeName?: string;
 }
 
 /**

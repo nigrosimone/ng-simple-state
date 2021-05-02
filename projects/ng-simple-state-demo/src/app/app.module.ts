@@ -13,7 +13,10 @@ import { CounterStore } from './counter-store';
     BrowserModule,
     FormsModule,
     CommonModule,
-    NgSimpleStateModule.forRoot({enableDevTool: !environment.production})
+    NgSimpleStateModule.forRoot({
+      enableDevTool: !environment.production,
+      enableLocalStorage: true
+    })
   ],
   bootstrap: [AppComponent],
   providers: [CounterStore]

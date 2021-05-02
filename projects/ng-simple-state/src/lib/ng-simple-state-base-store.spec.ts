@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
+import { inject } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
@@ -33,9 +34,9 @@ describe('NgSimpleStateBaseStore', () => {
 
     let service: CounterStore;
 
-    beforeEach(() => {
-        service = new CounterStore(new NgSimpleStateDevTool());
-    });
+    beforeEach(inject([Injector], (injector: Injector) => {
+        service = new CounterStore(injector);
+    }));
 
 
     it('initialState -> selectState', (done) => {

@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
+import { inject, TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
-import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 import { DevToolsExtension } from './ng-simple-state-dev-tool.spec';
+import { NgSimpleStateModule } from './ng-simple-state.module';
 
 export interface CounterState {
     count: number;
@@ -36,8 +37,15 @@ describe('NgSimpleStateBaseStore', () => {
     let service: CounterStore;
 
     beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [
+                NgSimpleStateModule.forRoot({
+                    enableDevTool: true
+                })
+            ]
+        });
         window["devToolsExtension"] = new DevToolsExtension();
-        service = new CounterStore(new NgSimpleStateDevTool({enableDevTool: true}));
+        service = new CounterStore(TestBed, {enableDevTool: true});
     });
 
     it('dev tool', (done) => {
@@ -60,7 +68,7 @@ describe('NgSimpleStateBaseStore', () => {
         service.setState(() => ({ count: 5 }), 'test');
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
-            expect(window["devToolsExtension"].name).toBe('test');
+            expect(window["devToolsExtension"].name).toBe('CounterStore.test');
             expect(window["devToolsExtension"].state).toEqual({ count: 5 });
             done();
         });
