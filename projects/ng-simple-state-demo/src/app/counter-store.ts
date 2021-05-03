@@ -17,7 +17,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
   storeConfig(): NgSimpleStateStoreConfig {
     return {
       storeName: 'test3',
-      enableDevTool: true
+      enableLocalStorage: true
     }
   }
 

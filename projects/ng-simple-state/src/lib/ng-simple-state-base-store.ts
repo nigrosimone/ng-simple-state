@@ -33,9 +33,9 @@ export abstract class NgSimpleStateBaseStore<S> {
         const _storeConfig = this.storeConfig() || {};
         this._storeConfig = { ..._globalConfig, ..._storeConfig };
 
-        this._localStorageIsEnabled = typeof this._storeConfig?.enableLocalStorage === 'boolean' ? this._storeConfig.enableLocalStorage : false;
-        this._devToolIsEnabled = typeof this._storeConfig?.enableDevTool === 'boolean' ? this._storeConfig.enableDevTool : false;
-        this._storeName = typeof this._storeConfig?.storeName === 'string' ? this._storeConfig.storeName : this.constructor.name;
+        this._localStorageIsEnabled = typeof this._storeConfig.enableLocalStorage === 'boolean' ? this._storeConfig.enableLocalStorage : false;
+        this._devToolIsEnabled = typeof this._storeConfig.enableDevTool === 'boolean' ? this._storeConfig.enableDevTool : false;
+        this._storeName = typeof this._storeConfig.storeName === 'string' ? this._storeConfig.storeName : this.constructor.name;
 
         let _initialState: S;
         if (this._localStorageIsEnabled) {
@@ -50,6 +50,10 @@ export abstract class NgSimpleStateBaseStore<S> {
         this._state$ = new BehaviorSubject<S>(Object.assign({}, _initialState));
     }
 
+    /**
+     * Override this method for set a specific config for the store 
+     * @returns NgSimpleStateStoreConfig
+     */
     storeConfig(): NgSimpleStateStoreConfig {
         return null;
     }

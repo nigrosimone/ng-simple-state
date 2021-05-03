@@ -11,7 +11,7 @@ export interface NgSimpleStateConfig {
 /**
  * NgSimpleState config option for store
  */
- export interface NgSimpleStateStoreConfig extends NgSimpleStateConfig {
+export interface NgSimpleStateStoreConfig extends NgSimpleStateConfig {
     storeName?: string;
 }
 
