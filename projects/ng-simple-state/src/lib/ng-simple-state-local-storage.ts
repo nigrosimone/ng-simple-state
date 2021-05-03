@@ -1,19 +1,22 @@
-import { Inject, Injectable, Optional } from "@angular/core";
-import { NgSimpleStateConfig, NG_SIMPLE_STORE_CONFIG } from "./ng-simple-state-models";
+import { Injectable } from "@angular/core";
 
 export const BASE_KEY = 'NgSimpleState::';
 
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateLocalStorage {
 
-    constructor(@Inject(NG_SIMPLE_STORE_CONFIG) @Optional() private config?: NgSimpleStateConfig) {}
+    private _isActive: boolean = false;
+
+    constructor() {
+        this._isActive = !!localStorage;
+    }
 
     /**
-     * Return true if local storage is enabled
-     * @returns True if local storage is enabled
+     * Return true if local storage is active
+     * @returns True if local storage is active
      */
-    isEnabled(): boolean {
-        return !!(this.config && this.config.enableLocalStorage && localStorage);
+    isActive(): boolean {
+        return this._isActive;
     }
 
     /**
@@ -23,7 +26,7 @@ export class NgSimpleStateLocalStorage {
     * @returns True if item is stored into local storage
     */
     setItem<K>(key: string, state: K): boolean {
-        if (this.isEnabled()) {
+        if (this._isActive) {
             localStorage.setItem(BASE_KEY + key, JSON.stringify(state));
             return true;
         }
@@ -36,7 +39,7 @@ export class NgSimpleStateLocalStorage {
     * @returns the item
     */
     getItem<K>(key: string): K | null {
-        if (this.isEnabled()) {
+        if (this._isActive) {
             const state = localStorage.getItem(BASE_KEY + key);
             return JSON.parse(state);
         }

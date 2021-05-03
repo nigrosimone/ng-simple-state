@@ -13,6 +13,14 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
+    storeConfig() {
+        return {
+            enableDevTool: true,
+            enableLocalStorage: true,
+            storeName: 'storeName'
+        };
+    }
+
     initialState(): CounterState {
         return {
             count: 1
@@ -48,16 +56,11 @@ describe('NgSimpleStateBaseStore misc', () => {
         });
         window["devToolsExtension"] = new DevToolsExtension();
 
-        localStorage.setItem(BASE_KEY + 'storageKey', JSON.stringify({
+        localStorage.setItem(BASE_KEY + 'storeName', JSON.stringify({
             count: 2
         }));
 
-        service = new CounterStore(TestBed, {
-            enableDevTool: true,
-            enableLocalStorage: true,
-            storageKey: 'storageKey',
-            storeName: 'storeName'
-        });
+        service = new CounterStore(TestBed);
     });
 
     afterEach(() => {

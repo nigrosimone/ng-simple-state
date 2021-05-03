@@ -2,7 +2,6 @@ import { Injectable, Injector } from '@angular/core';
 import { inject } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
-import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 export interface CounterState {
     count: number;
 }
@@ -42,7 +41,7 @@ describe('NgSimpleStateBaseStore', () => {
     it('initialState -> selectState', (done) => {
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(1);
-            expect(service.getCurrentState()).toEqual({count: 1});
+            expect(service.getCurrentState()).toEqual({ count: 1 });
             done();
         });
     });
@@ -51,7 +50,7 @@ describe('NgSimpleStateBaseStore', () => {
         service.increment();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(2);
-            expect(service.getCurrentState()).toEqual({count: 2});
+            expect(service.getCurrentState()).toEqual({ count: 2 });
             done();
         });
     });
@@ -60,7 +59,7 @@ describe('NgSimpleStateBaseStore', () => {
         service.decrement();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(0);
-            expect(service.getCurrentState()).toEqual({count: 0});
+            expect(service.getCurrentState()).toEqual({ count: 0 });
             done();
         });
     });
@@ -68,7 +67,7 @@ describe('NgSimpleStateBaseStore', () => {
     it('get state', (done) => {
         service.state.subscribe(state => {
             expect(state.count).toBe(1);
-            expect(service.getCurrentState()).toEqual({count: 1});
+            expect(service.getCurrentState()).toEqual({ count: 1 });
             done();
         });
     });
@@ -77,14 +76,14 @@ describe('NgSimpleStateBaseStore', () => {
         service.setState(() => ({ count: 5 }));
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
-            expect(service.getCurrentState()).toEqual({count: 5});
+            expect(service.getCurrentState()).toEqual({ count: 5 });
             done();
         });
     });
 
     it('completeState', () => {
         service.completeState();
-        expect(service.getCurrentState()).toEqual({count: 1});
+        expect(service.getCurrentState()).toEqual({ count: 1 });
     });
 
 });

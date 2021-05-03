@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector, Optional } from "@angular/core";
+import { Inject, Injectable, Injector } from "@angular/core";
 import { BehaviorSubject, Observable, asyncScheduler } from "rxjs";
 import { map, distinctUntilChanged, observeOn } from "rxjs/operators";
 import { NgSimpleStateDevTool } from "./ng-simple-state-dev-tool";
@@ -9,10 +9,10 @@ export abstract class NgSimpleStateBaseStore<S> {
 
     private _state$: BehaviorSubject<S>;
     private _localStorageIsEnabled: boolean;
-    private _localStorageKey: string;
     private _devToolIsEnabled: boolean;
-    private _ngSimpleStateDevTool: NgSimpleStateDevTool;
-    private _ngSimpleStateLocalStorage: NgSimpleStateLocalStorage;
+    private _devTool: NgSimpleStateDevTool;
+    private _localStorage: NgSimpleStateLocalStorage;
+    private _storeConfig: NgSimpleStateStoreConfig;
     private _storeName: string;
 
     /**
@@ -24,21 +24,22 @@ export abstract class NgSimpleStateBaseStore<S> {
     }
 
     constructor(
-        @Inject(Injector) injector: Injector,
-        @Inject(NG_SIMPLE_STORE_CONFIG) @Optional() private config?: NgSimpleStateStoreConfig
+        @Inject(Injector) injector: Injector
     ) {
-        this._ngSimpleStateDevTool = injector.get(NgSimpleStateDevTool);
-        this._ngSimpleStateLocalStorage = injector.get(NgSimpleStateLocalStorage);
+        this._devTool = injector.get(NgSimpleStateDevTool);
+        this._localStorage = injector.get(NgSimpleStateLocalStorage);
 
-        this._localStorageIsEnabled = typeof this.config?.enableLocalStorage === 'boolean' ? this.config.enableLocalStorage : this._ngSimpleStateLocalStorage.isEnabled();
-        this._localStorageKey = typeof this.config?.storageKey === 'string' ? this.config.storageKey : this.constructor.name;
+        const _globalConfig = injector.get(NG_SIMPLE_STORE_CONFIG, {});
+        const _storeConfig = this.storeConfig() || {};
+        this._storeConfig = { ..._storeConfig, ..._globalConfig };
 
-        this._devToolIsEnabled = typeof this.config?.enableDevTool === 'boolean' ? this.config.enableDevTool : this._ngSimpleStateDevTool.isEnabled();
-        this._storeName = typeof this.config?.storeName === 'string' ? this.config.storeName : this.constructor.name;
+        this._localStorageIsEnabled = typeof this._storeConfig?.enableLocalStorage === 'boolean' ? this._storeConfig.enableLocalStorage : false;
+        this._devToolIsEnabled = typeof this._storeConfig?.enableDevTool === 'boolean' ? this._storeConfig.enableDevTool : false;
+        this._storeName = typeof this._storeConfig?.storeName === 'string' ? this._storeConfig.storeName : this.constructor.name;
 
         let _initialState: S;
         if (this._localStorageIsEnabled) {
-            _initialState = this._ngSimpleStateLocalStorage.getItem<S>(this._localStorageKey);
+            _initialState = this._localStorage.getItem<S>(this._storeName);
         }
         if (!_initialState) {
             _initialState = this.initialState();
@@ -47,6 +48,10 @@ export abstract class NgSimpleStateBaseStore<S> {
         this.devToolSend(_initialState, `initialState`);
 
         this._state$ = new BehaviorSubject<S>(Object.assign({}, _initialState));
+    }
+
+    storeConfig(): NgSimpleStateStoreConfig {
+        return null;
     }
 
     /**
@@ -85,7 +90,9 @@ export abstract class NgSimpleStateBaseStore<S> {
         const newState = stateFn(currState);
         const state = Object.assign({}, currState, newState);
         this.devToolSend(state, actionName);
-        this.setLocalStorage(state);
+        if (this._localStorageIsEnabled) {
+            this._localStorage.setItem<S>(this._storeName, state)
+        }
         this._state$.next(state);
     }
 
@@ -114,18 +121,6 @@ export abstract class NgSimpleStateBaseStore<S> {
                 .split(" ")[1]
                 .split(".")[1];
         }
-        return this._ngSimpleStateDevTool.send(`${this._storeName}.${actionName}`, newState);
-    }
-
-    /**
-    * Set item into local storage
-    * @param state state valie
-    * @returns True if item is stored into local storage
-    */
-    private setLocalStorage(state: S): boolean {
-        if (!this._localStorageIsEnabled) {
-            return false;
-        }
-        return this._ngSimpleStateLocalStorage.setItem<S>(this._localStorageKey, state);
+        return this._devTool.send(`${this._storeName}.${actionName}`, newState);
     }
 }

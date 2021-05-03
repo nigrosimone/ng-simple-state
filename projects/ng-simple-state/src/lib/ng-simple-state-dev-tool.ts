@@ -1,27 +1,27 @@
-import { Inject, Injectable, Optional } from "@angular/core";
-import { NgSimpleStateConfig, NG_SIMPLE_STORE_CONFIG } from "./ng-simple-state-models";
-
+import { Injectable } from "@angular/core";
 
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateDevTool {
 
     private globalDevtools: any = window["__REDUX_DEVTOOLS_EXTENSION__"] || window["devToolsExtension"];
     private localDevTool: any;
+    private _isActive: boolean = false;
 
-    constructor(@Inject(NG_SIMPLE_STORE_CONFIG) @Optional() private config?: NgSimpleStateConfig) {
-        if (this.config && this.config.enableDevTool && this.globalDevtools) {
+    constructor() {
+        if (this.globalDevtools) {
             this.localDevTool = this.globalDevtools.connect({
                 name: 'NgSimpleState'
             });
+            this._isActive = !!this.localDevTool;
         }
     }
 
     /**
-     * Return true if dev tool are enabled
-     * @returns True if dev tool is enabled
+     * Return true if dev tool is actvice
+     * @returns True if dev tool is actvice
      */
-    isEnabled(): boolean {
-        return !!this.localDevTool;
+    isActive(): boolean {
+        return this._isActive;
     }
 
     /**
@@ -31,7 +31,7 @@ export class NgSimpleStateDevTool {
     * @returns True if dev tool is enabled
     */
     send(name: string, state: any): boolean {
-        if (this.localDevTool) {
+        if (this._isActive) {
             this.localDevTool.send(name, state);
             return true;
         }

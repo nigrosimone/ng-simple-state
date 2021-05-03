@@ -1,5 +1,5 @@
 import { Inject, Injectable, Injector } from "@angular/core";
-import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from "projects/ng-simple-state/src/public-api";
+import { NgSimpleStateBaseStore, NgSimpleStateConfig, NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from "projects/ng-simple-state/src/public-api";
 import { Observable } from "rxjs";
 
 export interface CounterState {
@@ -10,15 +10,16 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
-  /*
-  constructor(injector: Injector, @Inject(NG_SIMPLE_STORE_CONFIG) config: NgSimpleStateStoreConfig) {
-    super(injector, {
-      ...config,
-      storageKey: 'test',
-      storeName: 'test2'
-    });
+  constructor(injector: Injector) {
+    super(injector);
   }
-  **/
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'test3',
+      enableDevTool: true
+    }
+  }
 
   initialState(): CounterState {
     return {
