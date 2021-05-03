@@ -11,6 +11,6 @@ export class AppComponent {
   public counter$: Observable<number>;
 
   constructor(public counterStore: CounterStore) {
-    this.counter$ = this.counterStore.selectState(state => state.count);
+    this.counter$ = this.counterStore.selectCount();
   }
 }
