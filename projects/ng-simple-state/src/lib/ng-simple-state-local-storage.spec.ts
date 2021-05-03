@@ -11,6 +11,8 @@ describe('NgSimpleStateLocalStorage', () => {
         expect(service.isActive()).toBe(true);
         expect(service.setItem('test', '1')).toBe(true);
         expect(service.getItem('test')).toBe('1');
+        expect(service.removeItem('test')).toBe(true);
+        expect(service.getItem('test')).toBe(null);
     });
 
     it('localstorage not activee', () => {
@@ -19,5 +21,6 @@ describe('NgSimpleStateLocalStorage', () => {
         expect(service.isActive()).toBe(false);
         expect(service.setItem('test', '1')).toBe(false);
         expect(service.getItem('test')).toBe(null);
+        expect(service.removeItem('test')).toBe(false);
     });
 });

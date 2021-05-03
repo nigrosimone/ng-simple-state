@@ -45,4 +45,17 @@ export class NgSimpleStateLocalStorage {
         }
         return null;
     }
+
+    /**
+    * Remove item from local storage
+    * @param key key name
+    * @returns True if item is removed
+    */
+    removeItem(key: string): boolean {
+        if (this._isActive) {
+            localStorage.removeItem(BASE_KEY + key);
+            return true;
+        }
+        return false;
+    }
 }
