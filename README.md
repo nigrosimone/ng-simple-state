@@ -218,12 +218,21 @@ If you need to inject something into your store (eg. `HttpClient`), you need to 
 ```ts
 import { Injectable, Injector } from "@angular/core";
 import { HttpClient } from '@angular/common/http';
+import { NgSimpleStateBaseStore } from 'ng-simple-state';
 
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
   constructor(injector: Injector, private http: HttpClient) {
     super(injector);
+  }
+
+  increment(increment: number = 1): void {
+    this.http.post<Hero>('https://localhost:300/api/increment', { increment }).subscribe( count => {
+      // setState() from default use parent function name as action name for Redux DevTools.
+      // In this case we provide a second parameter `actionName` because the parent function is anonymous function
+      this.setState(state => ({ count: count }), 'increment');
+    });
   }
 
 }
@@ -233,6 +242,8 @@ If you need to override the module configuration provided by `NgSimpleStateModul
 
 ```ts
 import { Injectable } from "@angular/core";
+import { NgSimpleStateStoreConfig } from "ng-simple-state";
+
 
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
