@@ -49,8 +49,8 @@ describe('NgSimpleStateBaseStore misc', () => {
         TestBed.configureTestingModule({
             imports: [
                 NgSimpleStateModule.forRoot({
-                    enableDevTool: true,
-                    enableLocalStorage: true
+                    enableDevTool: false,
+                    enableLocalStorage: false
                 })
             ]
         });

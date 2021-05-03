@@ -31,7 +31,7 @@ export abstract class NgSimpleStateBaseStore<S> {
 
         const _globalConfig = injector.get(NG_SIMPLE_STORE_CONFIG, {});
         const _storeConfig = this.storeConfig() || {};
-        this._storeConfig = { ..._storeConfig, ..._globalConfig };
+        this._storeConfig = { ..._globalConfig, ..._storeConfig };
 
         this._localStorageIsEnabled = typeof this._storeConfig?.enableLocalStorage === 'boolean' ? this._storeConfig.enableLocalStorage : false;
         this._devToolIsEnabled = typeof this._storeConfig?.enableDevTool === 'boolean' ? this._storeConfig.enableDevTool : false;
