@@ -88,6 +88,7 @@ export abstract class NgSimpleStateBaseStore<S> {
     /**
     * Set a new state
     * @param selectFn State reducer
+    * @param actionName The action label into Redux DevTools (default is parent function name)
     */
     setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): void {
         const currState = this.getCurrentState();
