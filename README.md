@@ -35,7 +35,10 @@ import { environment } from '../environments/environment';
   imports: [
     BrowserModule,
     CommonModule,
-    NgSimpleStateModule.forRoot({enableDevTool: !environment.production}) // enable dev tool only in developing
+    NgSimpleStateModule.forRoot({
+      enableDevTool: !environment.production, // Enable Redux DevTools only in developing
+      enableLocalStorage: false // Enable local storage state persistence
+    }) 
   ],
   bootstrap: [AppComponent],
 })
@@ -169,7 +172,10 @@ import { CounterStore } from './counter-store';
   imports: [
     BrowserModule,
     CommonModule,
-    NgSimpleStateModule.forRoot({enableDevTool: !environment.production}) // enable dev tool only in developing
+    NgSimpleStateModule.forRoot({
+      enableDevTool: !environment.production, // Enable Redux DevTools only in developing
+      enableLocalStorage: false // Enable local storage state persistence
+    })
   ],
   bootstrap: [AppComponent],
   providers: [CounterStore]  // The CounterStore state is shared at AppModule level
@@ -205,6 +211,40 @@ export class AppComponent {
 
 ![alt text](https://github.com/nigrosimone/ng-simple-state/blob/main/projects/ng-simple-state-demo/src/assets/dev-tool.gif?raw=true)
 
+## Store's dependency injection and specific config
+
+If you need to inject something into your store (eg. `HttpClient`), you need to also inject the Angular `Injector` service to the super, eg.:
+
+```ts
+import { Injectable, Injector } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
+
+@Injectable()
+export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+
+  constructor(injector: Injector, private http: HttpClient) {
+    super(injector);
+  }
+
+}
+```
+
+If you need to override the module configuration provided by `NgSimpleStateModule.forRoot()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
+
+```ts
+import { Injectable } from "@angular/core";
+
+@Injectable()
+export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      enableLocalStorage: true // enable local storage for this store
+      storeName: 'CounterStore2', // For default the store name is the class name, you can set a specific name for this store (must be be unique)
+    }
+  }
+}
+```
 ## Alternatives
 
 Aren't you satisfied? there are some valid alternatives:
