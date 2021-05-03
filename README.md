@@ -228,10 +228,10 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
   }
 
   increment(increment: number = 1): void {
-    this.http.post<Hero>('https://localhost:300/api/increment', { increment }).subscribe( count => {
+    this.http.post<CounterState>('https://localhost:300/api/increment', { increment }).subscribe(response => {
       // setState() from default use parent function name as action name for Redux DevTools.
       // In this case we provide a second parameter `actionName` because the parent function is anonymous function
-      this.setState(state => ({ count: count }), 'increment');
+      this.setState(() => ({ count: response.count }), 'increment');
     });
   }
 
