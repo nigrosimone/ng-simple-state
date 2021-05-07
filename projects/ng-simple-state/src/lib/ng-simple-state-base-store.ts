@@ -14,6 +14,7 @@ export abstract class NgSimpleStateBaseStore<S> {
     private _localStorage: NgSimpleStateLocalStorage;
     private _storeConfig: NgSimpleStateStoreConfig;
     private _storeName: string;
+    private _firstState: S;
 
     /**
     * Return the observable state
@@ -37,17 +38,24 @@ export abstract class NgSimpleStateBaseStore<S> {
         this._devToolIsEnabled = typeof this._storeConfig.enableDevTool === 'boolean' ? this._storeConfig.enableDevTool : false;
         this._storeName = typeof this._storeConfig.storeName === 'string' ? this._storeConfig.storeName : this.constructor.name;
 
-        let _initialState: S;
+        
         if (this._localStorageIsEnabled) {
-            _initialState = this._localStorage.getItem<S>(this._storeName);
+            this._firstState = this._localStorage.getItem<S>(this._storeName);
         }
-        if (!_initialState) {
-            _initialState = this.initialState();
+        if (!this._firstState) {
+            this._firstState = this.initialState();
         }
 
-        this.devToolSend(_initialState, `initialState`);
+        this.devToolSend(this._firstState, `initialState`);
 
-        this._state$ = new BehaviorSubject<S>(Object.assign({}, _initialState));
+        this._state$ = new BehaviorSubject<S>(Object.assign({}, this._firstState));
+    }
+
+    /**
+     * Reset store to first store state
+     */
+    resetState() {
+        this.setState(() => (this._firstState), 'resetState');
     }
 
     /**
