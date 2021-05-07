@@ -195,6 +195,7 @@ import { CounterStore } from './counter-store';
   template: `
   <h1>Counter: {{ counter$ | async }}</h1>
   <button (click)="counterStore.decrement()">Decrement</button>
+  <button (click)="counterStore.resetState()">Reset</button>
   <button (click)="counterStore.increment()">Increment</button>
   `,
 })
@@ -202,7 +203,7 @@ export class AppComponent {
   public counter$: Observable<number>;
 
   constructor(public counterStore: CounterStore) {
-    this.counter$ = this.counterStore.selectState(state => state.count);
+    this.counter$ = this.counterStore.selectCount();
   }
 }
 ```
