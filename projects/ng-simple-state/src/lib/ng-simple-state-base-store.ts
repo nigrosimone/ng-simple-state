@@ -24,9 +24,7 @@ export abstract class NgSimpleStateBaseStore<S> {
         return this._state$;
     }
 
-    constructor(
-        @Inject(Injector) injector: Injector
-    ) {
+    constructor(@Inject(Injector) injector: Injector) {
         this._devTool = injector.get(NgSimpleStateDevTool);
         this._localStorage = injector.get(NgSimpleStateLocalStorage);
 
@@ -38,7 +36,7 @@ export abstract class NgSimpleStateBaseStore<S> {
         this._devToolIsEnabled = typeof this._storeConfig.enableDevTool === 'boolean' ? this._storeConfig.enableDevTool : false;
         this._storeName = typeof this._storeConfig.storeName === 'string' ? this._storeConfig.storeName : this.constructor.name;
 
-        
+
         if (this._localStorageIsEnabled) {
             this._firstState = this._localStorage.getItem<S>(this._storeName);
         }
@@ -54,7 +52,7 @@ export abstract class NgSimpleStateBaseStore<S> {
     /**
      * Reset store to first store state
      */
-    resetState() {
+    resetState(): void {
         this.setState(() => (this._firstState), 'resetState');
     }
 
