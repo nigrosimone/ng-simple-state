@@ -7,7 +7,7 @@
     "url": "git+https://github.com/nigrosimone/ng-simple-state.git"
   },
   "keywords": [
-    "angular"
+    "angular", "state", "rxjs", "state-management"
   ],
   "author": "Simone Nigro <nigro.simone@gmail.com>",
   "license": "MIT",

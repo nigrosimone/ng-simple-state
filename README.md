@@ -89,7 +89,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
   
   initialState(): CounterState {
     return {
-      count: 1
+      count: 0
     };
   }
 
@@ -112,7 +112,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
   
   initialState(): CounterState {
     return {
-      count: 1
+      count: 0
     };
   }
 
@@ -138,7 +138,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
   initialState(): CounterState {
     return {
-      count: 1
+      count: 0
     };
   }
 
