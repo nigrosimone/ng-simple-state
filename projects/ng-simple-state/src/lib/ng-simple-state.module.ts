@@ -1,5 +1,5 @@
-import { ModuleWithProviders, NgModule } from "@angular/core";
-import { NgSimpleStateConfig, NG_SIMPLE_STORE_CONFIG } from "./ng-simple-state-models";
+import { ModuleWithProviders, NgModule } from '@angular/core';
+import { NgSimpleStateConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-models';
 
 @NgModule({
     declarations: [],

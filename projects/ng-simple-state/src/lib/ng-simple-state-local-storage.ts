@@ -1,14 +1,14 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 
 export const BASE_KEY = 'NgSimpleState::';
 
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateLocalStorage {
 
-    private _isActive: boolean = false;
+    private isStorageActive = false;
 
     constructor() {
-        this._isActive = !!localStorage;
+        this.isStorageActive = !!localStorage;
     }
 
     /**
@@ -16,17 +16,17 @@ export class NgSimpleStateLocalStorage {
      * @returns True if local storage is active
      */
     isActive(): boolean {
-        return this._isActive;
+        return this.isStorageActive;
     }
 
     /**
-    * Set item into local storage
-    * @param key key name
-    * @param state state valie
-    * @returns True if item is stored into local storage
-    */
+     * Set item into local storage
+     * @param key key name
+     * @param state state valie
+     * @returns True if item is stored into local storage
+     */
     setItem<K>(key: string, state: K): boolean {
-        if (this._isActive) {
+        if (this.isStorageActive) {
             localStorage.setItem(BASE_KEY + key, JSON.stringify(state));
             return true;
         }
@@ -34,12 +34,12 @@ export class NgSimpleStateLocalStorage {
     }
 
     /**
-    * Return item from local storage
-    * @param key key name
-    * @returns the item
-    */
+     * Return item from local storage
+     * @param key key name
+     * @returns the item
+     */
     getItem<K>(key: string): K | null {
-        if (this._isActive) {
+        if (this.isStorageActive) {
             const state = localStorage.getItem(BASE_KEY + key);
             return JSON.parse(state);
         }
@@ -47,12 +47,12 @@ export class NgSimpleStateLocalStorage {
     }
 
     /**
-    * Remove item from local storage
-    * @param key key name
-    * @returns True if item is removed
-    */
+     * Remove item from local storage
+     * @param key key name
+     * @returns True if item is removed
+     */
     removeItem(key: string): boolean {
-        if (this._isActive) {
+        if (this.isStorageActive) {
             localStorage.removeItem(BASE_KEY + key);
             return true;
         }

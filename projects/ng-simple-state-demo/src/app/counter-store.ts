@@ -1,6 +1,6 @@
-import { Inject, Injectable, Injector } from "@angular/core";
-import { NgSimpleStateBaseStore, NgSimpleStateConfig, NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from "projects/ng-simple-state/src/public-api";
-import { Observable } from "rxjs";
+import { Inject, Injectable, Injector } from '@angular/core';
+import { NgSimpleStateBaseStore, NgSimpleStateConfig, NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from 'projects/ng-simple-state/src/public-api';
+import { Observable } from 'rxjs';
 
 export interface CounterState {
   count: number;
@@ -18,7 +18,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
     return {
       storeName: 'test3',
       enableLocalStorage: true
-    }
+    };
   }
 
   initialState(): CounterState {
