@@ -14,7 +14,8 @@ checks:
       threshold: 50
 exclude_paths:
   - '.github/'
-  - 'projects/**/**.spec.ts'
+  - 'projects/**/*.spec.ts'
+  - 'projects/ng-simple-state/karma.conf.js'
   - 'projects/ng-simple-state-demo/'
 ratings:
   paths:
