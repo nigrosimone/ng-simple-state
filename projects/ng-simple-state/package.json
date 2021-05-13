@@ -1,13 +1,16 @@
 {
   "name": "ng-simple-state",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Angular simple state manager.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nigrosimone/ng-simple-state.git"
   },
   "keywords": [
-    "angular", "state", "rxjs", "state-management"
+    "angular",
+    "state",
+    "rxjs",
+    "state-management"
   ],
   "author": "Simone Nigro <nigro.simone@gmail.com>",
   "license": "MIT",
