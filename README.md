@@ -18,12 +18,14 @@ npm i ng-simple-state
 
 ### Step 2: Import `NgSimpleStateModule` into your `AppModule`
 
-`ng-simple-state` has some global optional config:
+`NgSimpleStateModule` has some global optional config defined by `NgSimpleStateConfig` interface:
 
- - `enableDevTool`: if `true` enable `Redux DevTools` browser extension for inspect the state of the store. 
- - `enableLocalStorage`: if `true` latest state of store is saved in local storage and reloaded on store initialization.
+| Option               | Description                                                                                     | Default    |
+| -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
+| *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
+| *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
 
-Each store can be override the global configuration implementing `storeConfig()` method (see "Override global config").
+_Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
 
 ```ts
 import { BrowserModule } from '@angular/platform-browser';
@@ -262,6 +264,66 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
   }
 }
 ```
+
+The options are defined by `NgSimpleStateStoreConfig` interface:
+
+| Option               | Description                                                                                     | Default    |
+| -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
+| *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
+| *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
+| *storeName*          | The name used into `Redux DevTools` and local storage key.                                      | Class name |
+
+
+## Testing
+
+`ng-simple-state` is simple to test. Eg.:
+
+```ts
+import { TestBed } from '@angular/core/testing';
+import { NgSimpleStateModule } from 'ng-simple-state';
+import { CounterStore } from './counter-store';
+
+describe('CounterStore', () => {
+
+  let service: CounterStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        NgSimpleStateModule.forRoot({
+          enableDevTool: false,
+          enableLocalStorage: false
+        })
+      ]
+    });
+
+    service = new CounterStore(TestBed);
+  });
+
+  it('initialState', () => {
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+  });
+
+  it('increment', () => {
+    service.increment();
+    expect(service.getCurrentState()).toEqual({ count: 2 });
+  });
+
+  it('decrement', () => {
+    service.decrement();
+    expect(service.getCurrentState()).toEqual({ count: 0 });
+  });
+
+  it('selectCount', (done) => {
+    service.selectCount().subscribe(value => {
+      expect(value).toBe(1);
+      done();
+    });
+  });
+
+});
+```
+
 ## Alternatives
 
 Aren't you satisfied? there are some valid alternatives:
