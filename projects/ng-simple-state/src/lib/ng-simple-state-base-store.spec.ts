@@ -92,4 +92,9 @@ describe('NgSimpleStateBaseStore', () => {
         expect(service.getCurrentState()).toEqual({ count: 1 });
     });
 
+    it('restartState', () => {
+        service.setState(() => ({ count: 5 }));
+        service.restartState();
+        expect(service.getCurrentState()).toEqual({ count: 1 });
+    });
 });

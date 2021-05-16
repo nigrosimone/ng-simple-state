@@ -50,10 +50,17 @@ export abstract class NgSimpleStateBaseStore<S> {
     }
 
     /**
-     * Reset store to first store state
+     * Reset store to first loaded store state
      */
     resetState(): void {
         this.setState(() => (this.firstState), 'resetState');
+    }
+
+    /**
+     * Reset store to initial store state
+     */
+    restartState(): void {
+        this.setState(() => (this.initialState()), 'restartState');
     }
 
     /**
