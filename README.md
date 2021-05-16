@@ -18,9 +18,12 @@ npm i ng-simple-state
 
 ### Step 2: Import `NgSimpleStateModule` into your `AppModule`
 
-`ng-simple-state` support `Redux DevTools` browser extension for inspect the state of the store.
-The `Redux DevTools` is enabled only if `enableDevTool` option is true. 
-In this example `Redux DevTools` is enabled only in developing mode.
+`ng-simple-state` has some global optional config:
+
+ - `enableDevTool`: if `true` enable `Redux DevTools` browser extension for inspect the state of the store. 
+ - `enableLocalStorage`: if `true` latest state of store is saved in local storage and reloaded on store initialization.
+
+Each store can be override the global configuration implementing `storeConfig()` method (see "Override global config").
 
 ```ts
 import { BrowserModule } from '@angular/platform-browser';
@@ -37,7 +40,7 @@ import { environment } from '../environments/environment';
     CommonModule,
     NgSimpleStateModule.forRoot({
       enableDevTool: !environment.production, // Enable Redux DevTools only in developing
-      enableLocalStorage: false // Enable local storage state persistence
+      enableLocalStorage: false // Local storage state persistence is globally disabled
     }) 
   ],
   bootstrap: [AppComponent],
@@ -61,8 +64,8 @@ export interface CounterState {
 2) Define your store service by extending `NgSimpleStateBaseStore`, eg.:
 
 ```ts
-import { Injectable } from "@angular/core";
-import { NgSimpleStateBaseStore } from "ng-simple-state";
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseStore } from 'ng-simple-state';
 
 export interface CounterState {
     count: number;
@@ -77,8 +80,8 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 3) Implement `initialState()` method and provide the initial state of the store, eg.:
 
 ```ts
-import { Injectable } from "@angular/core";
-import { NgSimpleStateBaseStore } from "ng-simple-state";
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseStore } from 'ng-simple-state';
 
 export interface CounterState {
     count: number;
@@ -99,9 +102,9 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 4) Implement one or more selectors of the partial state you want, in this example `selectCount()` eg.:
 
 ```ts
-import { Injectable } from "@angular/core";
-import { NgSimpleStateBaseStore } from "ng-simple-state";
-import { Observable } from "rxjs";
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { Observable } from 'rxjs';
 
 export interface CounterState {
     count: number;
@@ -125,9 +128,9 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 5) Implement one or more actions for change the store state, in this example `increment()` and `decrement()` eg.:
 
 ```ts
-import { Injectable } from "@angular/core";
-import { NgSimpleStateBaseStore } from "ng-simple-state";
-import { Observable } from "rxjs";
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { Observable } from 'rxjs';
 
 export interface CounterState {
   count: number;
@@ -174,7 +177,7 @@ import { CounterStore } from './counter-store';
     CommonModule,
     NgSimpleStateModule.forRoot({
       enableDevTool: !environment.production, // Enable Redux DevTools only in developing
-      enableLocalStorage: false // Enable local storage state persistence
+      enableLocalStorage: false // Local storage state persistence is globally disabled
     })
   ],
   bootstrap: [AppComponent],
@@ -212,12 +215,12 @@ export class AppComponent {
 
 ![alt text](https://github.com/nigrosimone/ng-simple-state/blob/main/projects/ng-simple-state-demo/src/assets/dev-tool.gif?raw=true)
 
-## Store's dependency injection and specific config
+## Store's dependency injection
 
 If you need to inject something into your store (eg. `HttpClient`), you need to also inject the Angular `Injector` service to the super, eg.:
 
 ```ts
-import { Injectable, Injector } from "@angular/core";
+import { Injectable, Injector } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NgSimpleStateBaseStore } from 'ng-simple-state';
 
@@ -239,11 +242,13 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 ```
 
-If you need to override the module configuration provided by `NgSimpleStateModule.forRoot()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
+## Override global config
+
+If you need to override the global module configuration provided by `NgSimpleStateModule.forRoot()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
 
 ```ts
-import { Injectable } from "@angular/core";
-import { NgSimpleStateStoreConfig } from "ng-simple-state";
+import { Injectable } from '@angular/core';
+import { NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 
 @Injectable()
