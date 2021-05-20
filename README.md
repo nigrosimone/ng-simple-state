@@ -301,22 +301,22 @@ describe('CounterStore', () => {
   });
 
   it('initialState', () => {
-    expect(service.getCurrentState()).toEqual({ count: 1 });
+    expect(service.getCurrentState()).toEqual({ count: 0 });
   });
 
   it('increment', () => {
     service.increment();
-    expect(service.getCurrentState()).toEqual({ count: 2 });
+    expect(service.getCurrentState()).toEqual({ count: 1 });
   });
 
   it('decrement', () => {
     service.decrement();
-    expect(service.getCurrentState()).toEqual({ count: 0 });
+    expect(service.getCurrentState()).toEqual({ count: -1 });
   });
 
   it('selectCount', (done) => {
     service.selectCount().subscribe(value => {
-      expect(value).toBe(1);
+      expect(value).toBe(0);
       done();
     });
   });
