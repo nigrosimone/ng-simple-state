@@ -62,7 +62,6 @@
             "main": "projects/ng-simple-state-demo/src/main.ts",
             "polyfills": "projects/ng-simple-state-demo/src/polyfills.ts",
             "tsConfig": "projects/ng-simple-state-demo/tsconfig.app.json",
-            "aot": true,
             "assets": [
               "projects/ng-simple-state-demo/src/favicon.ico",
               "projects/ng-simple-state-demo/src/assets"
@@ -70,7 +69,13 @@
             "styles": [
               "projects/ng-simple-state-demo/src/styles.sass"
             ],
-            "scripts": []
+            "scripts": [],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
