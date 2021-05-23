@@ -7,11 +7,13 @@ export class NgSimpleStateDevTool {
     private globalDevtools: any = window['__REDUX_DEVTOOLS_EXTENSION__'] || window['devToolsExtension'];
     private localDevTool: any;
     private isActiveDevtool = false;
+    private instanceId = `ng-simple-state-${Date.now()}`;
 
     constructor() {
         if (this.globalDevtools) {
             this.localDevTool = this.globalDevtools.connect({
-                name: 'NgSimpleState'
+                name: 'NgSimpleState',
+                instanceId: this.instanceId
             });
             this.isActiveDevtool = !!this.localDevTool;
         }
@@ -33,7 +35,7 @@ export class NgSimpleStateDevTool {
      */
     send(name: string, state: any): boolean {
         if (this.isActiveDevtool) {
-            this.localDevTool.send(name, state);
+            this.localDevTool.send(name, state, false, this.instanceId);
             return true;
         }
         return false;
