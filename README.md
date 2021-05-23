@@ -324,6 +324,79 @@ describe('CounterStore', () => {
 });
 ```
 
+## Example: array store
+
+This is an example for a todo list store in a `src/app/todo-store.ts` file. 
+
+```ts
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { Observable } from 'rxjs';
+
+export interface Todo {
+  id: number;
+  name: string;
+  completed: boolean;
+}
+
+export type TodoState = Array<Todo>;
+
+@Injectable()
+export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
+
+  initialState(): TodoState {
+    return new Array();
+  }
+
+  selectAll(): Observable<Todo[]> {
+    return this.selectState(state => [...state]);
+  }
+
+  add(todo: Omit<Todo, 'id'>): void {
+    this.setState(state =>  [...state, {...todo, id: Date.now()}]);
+  }
+
+  delete(id: number): void {
+    this.setState(state => state.filter(item => item.id !== id) );
+  }
+
+  setComplete(id: number, completed: boolean = true): void {
+    this.setState(state => state.map(item => item.id === id ? {...item, completed} : item) );
+  }
+}
+```
+
+usage:
+
+```ts
+import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Todo, TodoStore } from './todo-store';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <input #newTodo> <button (click)="todoStore.add({name: newTodo.value, completed: false})">Add todo</button>
+    <ol>
+        <li *ngFor="let todo of todoList$ | async">
+            <ng-container *ngIf="todo.completed">✅</ng-container> 
+            {{ todo.name }} 
+            <button (click)="todoStore.setComplete(todo.id, !todo.completed)">Mark as {{ todo.completed ? 'Not completed' : 'Completed' }}</button> 
+            <button (click)="todoStore.delete(todo.id)">Delete</button>
+        </li>
+    </ol>
+  `,
+  providers: [TodoStore]
+})
+export class AppComponent {
+  public todoList$: Observable<Todo[]>;
+
+  constructor(public todoStore: TodoStore) {
+    this.todoList$ = this.todoStore.selectAll();
+  }
+}
+```
+
 ## Alternatives
 
 Aren't you satisfied? there are some valid alternatives:
