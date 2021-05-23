@@ -14,7 +14,7 @@ export type TodoState = Array<Todo>;
 export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
 
   initialState(): TodoState {
-    return new Array();
+    return [];
   }
 
   add(todo: Omit<Todo, 'id'>): void {

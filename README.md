@@ -345,11 +345,7 @@ export type TodoState = Array<Todo>;
 export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
 
   initialState(): TodoState {
-    return new Array();
-  }
-
-  selectAll(): Observable<Todo[]> {
-    return this.selectState(state => [...state]);
+    return [];
   }
 
   add(todo: Omit<Todo, 'id'>): void {
@@ -392,7 +388,7 @@ export class AppComponent {
   public todoList$: Observable<Todo[]>;
 
   constructor(public todoStore: TodoStore) {
-    this.todoList$ = this.todoStore.selectAll();
+    this.todoList$ = this.todoStore.selectState();
   }
 }
 ```
