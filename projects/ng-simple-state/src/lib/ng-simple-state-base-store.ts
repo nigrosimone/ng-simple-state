@@ -82,7 +82,7 @@ export abstract class NgSimpleStateBaseStore<S> {
 
     /**
      * Select a store state
-     * @param selectFn State selector
+     * @param selectFn State selector (if not provided return full state)
      * @returns Observable of the selected state
      */
     selectState<K>(selectFn?: (state: Readonly<S>) => K): Observable<K> {
