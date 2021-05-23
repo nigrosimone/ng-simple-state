@@ -17,10 +17,6 @@ export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
     return new Array();
   }
 
-  selectAll(): Observable<Todo[]> {
-    return this.selectState(state => [...state]);
-  }
-
   add(todo: Omit<Todo, 'id'>): void {
     this.setState(state =>  [...state, {...todo, id: Date.now()}]);
   }

@@ -37,7 +37,7 @@ describe('NgSimpleStateBaseStoreArray', () => {
 
 
     it('initialState -> selectState', (done) => {
-        service.selectAll().subscribe(value => {
+        service.selectState().subscribe(value => {
             expect(value).toEqual([1]);
             expect(service.getCurrentState()).toEqual([1]);
             done();
@@ -46,7 +46,7 @@ describe('NgSimpleStateBaseStoreArray', () => {
 
     it('add -> setState -> selectState', (done) => {
         service.add(2);
-        service.selectAll().subscribe(value => {
+        service.selectState().subscribe(value => {
             expect(value).toEqual([1, 2]);
             expect(service.getCurrentState()).toEqual([1, 2]);
             done();
@@ -55,7 +55,7 @@ describe('NgSimpleStateBaseStoreArray', () => {
 
     it('del -> setState -> selectState', (done) => {
         service.del(1);
-        service.selectAll().subscribe(value => {
+        service.selectState().subscribe(value => {
             expect(value).toEqual([]);
             expect(service.getCurrentState()).toEqual([]);
             done();

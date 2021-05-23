@@ -6,7 +6,8 @@ import { Todo, TodoStore } from './todo-store';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  providers: [TodoStore]
 })
 export class AppComponent {
   public counter$: Observable<number>;
@@ -14,6 +15,6 @@ export class AppComponent {
 
   constructor(public counterStore: CounterStore, public todoStore: TodoStore) {
     this.counter$ = this.counterStore.selectCount();
-    this.todoList$ = this.todoStore.selectAll();
+    this.todoList$ = this.todoStore.selectState();
   }
 }

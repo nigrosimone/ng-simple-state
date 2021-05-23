@@ -85,7 +85,10 @@ export abstract class NgSimpleStateBaseStore<S> {
      * @param selectFn State selector
      * @returns Observable of the selected state
      */
-    selectState<K>(selectFn: (state: Readonly<S>) => K): Observable<K> {
+    selectState<K>(selectFn?: (state: Readonly<S>) => K): Observable<K> {
+        if ( !selectFn ){
+            selectFn = (tmpState: Readonly<S>): any => Array.isArray(tmpState) ? [...tmpState] : {...tmpState};
+        }
         return this.state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
             distinctUntilChanged(),
