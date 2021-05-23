@@ -57,8 +57,8 @@ describe('NgSimpleStateBaseStore', () => {
 
     it('decrement -> setState -> selectState', (done) => {
         service.decrement();
-        service.selectState(state => state.count).subscribe(value => {
-            expect(value).toBe(0);
+        service.selectState().subscribe(value => {
+            expect(value).toEqual({ count: 0 });
             expect(service.getCurrentState()).toEqual({ count: 0 });
             done();
         });
