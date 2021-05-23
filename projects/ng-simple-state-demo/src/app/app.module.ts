@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { NgSimpleStateModule } from 'projects/ng-simple-state/src/public-api';
 import { environment } from '../environments/environment';
 import { CounterStore } from './counter-store';
-
+import { TodoStore } from './todo-store';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -19,6 +19,6 @@ import { CounterStore } from './counter-store';
     })
   ],
   bootstrap: [AppComponent],
-  providers: [CounterStore]
+  providers: [CounterStore, TodoStore]
 })
 export class AppModule {}

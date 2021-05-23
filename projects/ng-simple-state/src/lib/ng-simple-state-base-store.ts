@@ -36,7 +36,6 @@ export abstract class NgSimpleStateBaseStore<S> {
         this.devToolIsEnabled = typeof this.localStoreConfig.enableDevTool === 'boolean' ? this.localStoreConfig.enableDevTool : false;
         this.storeName = typeof this.localStoreConfig.storeName === 'string' ? this.localStoreConfig.storeName : this.constructor.name;
 
-
         if (this.localStorageIsEnabled) {
             this.firstState = this.localStorage.getItem<S>(this.storeName);
         }
@@ -46,7 +45,11 @@ export abstract class NgSimpleStateBaseStore<S> {
 
         this.devToolSend(this.firstState, `initialState`);
 
-        this.state$ = new BehaviorSubject<S>(Object.assign({}, this.firstState));
+        if ( Array.isArray(this.firstState) ) {
+            this.state$ = new BehaviorSubject<S>( [].concat(this.firstState) as unknown as S );
+        } else {
+            this.state$ = new BehaviorSubject<S>(Object.assign({}, this.firstState));
+        }
     }
 
     /**
@@ -106,7 +109,14 @@ export abstract class NgSimpleStateBaseStore<S> {
     setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): void {
         const currState = this.getCurrentState();
         const newState = stateFn(currState);
-        const state = Object.assign({}, currState, newState);
+
+        let state: S;
+        if ( Array.isArray(currState) ) {
+            state = [].concat(newState) as unknown as S;
+        } else {
+            state = Object.assign({}, currState, newState);
+        }
+
         this.devToolSend(state, actionName);
         if (this.localStorageIsEnabled) {
             this.localStorage.setItem<S>(this.storeName, state);

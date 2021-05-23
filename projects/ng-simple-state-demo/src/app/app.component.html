@@ -2,3 +2,10 @@
 <button (click)="counterStore.decrement()">Decrement</button>
 <button (click)="counterStore.resetState()">Reset</button>
 <button (click)="counterStore.increment()">Increment</button>
+<br><hr>
+<input #newTodo><button (click)="todoStore.add({name: newTodo.value, completed: false})">Add</button>
+<ol>
+    <li *ngFor="let todo of todoList$ | async">
+        <ng-container *ngIf="todo.completed">✅</ng-container> {{ todo.name }} <button (click)="todoStore.setComplete(todo.id, !todo.completed)">Mark as {{ todo.completed ? 'Not completed' : 'Completed' }}</button> <button (click)="todoStore.delete(todo.id)">Delete</button>
+    </li>
+</ol>
