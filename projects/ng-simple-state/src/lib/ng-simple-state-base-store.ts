@@ -15,6 +15,7 @@ export abstract class NgSimpleStateBaseStore<S> {
     private localStoreConfig: NgSimpleStateStoreConfig;
     private storeName: string;
     private firstState: S;
+    private isArray: boolean;
 
     /**
      * Return the observable state
@@ -45,11 +46,8 @@ export abstract class NgSimpleStateBaseStore<S> {
 
         this.devToolSend(this.firstState, `initialState`);
 
-        if ( Array.isArray(this.firstState) ) {
-            this.state$ = new BehaviorSubject<S>( [].concat(this.firstState) as unknown as S );
-        } else {
-            this.state$ = new BehaviorSubject<S>(Object.assign({}, this.firstState));
-        }
+        this.isArray = Array.isArray(this.firstState);
+        this.state$ = new BehaviorSubject<S>(Object.assign(this.isArray ? [] : {}, this.firstState));
     }
 
     /**
@@ -86,8 +84,8 @@ export abstract class NgSimpleStateBaseStore<S> {
      * @returns Observable of the selected state
      */
     selectState<K>(selectFn?: (state: Readonly<S>) => K): Observable<K> {
-        if ( !selectFn ){
-            selectFn = (tmpState: Readonly<S>): any => Array.isArray(tmpState) ? [...tmpState] : {...tmpState};
+        if (!selectFn) {
+            selectFn = (tmpState: Readonly<S>): any => Object.assign(this.isArray ? [] : {}, tmpState);
         }
         return this.state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
@@ -112,14 +110,12 @@ export abstract class NgSimpleStateBaseStore<S> {
     setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): void {
         const currState = this.getCurrentState();
         const newState = stateFn(currState);
-
         let state: S;
-        if ( Array.isArray(currState) ) {
-            state = [].concat(newState) as unknown as S;
+        if (this.isArray) {
+            state = Object.assign([], newState) as any;
         } else {
             state = Object.assign({}, currState, newState);
         }
-
         this.devToolSend(state, actionName);
         if (this.localStorageIsEnabled) {
             this.localStorage.setItem<S>(this.storeName, state);
