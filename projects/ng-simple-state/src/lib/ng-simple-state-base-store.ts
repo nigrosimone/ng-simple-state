@@ -5,7 +5,7 @@ import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 import { NgSimpleStateLocalStorage } from './ng-simple-state-local-storage';
 import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-models';
 @Injectable()
-export abstract class NgSimpleStateBaseStore<S> {
+export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> {
 
     private state$: BehaviorSubject<S>;
     private localStorageIsEnabled: boolean;
