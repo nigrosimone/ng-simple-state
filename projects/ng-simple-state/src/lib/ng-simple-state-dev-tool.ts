@@ -8,7 +8,7 @@ export class NgSimpleStateDevTool {
     private localDevTool: any;
     private isActiveDevtool = false;
     private instanceId = `ng-simple-state-${Date.now()}`;
-    private baseState: {[key: string]: any} = {};
+    private baseState: { [key: string]: any } = {};
 
     constructor() {
         if (this.globalDevtools) {
@@ -17,6 +17,9 @@ export class NgSimpleStateDevTool {
                 instanceId: this.instanceId
             });
             this.isActiveDevtool = !!this.localDevTool;
+            if (this.isActiveDevtool) {
+                this.localDevTool.init(this.baseState);
+            }
         }
     }
 
@@ -37,7 +40,7 @@ export class NgSimpleStateDevTool {
      */
     send(storeName: string, actionName: string, state: any): boolean {
         if (this.isActiveDevtool) {
-            this.localDevTool.send(`${storeName}.${actionName}`, Object.assign(this.baseState, {[storeName]: state}), false, this.instanceId);
+            this.localDevTool.send(`${storeName}.${actionName}`, Object.assign(this.baseState, { [storeName]: state }), false, this.instanceId);
             return true;
         }
         return false;

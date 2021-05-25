@@ -10,7 +10,8 @@ export class DevToolsExtension {
             send: (name: string, state: any) => {
                 self.name = name;
                 self.state = state;
-            }
+            },
+            init: () => {}
         };
     }
 }
