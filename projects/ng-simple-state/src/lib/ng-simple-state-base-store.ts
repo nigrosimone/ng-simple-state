@@ -1,11 +1,11 @@
-import { Inject, Injectable, Injector } from '@angular/core';
+import { Inject, Injectable, Injector, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 import { NgSimpleStateLocalStorage } from './ng-simple-state-local-storage';
 import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-models';
 @Injectable()
-export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> {
+export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> implements OnDestroy {
 
     private state$: BehaviorSubject<S>;
     private localStorageIsEnabled: boolean;
@@ -48,6 +48,14 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> {
 
         this.isArray = Array.isArray(this.firstState);
         this.state$ = new BehaviorSubject<S>(Object.assign(this.isArray ? [] : {}, this.firstState));
+    }
+
+    /**
+     * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
+     */
+    ngOnDestroy(): void {
+        this.devToolSend(undefined, 'ngOnDestroy');
+        this.state$.complete();
     }
 
     /**
@@ -121,13 +129,6 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> {
             this.localStorage.setItem<S>(this.storeName, state);
         }
         this.state$.next(state);
-    }
-
-    /**
-     * Complete the state
-     */
-    completeState(): void {
-        this.state$.complete();
     }
 
     /**

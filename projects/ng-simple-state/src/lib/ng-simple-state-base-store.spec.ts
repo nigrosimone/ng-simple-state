@@ -81,8 +81,8 @@ describe('NgSimpleStateBaseStore', () => {
         });
     });
 
-    it('completeState', () => {
-        service.completeState();
+    it('ngOnDestroy', () => {
+        service.ngOnDestroy();
         expect(service.getCurrentState()).toEqual({ count: 1 });
     });
 

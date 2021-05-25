@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { NgSimpleStateBaseStore } from 'projects/ng-simple-state/src/public-api';
-import { Observable } from 'rxjs';
 
 export interface Todo {
   id: number;
@@ -17,8 +16,8 @@ export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
     return [];
   }
 
-  add(todo: Omit<Todo, 'id'>): void {
-    this.setState(state =>  [...state, {...todo, id: Date.now()}]);
+  add(name: string): void {
+    this.setState(state =>  [...state, {name, completed: false, id: Date.now()}]);
   }
 
   delete(id: number): void {

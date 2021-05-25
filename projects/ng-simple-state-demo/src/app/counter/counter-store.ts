@@ -1,5 +1,5 @@
-import { Inject, Injectable, Injector } from '@angular/core';
-import { NgSimpleStateBaseStore, NgSimpleStateConfig, NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from 'projects/ng-simple-state/src/public-api';
+import { Injectable, Injector } from '@angular/core';
+import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from 'projects/ng-simple-state/src/public-api';
 import { Observable } from 'rxjs';
 
 export interface CounterState {
