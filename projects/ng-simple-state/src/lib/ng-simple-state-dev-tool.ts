@@ -30,9 +30,10 @@ export class NgSimpleStateDevTool {
 
     /**
      * Send to dev tool a new state
-     * @param newState new state
+     * @param storeName The store name
      * @param actionName The action name
-     * @returns True if dev tool is enabled
+     * @param state the state
+     * @returns True if dev tool is enabled and action is send
      */
     send(storeName: string, actionName: string, state: any): boolean {
         if (this.isActiveDevtool) {
