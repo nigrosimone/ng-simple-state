@@ -21,16 +21,16 @@ describe('NgSimpleStateDevTool', () => {
         window['devToolsExtension'] = new DevToolsExtension();
         const service = new NgSimpleStateDevTool();
         expect(service.isActive()).toBe(true);
-        expect(service.send('test1', 'test2')).toBe(true);
-        expect(window['devToolsExtension'].name).toBe('test1');
-        expect(window['devToolsExtension'].state).toBe('test2');
+        expect(service.send('test', 'test1', 'test2')).toBe(true);
+        expect(window['devToolsExtension'].name).toBe('test.test1');
+        expect(window['devToolsExtension'].state).toEqual({ test: 'test2' });
     });
 
     it('no devToolsExtension', () => {
         window['devToolsExtension'] = null;
         const service = new NgSimpleStateDevTool();
-        service.send('test', 'test');
-        expect(service.send('test', 'test')).toBe(false);
+        service.send('test', 'test', 'test');
+        expect(service.send('test', 'test', 'test')).toBe(false);
         expect(service.isActive()).toBe(false);
         expect(window['devToolsExtension']).toBe(null);
     });
@@ -44,8 +44,8 @@ describe('NgSimpleStateDevTool', () => {
             }
         };
         const service = new NgSimpleStateDevTool();
-        service.send('test', 'test');
-        expect(service.send('test', 'test')).toBe(false);
+        service.send('test', 'test', 'test');
+        expect(service.send('test', 'test', 'test')).toBe(false);
         expect(service.isActive()).toBe(false);
         expect(window['devToolsExtension'].name).toBe(null);
         expect(window['devToolsExtension'].state).toBe(null);

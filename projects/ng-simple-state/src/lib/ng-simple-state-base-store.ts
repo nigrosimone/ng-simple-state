@@ -148,6 +148,6 @@ export abstract class NgSimpleStateBaseStore<S> {
                 .split(' ')[1]
                 .split('.')[1];
         }
-        return this.devTool.send(`${this.storeName}.${actionName}`, newState);
+        return this.devTool.send(this.storeName, actionName, newState);
     }
 }

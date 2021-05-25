@@ -8,6 +8,7 @@ export class NgSimpleStateDevTool {
     private localDevTool: any;
     private isActiveDevtool = false;
     private instanceId = `ng-simple-state-${Date.now()}`;
+    private baseState: {[key: string]: any} = {};
 
     constructor() {
         if (this.globalDevtools) {
@@ -33,9 +34,9 @@ export class NgSimpleStateDevTool {
      * @param actionName The action name
      * @returns True if dev tool is enabled
      */
-    send(name: string, state: any): boolean {
+    send(storeName: string, actionName: string, state: any): boolean {
         if (this.isActiveDevtool) {
-            this.localDevTool.send(name, state, false, this.instanceId);
+            this.localDevTool.send(`${storeName}.${actionName}`, Object.assign(this.baseState, {[storeName]: state}), false, this.instanceId);
             return true;
         }
         return false;

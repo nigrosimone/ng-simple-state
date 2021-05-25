@@ -70,26 +70,26 @@ describe('NgSimpleStateBaseStore misc', () => {
 
     it('dev tool', (done) => {
         expect(window['devToolsExtension'].name).toBe('storeName.initialState');
-        expect(window['devToolsExtension'].state).toEqual({ count: 2 });
+        expect(window['devToolsExtension'].state).toEqual({ storeName: { count: 2 }});
 
         service.increment();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(3);
             expect(window['devToolsExtension'].name).toBe('storeName.increment');
-            expect(window['devToolsExtension'].state).toEqual({ count: 3 });
+            expect(window['devToolsExtension'].state).toEqual({ storeName: { count: 3 }});
             done();
         });
     });
 
     it('dev tool action name', (done) => {
         expect(window['devToolsExtension'].name).toBe('storeName.initialState');
-        expect(window['devToolsExtension'].state).toEqual({ count: 2 });
+        expect(window['devToolsExtension'].state).toEqual({storeName: { count: 2 }});
 
         service.setState(() => ({ count: 5 }), 'test');
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
             expect(window['devToolsExtension'].name).toBe('storeName.test');
-            expect(window['devToolsExtension'].state).toEqual({ count: 5 });
+            expect(window['devToolsExtension'].state).toEqual({storeName: { count: 5 }});
             done();
         });
     });
