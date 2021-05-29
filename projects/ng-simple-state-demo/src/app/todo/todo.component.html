@@ -1,6 +1,8 @@
-<input #newTodo><button (click)="todoStore.add(newTodo.value)">Add</button>
+<input [(ngModel)]="newTodo"><button (click)="todoStore.add(newTodo); newTodo = null" [disabled]="!newTodo">Add</button>
 <ol>
     <li *ngFor="let todo of todoList$ | async">
-        <ng-container *ngIf="todo.completed">✅</ng-container> {{ todo.name }} <button (click)="todoStore.setComplete(todo.id, !todo.completed)">Mark as {{ todo.completed ? 'Not completed' : 'Completed' }}</button> <button (click)="todoStore.delete(todo.id)">Delete</button>
+        <input type="checkbox" [checked]="todo.completed" (change)="todoStore.setComplete(todo.id, $event.currentTarget.checked)">
+        {{ todo.name }} 
+        <button (click)="todoStore.delete(todo.id)">&#10005;</button>
     </li>
 </ol>

@@ -10,7 +10,8 @@ import { Todo, TodoStore } from './todo-store';
 })
 export class TodoComponent {
   public todoList$: Observable<Todo[]>;
-  
+  public newTodo: string;
+
   constructor(public todoStore: TodoStore) {
     this.todoList$ = this.todoStore.selectState();
   }
