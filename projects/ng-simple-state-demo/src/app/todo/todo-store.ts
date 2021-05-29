@@ -27,4 +27,8 @@ export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
   setComplete(id: number, completed: boolean = true): void {
     this.setState(state => state.map(item => item.id === id ? {...item, completed} : item) );
   }
+
+  trackBy(index: number, item: Todo): number {
+    return item.id;
+  }
 }

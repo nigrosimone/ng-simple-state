@@ -1,6 +1,6 @@
 <input [(ngModel)]="newTodo"><button (click)="todoStore.add(newTodo); newTodo = null" [disabled]="!newTodo">Add</button>
 <ol>
-    <li *ngFor="let todo of todoList$ | async">
+    <li *ngFor="let todo of todoList$ | async; trackBy: todoStore.trackBy">
         <input type="checkbox" [checked]="todo.completed" (change)="todoStore.setComplete(todo.id, $event.currentTarget.checked)">
         {{ todo.name }} 
         <button (click)="todoStore.delete(todo.id)">&#10005;</button>
