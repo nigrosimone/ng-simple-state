@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { CommonModule } from '@angular/common';
-import { NgSimpleStateModule } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateModule } from 'ng-simple-state';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 @NgModule({
