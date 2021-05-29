@@ -5,8 +5,7 @@ import { AppComponent } from './app.component';
 import { CommonModule } from '@angular/common';
 import { NgSimpleStateModule } from 'projects/ng-simple-state/src/public-api';
 import { environment } from '../environments/environment';
-import { TodoModule } from './todo/todo.module';
-import { CounterModule } from './counter/counter.module';
+import { AppRoutingModule } from './app-routing.module';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -17,8 +16,7 @@ import { CounterModule } from './counter/counter.module';
       enableDevTool: !environment.production,
       enableLocalStorage: true
     }),
-    TodoModule,
-    CounterModule
+    AppRoutingModule
   ],
   bootstrap: [AppComponent]
 })

@@ -1,7 +1,9 @@
-<app-counter *ngIf="counter"></app-counter>
-<br>
-<button (click)="counter = !counter">Switch Counter</button>
-<br><hr>
-<app-todo *ngIf="todo"></app-todo>
-<br>
-<button (click)="todo = !todo">Switch todo</button>
+
+<h1>NgSimpleState</h1>
+<nav>
+    <ul>
+      <li><a routerLink="/todo" routerLinkActive="active">Todo</a></li>
+      <li><a routerLink="/counter" routerLinkActive="active">counter</a></li>
+    </ul>
+</nav>
+<router-outlet></router-outlet>
