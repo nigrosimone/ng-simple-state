@@ -107,7 +107,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @returns The current state
      */
     getCurrentState(): S {
-        return this.state$.value;
+        return this.state$.getValue();
     }
 
     /**
