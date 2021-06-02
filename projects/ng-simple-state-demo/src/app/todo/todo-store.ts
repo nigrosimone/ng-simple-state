@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { NgSimpleStateBaseStore } from '../../../../ng-simple-state/src/public-api';
 
 export interface Todo {
   id: number;
