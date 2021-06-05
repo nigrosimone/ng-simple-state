@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 
 export interface CounterState {
   count: number;
-  other: number;
 }
 
 @Injectable()
@@ -16,15 +15,14 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
   storeConfig(): NgSimpleStateStoreConfig {
     return {
-      storeName: 'test3',
+      storeName: 'MyCounterStore',
       enableLocalStorage: true
     };
   }
 
   initialState(): CounterState {
     return {
-      count: 1,
-      other: 2
+      count: 0
     };
   }
 

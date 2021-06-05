@@ -17,15 +17,15 @@ export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
   }
 
   add(name: string): void {
-    this.setState(state =>  [...state, {name, completed: false, id: Date.now()}]);
+    this.setState(state => [...state, { name, completed: false, id: Date.now() }]);
   }
 
   delete(id: number): void {
-    this.setState(state => state.filter(item => item.id !== id) );
+    this.setState(state => state.filter(item => item.id !== id));
   }
 
   setComplete(id: number, completed: boolean = true): void {
-    this.setState(state => state.map(item => item.id === id ? {...item, completed} : item) );
+    this.setState(state => state.map(item => item.id === id ? { ...item, completed } : item));
   }
 
   trackBy(index: number, item: Todo): number {

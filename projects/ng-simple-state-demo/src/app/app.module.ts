@@ -14,10 +14,10 @@ import { AppRoutingModule } from './app-routing.module';
     CommonModule,
     NgSimpleStateModule.forRoot({
       enableDevTool: !environment.production,
-      enableLocalStorage: true
+      enableLocalStorage: false
     }),
     AppRoutingModule
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule { }

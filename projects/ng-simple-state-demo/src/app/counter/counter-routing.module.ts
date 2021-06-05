@@ -4,7 +4,7 @@ import { CounterComponent } from './counter.component';
 
 const routes: Routes = [
     { path: '', component: CounterComponent },
-]; 
+];
 
 @NgModule({
     imports: [RouterModule.forChild(routes)],
