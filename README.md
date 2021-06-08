@@ -285,7 +285,7 @@ import { CounterStore } from './counter-store';
 
 describe('CounterStore', () => {
 
-  let service: CounterStore;
+  let counterStore: CounterStore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -297,25 +297,25 @@ describe('CounterStore', () => {
       ]
     });
 
-    service = new CounterStore(TestBed);
+    counterStore = new CounterStore(TestBed);
   });
 
   it('initialState', () => {
-    expect(service.getCurrentState()).toEqual({ count: 0 });
+    expect(counterStore.getCurrentState()).toEqual({ count: 0 });
   });
 
   it('increment', () => {
-    service.increment();
-    expect(service.getCurrentState()).toEqual({ count: 1 });
+    counterStore.increment();
+    expect(counterStore.getCurrentState()).toEqual({ count: 1 });
   });
 
   it('decrement', () => {
-    service.decrement();
-    expect(service.getCurrentState()).toEqual({ count: -1 });
+    counterStore.decrement();
+    expect(counterStore.getCurrentState()).toEqual({ count: -1 });
   });
 
   it('selectCount', (done) => {
-    service.selectCount().subscribe(value => {
+    counterStore.selectCount().subscribe(value => {
       expect(value).toBe(0);
       done();
     });
