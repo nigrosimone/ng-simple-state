@@ -41,7 +41,7 @@ import { environment } from '../environments/environment';
     BrowserModule,
     CommonModule,
     NgSimpleStateModule.forRoot({
-      enableDevTool: !environment.production, // Enable Redux DevTools only in developing
+      enableDevTool: !environment.production, // Enable Redux DevTools only in development mode
       enableLocalStorage: false // Local storage state persistence is globally disabled
     }) 
   ],
