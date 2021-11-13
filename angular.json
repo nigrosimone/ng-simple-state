@@ -29,18 +29,10 @@
             "karmaConfig": "projects/ng-simple-state/karma.conf.js"
           }
         },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/ng-simple-state/tsconfig.lib.json",
-              "projects/ng-simple-state/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        }
+		"lint": {
+			"builder": "@angular-eslint/builder:lint",
+			"options": {}
+		}
       }
     },
     "ng-simple-state-demo": {
@@ -88,7 +80,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
@@ -142,19 +133,6 @@
             "scripts": []
           }
         },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/ng-simple-state-demo/tsconfig.app.json",
-              "projects/ng-simple-state-demo/tsconfig.spec.json",
-              "projects/ng-simple-state-demo/e2e/tsconfig.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        },
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
@@ -166,7 +144,11 @@
               "devServerTarget": "ng-simple-state-demo:serve:production"
             }
           }
-        }
+        },
+		"lint": {
+			"builder": "@angular-eslint/builder:lint",
+			"options": {}
+		}
       }
     }},
   "defaultProject": "ng-simple-state"
