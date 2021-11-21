@@ -17,14 +17,14 @@ module.exports = function (config) {
     },
     coverageReporter: {
       dir: require('path').join(__dirname, '../../coverage/ng-simple-state'),
-      reports: ['html', 'lcovonly', 'text-summary'],
-      fixWebpackSourcePaths: true
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+		{ type: 'lcovonly' },
+        { type: 'text-summary' }
+      ]
     },
     reporters: ['progress', 'kjhtml'],
-	coverageReporter: {
-      type: 'lcov',
-      dir: 'coverage/'
-    },
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
