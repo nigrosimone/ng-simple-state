@@ -14,7 +14,7 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
-    storeConfig(): NgSimpleStateStoreConfig {
+    override storeConfig(): NgSimpleStateStoreConfig {
         return {
             enableDevTool: true,
             enableLocalStorage: true,
@@ -55,7 +55,7 @@ describe('NgSimpleStateBaseStore misc', () => {
                 })
             ]
         });
-        window['devToolsExtension'] = new DevToolsExtension();
+        (window as any)['devToolsExtension'] = new DevToolsExtension();
 
         localStorage.setItem(BASE_KEY + 'storeName', JSON.stringify({
             count: 2
@@ -69,27 +69,27 @@ describe('NgSimpleStateBaseStore misc', () => {
     });
 
     it('dev tool', (done) => {
-        expect(window['devToolsExtension'].name).toBe('storeName.initialState');
-        expect(window['devToolsExtension'].state).toEqual({ storeName: { count: 2 }});
+        expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
+        expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
         service.increment();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(3);
-            expect(window['devToolsExtension'].name).toBe('storeName.increment');
-            expect(window['devToolsExtension'].state).toEqual({ storeName: { count: 3 }});
+            expect((window as any)['devToolsExtension'].name).toBe('storeName.increment');
+            expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 3 } });
             done();
         });
     });
 
     it('dev tool action name', (done) => {
-        expect(window['devToolsExtension'].name).toBe('storeName.initialState');
-        expect(window['devToolsExtension'].state).toEqual({storeName: { count: 2 }});
+        expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
+        expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
         service.setState(() => ({ count: 5 }), 'test');
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
-            expect(window['devToolsExtension'].name).toBe('storeName.test');
-            expect(window['devToolsExtension'].state).toEqual({storeName: { count: 5 }});
+            expect((window as any)['devToolsExtension'].name).toBe('storeName.test');
+            expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 5 } });
             done();
         });
     });

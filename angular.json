@@ -10,16 +10,19 @@
       "prefix": "ng",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "tsConfig": "projects/ng-simple-state/tsconfig.lib.json",
             "project": "projects/ng-simple-state/ng-package.json"
           },
           "configurations": {
             "production": {
               "tsConfig": "projects/ng-simple-state/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ng-simple-state/tsconfig.lib.json"
             }
-          }
+          },
+          "defaultConfiguration": "production"
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
@@ -29,10 +32,15 @@
             "karmaConfig": "projects/ng-simple-state/karma.conf.js"
           }
         },
-		"lint": {
-			"builder": "@angular-eslint/builder:lint",
-			"options": {}
-		}
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ng-simple-state/**/*.ts",
+              "projects/ng-simple-state/**/*.html"
+            ]
+          }
+        }
       }
     },
     "ng-simple-state-demo": {
@@ -40,6 +48,9 @@
       "schematics": {
         "@schematics/angular:component": {
           "style": "sass"
+        },
+        "@schematics/angular:application": {
+          "strict": true
         }
       },
       "root": "projects/ng-simple-state-demo",
@@ -54,6 +65,7 @@
             "main": "projects/ng-simple-state-demo/src/main.ts",
             "polyfills": "projects/ng-simple-state-demo/src/polyfills.ts",
             "tsConfig": "projects/ng-simple-state-demo/tsconfig.app.json",
+            "inlineStyleLanguage": "sass",
             "assets": [
               "projects/ng-simple-state-demo/src/favicon.ico",
               "projects/ng-simple-state-demo/src/assets"
@@ -61,59 +73,57 @@
             "styles": [
               "projects/ng-simple-state-demo/src/styles.sass"
             ],
-            "scripts": [],
-            "vendorChunk": true,
-            "extractLicenses": false,
-            "buildOptimizer": false,
-            "sourceMap": true,
-            "optimization": false,
-            "namedChunks": true
+            "scripts": []
           },
           "configurations": {
             "production": {
-              "fileReplacements": [
-                {
-                  "replace": "projects/ng-simple-state-demo/src/environments/environment.ts",
-                  "with": "projects/ng-simple-state-demo/src/environments/environment.prod.ts"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kb",
-                  "maximumError": "10kb"
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
                 }
-              ]
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
-          }
+          },
+          "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "browserTarget": "ng-simple-state-demo:build"
-          },
           "configurations": {
             "production": {
               "browserTarget": "ng-simple-state-demo:build:production"
+            },
+            "development": {
+              "browserTarget": "ng-simple-state-demo:build:development"
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ng-simple-state-demo:build"
+            "browserTarget": "ng-simple-state-demochio:build"
           }
         },
         "test": {
@@ -123,6 +133,7 @@
             "polyfills": "projects/ng-simple-state-demo/src/polyfills.ts",
             "tsConfig": "projects/ng-simple-state-demo/tsconfig.spec.json",
             "karmaConfig": "projects/ng-simple-state-demo/karma.conf.js",
+            "inlineStyleLanguage": "sass",
             "assets": [
               "projects/ng-simple-state-demo/src/favicon.ico",
               "projects/ng-simple-state-demo/src/assets"
@@ -133,23 +144,20 @@
             "scripts": []
           }
         },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "protractorConfig": "projects/ng-simple-state-demo/e2e/protractor.conf.js",
-            "devServerTarget": "ng-simple-state-demo:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "ng-simple-state-demo:serve:production"
-            }
+            "lintFilePatterns": [
+              "projects/ng-simple-state-demo/**/*.ts",
+              "projects/ng-simple-state-demo/**/*.html"
+            ]
           }
-        },
-		"lint": {
-			"builder": "@angular-eslint/builder:lint",
-			"options": {}
-		}
+        }
       }
-    }},
-  "defaultProject": "ng-simple-state"
+    }
+  },
+  "defaultProject": "ng-simple-state",
+  "cli": {
+    "defaultCollection": "@angular-eslint/schematics"
+  }
 }

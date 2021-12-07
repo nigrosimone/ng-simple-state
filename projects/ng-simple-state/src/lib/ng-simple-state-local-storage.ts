@@ -41,7 +41,9 @@ export class NgSimpleStateLocalStorage {
     getItem<K>(key: string): K | null {
         if (this.isStorageActive) {
             const state = localStorage.getItem(BASE_KEY + key);
-            return JSON.parse(state);
+            if (state) {
+                return JSON.parse(state);
+            }
         }
         return null;
     }

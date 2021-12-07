@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 export class NgSimpleStateDevTool {
 
     // tslint:disable-next-line: no-string-literal
-    private globalDevtools: any = window['__REDUX_DEVTOOLS_EXTENSION__'] || window['devToolsExtension'];
+    private globalDevtools: any = (window as any)['__REDUX_DEVTOOLS_EXTENSION__'] || (window as any)['devToolsExtension'];
     private localDevTool: any;
     private isActiveDevtool = false;
     private instanceId = `ng-simple-state-${Date.now()}`;

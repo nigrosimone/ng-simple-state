@@ -14,7 +14,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     private localStorage: NgSimpleStateLocalStorage;
     private localStoreConfig: NgSimpleStateStoreConfig;
     private storeName: string;
-    private firstState: S;
+    private firstState: S | null = null;
     private isArray: boolean;
 
     /**
@@ -62,7 +62,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * Reset store to first loaded store state
      */
     resetState(): void {
-        this.setState(() => (this.firstState), 'resetState');
+        this.setState(() => (this.firstState as S), 'resetState');
     }
 
     /**
@@ -76,7 +76,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * Override this method for set a specific config for the store
      * @returns NgSimpleStateStoreConfig
      */
-    storeConfig(): NgSimpleStateStoreConfig {
+    storeConfig(): NgSimpleStateStoreConfig | null {
         return null;
     }
 
@@ -91,12 +91,13 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @param selectFn State selector (if not provided return full state)
      * @returns Observable of the selected state
      */
+    // eslint-disable-next-line no-unused-vars
     selectState<K>(selectFn?: (state: Readonly<S>) => K): Observable<K> {
         if (!selectFn) {
             selectFn = (tmpState: Readonly<S>): any => Object.assign(this.isArray ? [] : {}, tmpState);
         }
         return this.state$.pipe(
-            map(state => selectFn(state as Readonly<S>)),
+            map(state => (selectFn as any)(state as Readonly<S>)),
             distinctUntilChanged(),
             observeOn(asyncScheduler)
         );
@@ -115,6 +116,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      */
+    // eslint-disable-next-line no-unused-vars
     setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): void {
         const currState = this.getCurrentState();
         const newState = stateFn(currState);
@@ -137,18 +139,18 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @param actionName The action name
      * @returns True if fìdev tools are enabled
      */
-    private devToolSend(newState: S, actionName?: string): boolean {
+    private devToolSend(newState: S | undefined, actionName?: string): boolean {
         if (!this.devToolIsEnabled) {
             return false;
         }
         if (!actionName) {
             // retrive the parent (of parent) method into the stack trace
             actionName = new Error().stack
-                .split('\n')[3]
+                ?.split('\n')[3]
                 .trim()
                 .split(' ')[1]
                 .split('.')[1];
         }
-        return this.devTool.send(this.storeName, actionName, newState);
+        return this.devTool.send(this.storeName, actionName || 'unknown', newState);
     }
 }

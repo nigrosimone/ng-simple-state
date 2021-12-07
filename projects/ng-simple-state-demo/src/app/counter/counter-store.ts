@@ -13,7 +13,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
     super(injector);
   }
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  override storeConfig(): NgSimpleStateStoreConfig {
     return {
       storeName: 'MyCounterStore',
       enableLocalStorage: true

@@ -1,16 +1,13 @@
 {
   "name": "ng-simple-state",
-  "version": "13.0.4",
-  "description": "Simple state management in Angular with only Services and RxJS.",
+  "version": "13.0.1",
+  "description": "Structural directive for sharing data as local variable into html component template.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nigrosimone/ng-simple-state.git"
   },
   "keywords": [
-    "angular",
-    "state",
-    "rxjs",
-    "state-management"
+    "angular"
   ],
   "author": "Simone Nigro <nigro.simone@gmail.com>",
   "license": "MIT",
