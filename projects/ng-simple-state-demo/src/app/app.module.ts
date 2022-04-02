@@ -14,7 +14,8 @@ import { AppRoutingModule } from './app-routing.module';
     CommonModule,
     NgSimpleStateModule.forRoot({
       enableDevTool: !environment.production,
-      enableLocalStorage: false
+      enableLocalStorage: true,
+      persistentStorage: 'local'
     }),
     AppRoutingModule
   ],

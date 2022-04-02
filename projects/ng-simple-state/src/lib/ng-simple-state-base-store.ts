@@ -1,9 +1,11 @@
 import { Inject, Injectable, Injector, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
+import { NgSimpleStateBrowserStorage } from './ng-simple-state-browser-storage';
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 import { NgSimpleStateLocalStorage } from './ng-simple-state-local-storage';
 import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-models';
+import { NgSimpleStateSessionStorage } from './ng-simple-state-session-storage';
 @Injectable()
 export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> implements OnDestroy {
 
@@ -11,7 +13,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     private localStorageIsEnabled: boolean;
     private devToolIsEnabled: boolean;
     private devTool: NgSimpleStateDevTool;
-    private localStorage: NgSimpleStateLocalStorage;
+    private persistentStorage: NgSimpleStateBrowserStorage;
     private localStoreConfig: NgSimpleStateStoreConfig;
     private storeName: string;
     private firstState: S | null = null;
@@ -27,18 +29,25 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
 
     constructor(@Inject(Injector) injector: Injector) {
         this.devTool = injector.get(NgSimpleStateDevTool);
-        this.localStorage = injector.get(NgSimpleStateLocalStorage);
 
         const globalConfig = injector.get(NG_SIMPLE_STORE_CONFIG, {});
         const storeConfig = this.storeConfig() || {};
         this.localStoreConfig = { ...globalConfig, ...storeConfig };
+
+        if (this.localStoreConfig.persistentStorage === 'local') {
+            this.persistentStorage = injector.get(NgSimpleStateLocalStorage);
+        } else if (this.localStoreConfig.persistentStorage === 'session') {
+            this.persistentStorage = injector.get(NgSimpleStateSessionStorage);
+        } else {
+            this.persistentStorage = injector.get(NgSimpleStateLocalStorage);
+        }
 
         this.localStorageIsEnabled = typeof this.localStoreConfig.enableLocalStorage === 'boolean' ? this.localStoreConfig.enableLocalStorage : false;
         this.devToolIsEnabled = typeof this.localStoreConfig.enableDevTool === 'boolean' ? this.localStoreConfig.enableDevTool : false;
         this.storeName = typeof this.localStoreConfig.storeName === 'string' ? this.localStoreConfig.storeName : this.constructor.name;
 
         if (this.localStorageIsEnabled) {
-            this.firstState = this.localStorage.getItem<S>(this.storeName);
+            this.firstState = this.persistentStorage.getItem<S>(this.storeName);
         }
         if (!this.firstState) {
             this.firstState = this.initialState();
@@ -128,7 +137,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
         }
         this.devToolSend(state, actionName);
         if (this.localStorageIsEnabled) {
-            this.localStorage.setItem<S>(this.storeName, state);
+            this.persistentStorage.setItem<S>(this.storeName, state);
         }
         this.state$.next(state);
     }

@@ -24,6 +24,7 @@ npm i ng-simple-state
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
 | *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
+| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `local`    |
 
 _Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
 
@@ -258,7 +259,8 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
   override storeConfig(): NgSimpleStateStoreConfig {
     return {
-      enableLocalStorage: true // enable local storage for this store
+      enableLocalStorage: true, // enable local storage for this store
+      persistentStorage: 'session', // persistentStorage can be 'session' or 'local' (default is localStorage)
       storeName: 'CounterStore2', // For default the store name is the class name, you can set a specific name for this store (must be be unique)
     }
   }
@@ -272,6 +274,7 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
 | *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
 | *storeName*          | The name used into `Redux DevTools` and local storage key.                                      | Class name |
+| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `local`    |
 
 
 ## Testing

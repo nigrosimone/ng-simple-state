@@ -6,6 +6,7 @@ import { InjectionToken } from '@angular/core';
 export interface NgSimpleStateConfig {
     enableDevTool?: boolean;
     enableLocalStorage?: boolean;
+    persistentStorage?: 'session' | 'local';
 }
 
 /**
