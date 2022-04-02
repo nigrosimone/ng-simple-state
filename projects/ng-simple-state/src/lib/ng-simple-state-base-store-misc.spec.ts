@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
+import { BASE_KEY } from './ng-simple-state-browser-storage';
 import { DevToolsExtension } from './ng-simple-state-dev-tool.spec';
-import { BASE_KEY } from './ng-simple-state-local-storage';
 import { NgSimpleStateStoreConfig } from './ng-simple-state-models';
 import { NgSimpleStateModule } from './ng-simple-state.module';
 
@@ -51,7 +51,8 @@ describe('NgSimpleStateBaseStore misc', () => {
             imports: [
                 NgSimpleStateModule.forRoot({
                     enableDevTool: false,
-                    enableLocalStorage: false
+                    enableLocalStorage: false,
+                    persistentStorage: 'local'
                 })
             ]
         });
