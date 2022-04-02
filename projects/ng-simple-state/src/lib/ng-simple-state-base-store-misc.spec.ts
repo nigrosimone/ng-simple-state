@@ -42,7 +42,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 
 
-describe('NgSimpleStateBaseStore misc', () => {
+describe('NgSimpleStateBaseStore misc 1', () => {
 
     let service: CounterStore;
 
@@ -67,6 +67,64 @@ describe('NgSimpleStateBaseStore misc', () => {
 
     afterEach(() => {
         localStorage.clear();
+    });
+
+    it('dev tool', (done) => {
+        expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
+        expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
+
+        service.increment();
+        service.selectState(state => state.count).subscribe(value => {
+            expect(value).toBe(3);
+            expect((window as any)['devToolsExtension'].name).toBe('storeName.increment');
+            expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 3 } });
+            done();
+        });
+    });
+
+    it('dev tool action name', (done) => {
+        expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
+        expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
+
+        service.setState(() => ({ count: 5 }), 'test');
+        service.selectState(state => state.count).subscribe(value => {
+            expect(value).toBe(5);
+            expect((window as any)['devToolsExtension'].name).toBe('storeName.test');
+            expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 5 } });
+            done();
+        });
+    });
+
+});
+
+
+
+
+describe('NgSimpleStateBaseStore misc 2', () => {
+
+    let service: CounterStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [
+                NgSimpleStateModule.forRoot({
+                    enableDevTool: false,
+                    enableLocalStorage: false,
+                    persistentStorage: 'session'
+                })
+            ]
+        });
+        (window as any)['devToolsExtension'] = new DevToolsExtension();
+
+        sessionStorage.setItem(BASE_KEY + 'storeName', JSON.stringify({
+            count: 2
+        }));
+
+        service = new CounterStore(TestBed);
+    });
+
+    afterEach(() => {
+        sessionStorage.clear();
     });
 
     it('dev tool', (done) => {
