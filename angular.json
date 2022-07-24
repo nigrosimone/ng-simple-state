@@ -156,8 +156,9 @@
       }
     }
   },
-  "defaultProject": "ng-simple-state",
   "cli": {
-    "defaultCollection": "@angular-eslint/schematics"
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   }
 }
