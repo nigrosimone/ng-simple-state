@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector, OnDestroy } from '@angular/core';
+import { Inject, Injectable, Injector, OnDestroy, Directive } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBrowserStorage } from './ng-simple-state-browser-storage';
@@ -7,6 +7,8 @@ import { NgSimpleStateLocalStorage } from './ng-simple-state-local-storage';
 import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-models';
 import { NgSimpleStateSessionStorage } from './ng-simple-state-session-storage';
 @Injectable()
+@Directive()
+// tslint:disable-next-line: directive-class-suffix
 export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> implements OnDestroy {
 
     private state$: BehaviorSubject<S>;

@@ -6,10 +6,12 @@ import { CommonModule } from '@angular/common';
 import { NgSimpleStateModule } from '../../../ng-simple-state/src/public-api';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
+import { TestComponent } from './component/test.component';
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule,
+    TestComponent,
     FormsModule,
     CommonModule,
     NgSimpleStateModule.forRoot({

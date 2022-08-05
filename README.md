@@ -218,6 +218,52 @@ export class AppComponent {
 
 ![alt text](https://github.com/nigrosimone/ng-simple-state/blob/main/projects/ng-simple-state-demo/src/assets/dev-tool.gif?raw=true)
 
+## Manage component state without service
+
+If you want manage just a component state without make a new service, your component can extend directly `NgSimpleStateBaseStore`:
+
+```ts
+import { Component, Injector } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { Observable } from 'rxjs';
+
+export interface CounterState {
+    count: number;
+}
+
+@Component({
+    selector: 'ng-counter',
+    template: `
+        {{counter$ | async}}
+        <button (click)="increment()">+</button>
+        <button (click)="decrement()">-</button>
+    `
+})
+export class CounterComponent extends NgSimpleStateBaseStore<CounterState> {
+
+    public counter$: Observable<number> = this.selectState(state => state.count);
+
+    constructor(injector: Injector) {
+      super(injector);
+    }
+
+    initialState(): CounterState {
+        return {
+            count: 0
+        };
+    }
+
+    increment(): void {
+        this.setState(state => ({ count: state.count + 1 }));
+    }
+
+    decrement(): void {
+        this.setState(state => ({ count: state.count - 1 }));
+    }
+}
+```
+
 ## Store's dependency injection
 
 If you need to inject something into your store (eg. `HttpClient`), you need to also inject the Angular `Injector` service to the super, eg.:
