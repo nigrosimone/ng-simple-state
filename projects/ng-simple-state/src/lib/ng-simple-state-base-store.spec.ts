@@ -1,7 +1,9 @@
-import { Injectable, Injector } from '@angular/core';
-import { inject } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
+import { Component, DebugElement, Injectable, Injector } from '@angular/core';
+import { ComponentFixture, fakeAsync, inject, TestBed, tick } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
+import { NgSimpleStateModule } from './ng-simple-state.module';
 export interface CounterState {
     count: number;
 }
@@ -29,7 +31,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 
 
-describe('NgSimpleStateBaseStore', () => {
+describe('NgSimpleStateBaseStore: Service', () => {
 
     let service: CounterStore;
 
@@ -97,4 +99,64 @@ describe('NgSimpleStateBaseStore', () => {
         service.restartState();
         expect(service.getCurrentState()).toEqual({ count: 1 });
     });
+});
+
+@Component({
+    selector: 'ng-test',
+    template: `{{counter$ | async}}`
+})
+export class TestComponent extends NgSimpleStateBaseStore<CounterState> {
+
+    public counter$: Observable<number> = this.selectState(state => state.count);
+
+    initialState(): CounterState {
+        return {
+            count: 0
+        };
+    }
+
+    increment(): void {
+        this.setState(state => ({ count: state.count + 1 }));
+    }
+
+    decrement(): void {
+        this.setState(state => ({ count: state.count - 1 }));
+    }
+}
+describe('NgSimpleStateBaseStore: Component', () => {
+
+    let fixture: ComponentFixture<TestComponent>;
+    let debugElement: DebugElement;
+    let element: HTMLElement;
+    let component: TestComponent;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            declarations: [TestComponent],
+            imports: [NgSimpleStateModule, CommonModule]
+        });
+        fixture = TestBed.createComponent(TestComponent);
+        debugElement = fixture.debugElement;
+        component = fixture.componentInstance;
+        element = debugElement.nativeElement;
+    });
+
+    afterEach(() => {
+        document.body.removeChild(element);
+    });
+
+    it('initialState', fakeAsync(() => {
+        fixture.detectChanges();
+        tick();
+        fixture.detectChanges();
+        expect(element.textContent?.trim()).toBe('0');
+    }));
+
+    it('increment', fakeAsync(() => {
+        component.increment();
+        fixture.detectChanges();
+        tick();
+        fixture.detectChanges();
+        expect(element.textContent?.trim()).toBe('1');
+    }));
 });
