@@ -17,12 +17,12 @@ export class CounterStore extends NgSimpleStateBaseStore<NumbersState> {
         return this.selectState(state => [...state]);
     }
 
-    add(value: number): void {
-        this.setState(state => [...state, value]);
+    add(value: number): boolean {
+        return this.setState(state => [...state, value]);
     }
 
-    del(value: number): void {
-        this.setState(state => state.filter(item => item !== value));
+    del(value: number): boolean {
+        return this.setState(state => state.filter(item => item !== value));
     }
 }
 
@@ -45,7 +45,7 @@ describe('NgSimpleStateBaseStoreArray', () => {
     });
 
     it('add -> setState -> selectState', (done) => {
-        service.add(2);
+        expect(service.add(2)).toBeTrue();
         service.selectState().subscribe(value => {
             expect(value).toEqual([1, 2]);
             expect(service.getCurrentState()).toEqual([1, 2]);
@@ -54,7 +54,7 @@ describe('NgSimpleStateBaseStoreArray', () => {
     });
 
     it('del -> setState -> selectState', (done) => {
-        service.del(1);
+        expect(service.del(1)).toBeTrue();
         service.selectState().subscribe(value => {
             expect(value).toEqual([]);
             expect(service.getCurrentState()).toEqual([]);
@@ -63,14 +63,14 @@ describe('NgSimpleStateBaseStoreArray', () => {
     });
 
     it('resetState', () => {
-        service.add(2);
-        service.resetState();
+        expect(service.add(2)).toBeTrue();
+        expect(service.resetState()).toBeTrue();
         expect(service.getCurrentState()).toEqual([1]);
     });
 
     it('restartState', () => {
-        service.add(2);
-        service.restartState();
+        expect(service.add(2)).toBeTrue();
+        expect(service.restartState()).toBeTrue();
         expect(service.getCurrentState()).toEqual([1]);
     });
 });

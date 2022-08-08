@@ -32,12 +32,12 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
         return this.selectState(state => state.count);
     }
 
-    increment(increment: number = 1): void {
-        this.setState(state => ({ count: state.count + increment }));
+    increment(increment: number = 1): boolean {
+        return this.setState(state => ({ count: state.count + increment }));
     }
 
-    decrement(decrement: number = 1): void {
-        this.setState(state => ({ count: state.count - decrement }));
+    decrement(decrement: number = 1): boolean {
+        return this.setState(state => ({ count: state.count - decrement }));
     }
 }
 
@@ -73,7 +73,7 @@ describe('NgSimpleStateBaseStore misc 1', () => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
-        service.increment();
+        expect(service.increment()).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(3);
             expect((window as any)['devToolsExtension'].name).toBe('storeName.increment');
@@ -86,7 +86,7 @@ describe('NgSimpleStateBaseStore misc 1', () => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
-        service.setState(() => ({ count: 5 }), 'test');
+        expect(service.setState(() => ({ count: 5 }), 'test')).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
             expect((window as any)['devToolsExtension'].name).toBe('storeName.test');
@@ -131,7 +131,7 @@ describe('NgSimpleStateBaseStore misc 2', () => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
-        service.increment();
+        expect(service.increment()).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(3);
             expect((window as any)['devToolsExtension'].name).toBe('storeName.increment');
@@ -144,7 +144,7 @@ describe('NgSimpleStateBaseStore misc 2', () => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
-        service.setState(() => ({ count: 5 }), 'test');
+        expect(service.setState(() => ({ count: 5 }), 'test')).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
             expect((window as any)['devToolsExtension'].name).toBe('storeName.test');
