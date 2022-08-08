@@ -21,12 +21,12 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
         return this.selectState(state => state.count);
     }
 
-    increment(increment: number = 1): void {
-        this.setState(state => ({ count: state.count + increment }));
+    increment(increment: number = 1): boolean {
+        return this.setState(state => ({ count: state.count + increment }));
     }
 
-    decrement(decrement: number = 1): void {
-        this.setState(state => ({ count: state.count - decrement }));
+    decrement(decrement: number = 1): boolean {
+        return this.setState(state => ({ count: state.count - decrement }));
     }
 }
 
@@ -49,7 +49,7 @@ describe('NgSimpleStateBaseStore: Service', () => {
     });
 
     it('increment -> setState -> selectState', (done) => {
-        service.increment();
+        expect(service.increment()).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(2);
             expect(service.getCurrentState()).toEqual({ count: 2 });
@@ -58,7 +58,7 @@ describe('NgSimpleStateBaseStore: Service', () => {
     });
 
     it('decrement -> setState -> selectState', (done) => {
-        service.decrement();
+        expect(service.decrement()).toBeTrue();
         service.selectState().subscribe(value => {
             expect(value).toEqual({ count: 0 });
             expect(service.getCurrentState()).toEqual({ count: 0 });
@@ -119,12 +119,12 @@ export class TestComponent extends NgSimpleStateBaseStore<CounterState> {
         };
     }
 
-    increment(): void {
-        this.setState(state => ({ count: state.count + 1 }));
+    increment(): boolean {
+        return this.setState(state => ({ count: state.count + 1 }));
     }
 
-    decrement(): void {
-        this.setState(state => ({ count: state.count - 1 }));
+    decrement(): boolean {
+        return this.setState(state => ({ count: state.count - 1 }));
     }
 }
 describe('NgSimpleStateBaseStore: Component', () => {
@@ -157,10 +157,18 @@ describe('NgSimpleStateBaseStore: Component', () => {
     }));
 
     it('increment', fakeAsync(() => {
-        component.increment();
+        expect(component.increment()).toBeTrue();
         fixture.detectChanges();
         tick();
         fixture.detectChanges();
         expect(element.textContent?.trim()).toBe('1');
+    }));
+
+    it('decrement', fakeAsync(() => {
+        expect(component.decrement()).toBeTrue();
+        fixture.detectChanges();
+        tick();
+        fixture.detectChanges();
+        expect(element.textContent?.trim()).toBe('-1');
     }));
 });
