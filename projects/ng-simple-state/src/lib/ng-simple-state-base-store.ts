@@ -126,6 +126,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * Set a new state
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
      */
     // eslint-disable-next-line no-unused-vars
     setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean {
