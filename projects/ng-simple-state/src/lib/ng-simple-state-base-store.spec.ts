@@ -66,6 +66,10 @@ describe('NgSimpleStateBaseStore: Service', () => {
         });
     });
 
+    it('no changes', () => {
+        expect(service.setState(state => state)).toBeFalse();
+    });
+
     it('get state', (done) => {
         service.state.subscribe(state => {
             expect(state.count).toBe(1);
@@ -75,7 +79,7 @@ describe('NgSimpleStateBaseStore: Service', () => {
     });
 
     it('decrement -> setState', (done) => {
-        service.setState(() => ({ count: 5 }));
+        expect(service.setState(() => ({ count: 5 }))).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
             expect(service.getCurrentState()).toEqual({ count: 5 });
@@ -89,14 +93,14 @@ describe('NgSimpleStateBaseStore: Service', () => {
     });
 
     it('resetState', () => {
-        service.setState(() => ({ count: 5 }));
-        service.resetState();
+        expect(service.setState(() => ({ count: 5 }))).toBeTrue();
+        expect(service.resetState()).toBeTrue();
         expect(service.getCurrentState()).toEqual({ count: 1 });
     });
 
     it('restartState', () => {
-        service.setState(() => ({ count: 5 }));
-        service.restartState();
+        expect(service.setState(() => ({ count: 5 }))).toBeTrue();
+        expect(service.restartState()).toBeTrue();
         expect(service.getCurrentState()).toEqual({ count: 1 });
     });
 });

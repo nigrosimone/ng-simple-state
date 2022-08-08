@@ -72,15 +72,15 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     /**
      * Reset store to first loaded store state
      */
-    resetState(): void {
-        this.setState(() => (this.firstState as S), 'resetState');
+    resetState(): boolean {
+        return this.setState(() => (this.firstState as S), 'resetState');
     }
 
     /**
      * Reset store to initial store state
      */
-    restartState(): void {
-        this.setState(() => (this.initialState()), 'restartState');
+    restartState(): boolean {
+        return this.setState(() => (this.initialState()), 'restartState');
     }
 
     /**
@@ -128,9 +128,12 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @param actionName The action label into Redux DevTools (default is parent function name)
      */
     // eslint-disable-next-line no-unused-vars
-    setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): void {
+    setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean {
         const currState = this.getCurrentState();
         const newState = stateFn(currState);
+        if (currState === newState) {
+            return false;
+        }
         let state: S;
         if (this.isArray) {
             state = Object.assign([], newState) as any;
@@ -142,6 +145,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
             this.persistentStorage.setItem<S>(this.storeName, state);
         }
         this.state$.next(state);
+        return true;
     }
 
     /**
