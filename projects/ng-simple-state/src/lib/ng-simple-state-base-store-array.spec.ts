@@ -44,6 +44,10 @@ describe('NgSimpleStateBaseStoreArray', () => {
         });
     });
 
+    it('no changes', () => {
+        expect(service.setState((state) => state as any)).toBeFalse();
+    });
+
     it('add -> setState -> selectState', (done) => {
         expect(service.add(2)).toBeTrue();
         service.selectState().subscribe(value => {
