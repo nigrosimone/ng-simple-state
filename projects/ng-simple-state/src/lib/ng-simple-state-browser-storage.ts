@@ -4,24 +4,23 @@ export abstract class NgSimpleStateBrowserStorage {
 
     private isStorageActive = false;
 
-    // eslint-disable-next-line no-unused-vars
     constructor(private storage: Storage) {
-        this.isStorageActive = !!localStorage;
+        this.isStorageActive = !!storage;
     }
 
     /**
-     * Return true if local storage is active
-     * @returns True if local storage is active
+     * Return true if storage is active
+     * @returns True if storage is active
      */
     isActive(): boolean {
         return this.isStorageActive;
     }
 
     /**
-     * Set item into local storage
+     * Set item into storage
      * @param key key name
      * @param state state valie
-     * @returns True if item is stored into local storage
+     * @returns True if item is stored into storage
      */
     setItem<K>(key: string, state: K): boolean {
         if (this.isStorageActive) {
@@ -32,7 +31,7 @@ export abstract class NgSimpleStateBrowserStorage {
     }
 
     /**
-     * Return item from local storage
+     * Return item from storage
      * @param key key name
      * @returns the item
      */
@@ -47,7 +46,7 @@ export abstract class NgSimpleStateBrowserStorage {
     }
 
     /**
-     * Remove item from local storage
+     * Remove item from storage
      * @param key key name
      * @returns True if item is removed
      */
