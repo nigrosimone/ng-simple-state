@@ -6,7 +6,7 @@ describe('NgSimpleStateSessionStorage', () => {
         sessionStorage.clear();
     });
 
-    it('localstorage active', () => {
+    it('sessionStorage active', () => {
         const service = new NgSimpleStateSessionStorage();
         expect(service.isActive()).toBe(true);
         expect(service.setItem('test', '1')).toBe(true);
@@ -15,7 +15,7 @@ describe('NgSimpleStateSessionStorage', () => {
         expect(service.getItem('test')).toBe(null);
     });
 
-    it('localstorage not activee', () => {
+    it('sessionStorage not activee', () => {
         const service = new NgSimpleStateSessionStorage();
         (service as any).isStorageActive = false;
         expect(service.isActive()).toBe(false);
