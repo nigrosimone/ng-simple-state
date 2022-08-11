@@ -9,6 +9,7 @@ Sharing state between components as simple as possible and leverage the good par
 See the demos:
  - [Counter](https://stackblitz.com/edit/demo-ng-simple-state?file=src%2Fapp%2Fapp.component.ts)
  - [Tour of heroes](https://stackblitz.com/edit/ng-simple-state-tour-of-heroes?file=src%2Fapp%2Fhero.service.ts)
+ - [To Do List](https://stackblitz.com/edit/ng-simple-state-todo?file=src%2Fapp%2Fapp.component.ts)
 
 ## Get Started
 
