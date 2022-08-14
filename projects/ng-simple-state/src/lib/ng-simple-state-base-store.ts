@@ -6,6 +6,7 @@ import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 import { NgSimpleStateLocalStorage } from './ng-simple-state-local-storage';
 import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-models';
 import { NgSimpleStateSessionStorage } from './ng-simple-state-session-storage';
+
 @Injectable()
 @Directive()
 // tslint:disable-next-line: directive-class-suffix
@@ -22,7 +23,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     private isArray: boolean;
 
     /**
-     * Return the observable state
+     * Return the observable of the state
      * @returns Observable of the state
      */
     public get state(): BehaviorSubject<S> {
@@ -70,14 +71,16 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     }
 
     /**
-     * Reset store to first loaded store state
+     * Reset store to first loaded store state:
+     *  - the last saved state, if `enableLocalStorage` config is `true`
+     *  - otherwise the initial state provided from `initialState()` method.
      */
     resetState(): boolean {
         return this.setState(() => (this.firstState as S), 'resetState');
     }
 
     /**
-     * Reset store to initial store state
+     * Reset the store to initial state provided from `initialState()` method
      */
     restartState(): boolean {
         return this.setState(() => (this.initialState()), 'restartState');
@@ -105,7 +108,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     // eslint-disable-next-line no-unused-vars
     selectState<K>(selectFn?: (state: Readonly<S>) => K): Observable<K> {
         if (!selectFn) {
-            selectFn = (tmpState: Readonly<S>): any => Object.assign(this.isArray ? [] : {}, tmpState);
+            selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as unknown as K;
         }
         return this.state$.pipe(
             map(state => (selectFn as any)(state as Readonly<S>)),
@@ -137,7 +140,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
         }
         let state: S;
         if (this.isArray) {
-            state = Object.assign([], newState) as any;
+            state = Object.assign([] as S, newState);
         } else {
             state = Object.assign({}, currState, newState);
         }
