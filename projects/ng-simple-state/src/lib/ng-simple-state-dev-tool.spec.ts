@@ -20,7 +20,7 @@ describe('NgSimpleStateDevTool', () => {
 
     it('enableDevTool active', () => {
         (window as any)['devToolsExtension'] = new DevToolsExtension();
-        const service = new NgSimpleStateDevTool();
+        const service = new NgSimpleStateDevTool({runOutsideAngular: (cbk: any) => cbk() } as any);
         expect(service.isActive()).toBe(true);
         expect(service.send('test', 'test1', 'test2')).toBe(true);
         expect((window as any)['devToolsExtension'].name).toBe('test.test1');
@@ -29,7 +29,7 @@ describe('NgSimpleStateDevTool', () => {
 
     it('no devToolsExtension', () => {
         (window as any)['devToolsExtension'] = null;
-        const service = new NgSimpleStateDevTool();
+        const service = new NgSimpleStateDevTool({runOutsideAngular: (cbk: any) => cbk() } as any);
         service.send('test', 'test', 'test');
         expect(service.send('test', 'test', 'test')).toBe(false);
         expect(service.isActive()).toBe(false);
@@ -44,7 +44,7 @@ describe('NgSimpleStateDevTool', () => {
                 return null;
             }
         };
-        const service = new NgSimpleStateDevTool();
+        const service = new NgSimpleStateDevTool({runOutsideAngular: (cbk: any) => cbk() } as any);
         service.send('test', 'test', 'test');
         expect(service.send('test', 'test', 'test')).toBe(false);
         expect(service.isActive()).toBe(false);
