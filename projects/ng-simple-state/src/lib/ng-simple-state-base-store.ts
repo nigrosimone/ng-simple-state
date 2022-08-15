@@ -126,6 +126,16 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     }
 
     /**
+     * Return the first loaded store state:
+     * the last saved state, if `enableLocalStorage` config is `true`;
+     * otherwise the initial state provided from `initialState()` method.
+     * @returns The first state
+     */
+    getFirstState(): S | null {
+        return this.firstState;
+    }
+
+    /**
      * Set a new state
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)

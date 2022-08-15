@@ -43,6 +43,7 @@ describe('NgSimpleStateBaseStore: Service', () => {
     it('initialState -> selectState', (done) => {
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(1);
+            expect(service.getFirstState()).toEqual({ count: 1 });
             expect(service.getCurrentState()).toEqual({ count: 1 });
             done();
         });
@@ -52,6 +53,7 @@ describe('NgSimpleStateBaseStore: Service', () => {
         expect(service.increment()).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(2);
+            expect(service.getFirstState()).toEqual({ count: 1 });
             expect(service.getCurrentState()).toEqual({ count: 2 });
             done();
         });
