@@ -154,11 +154,11 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
         } else {
             state = Object.assign({}, currState, newState);
         }
+        this.state$.next(state);
         this.devToolSend(state, actionName);
         if (this.localStorageIsEnabled) {
             this.persistentStorage.setItem<S>(this.storeName, state);
         }
-        this.state$.next(state);
         return true;
     }
 
