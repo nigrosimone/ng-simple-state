@@ -460,6 +460,6 @@ This is an open-source project. Star this [repository](https://github.com/nigros
 I have published some other Angular libraries, take a look:
 
  - [NgHttpCaching: Cache for HTTP requests in Angular application](https://www.npmjs.com/package/ng-http-caching)
- - [NgGenericPipe: Generic pipe for Angular application](https://www.npmjs.com/package/ng-generic-pipe)
+ - [NgGenericPipe: Generic pipe for Angular application for use a component method into component template.](https://www.npmjs.com/package/ng-generic-pipe)
  - [NgLet: Structural directive for sharing data as local variable into html component template](https://www.npmjs.com/package/ng-let)
  - [NgForTrackByProperty: Angular global trackBy property directive with strict type checking](https://www.npmjs.com/package/ng-for-track-by-property)
