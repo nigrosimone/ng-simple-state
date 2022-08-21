@@ -111,6 +111,40 @@ describe('NgSimpleStateBaseStore: Service', () => {
         expect(service.getFirstState()).toEqual({ count: 1 });
         expect(service.getCurrentState()).toEqual({ count: 1 });
     });
+
+    it('deepFreeze', () => {
+        
+        try {
+            expect(service['devMode']).toEqual(true);
+            const state = service.getFirstState();
+            expect(state).toEqual({ count: 1 });
+            if (state) {
+                (state as any).count = 2;
+            }
+            expect(state).toEqual({ count: 2 });
+        } catch (error: any) {
+            expect(error.message).toEqual('!');
+        }
+
+        try {
+            expect(service['devMode']).toEqual(true);
+            service['devMode'] = false;
+            expect(service['devMode']).toEqual(false);
+            const state = service.getFirstState();
+            if (state) {
+                expect(state).toEqual({ count: 2 });
+                (state as any).count = 3;
+            }
+            expect(true).toEqual(false);
+        } catch (error: any) {
+            expect(error.message).toEqual('Cannot assign to read only property \'count\' of object \'[object Object]\'');
+        } finally {
+            service['devMode'] = true;
+            expect(service['devMode']).toEqual(true);
+        }
+
+    });
+
 });
 
 @Component({

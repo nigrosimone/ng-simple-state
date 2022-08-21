@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector, OnDestroy, Directive } from '@angular/core';
+import { Inject, Injectable, Injector, OnDestroy, Directive, isDevMode } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBrowserStorage } from './ng-simple-state-browser-storage';
@@ -21,6 +21,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     private storeName: string;
     private firstState: S | null = null;
     private isArray: boolean;
+    private devMode: boolean = isDevMode();
 
     /**
      * Return the observable of the state
@@ -121,8 +122,8 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * Return the current store state (snapshot)
      * @returns The current state
      */
-    getCurrentState(): S {
-        return this.state$.getValue();
+    getCurrentState(): Readonly<S> {
+        return this.deepFreeze(this.state$.getValue());
     }
 
     /**
@@ -131,8 +132,8 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * otherwise the initial state provided from `initialState()` method.
      * @returns The first state
      */
-    getFirstState(): S | null {
-        return this.firstState;
+    getFirstState(): Readonly<S> | null {
+        return this.deepFreeze(this.firstState);
     }
 
     /**
@@ -181,5 +182,36 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
                 .split('.')[1];
         }
         return this.devTool.send(this.storeName, actionName || 'unknown', newState);
+    }
+
+    /**
+     * Recursively Object.freeze simple Javascript structures consisting of plain objects, arrays, and primitives. 
+     * Make the data immutable.
+     * @returns immutable object
+     */
+    private deepFreeze(object: S | null): Readonly<S> {
+        // No freezing in production (for better performance).
+        if (this.devMode || !object) {
+            return object as Readonly<S>;
+        }
+
+        // When already frozen, we assume its children are frozen (for better performance).
+        // This should be true if you always use `deepFreeze` to freeze objects,
+        // which is why you should have a linter rule that prevents you from using
+        // `Object.freeze` standalone.
+        //
+        // Note that Object.isFrozen will also return `true` for primitives (numbers,
+        // strings, booleans, undefined, null), so there is no need to check for
+        // those explicitly.
+        if (Object.isFrozen(object)) {
+            return object as Readonly<S>;
+        }
+
+        // At this point we know that we're dealing with either an array or plain object, so
+        // just freeze it and recurse on its values.
+        Object.freeze(object);
+        Object.keys(object).forEach(key => this.deepFreeze((object as any)[key]));
+
+        return object as Readonly<S>;
     }
 }
