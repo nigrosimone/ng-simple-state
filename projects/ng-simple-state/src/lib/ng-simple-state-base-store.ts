@@ -81,7 +81,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     }
 
     /**
-     * Reset the store to initial state provided from `initialState()` method
+     * Restart the store to initial state provided from `initialState()` method
      */
     restartState(): boolean {
         return this.setState(() => (this.initialState()), 'restartState');
@@ -179,13 +179,16 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
                 ?.split('\n')[3]
                 .trim()
                 .split(' ')[1]
-                .split('.')[1];
+                .split('.')[1] || 'unknown';
         }
-        return this.devTool.send(this.storeName, actionName || 'unknown', newState);
+        if (!this.devTool.send(this.storeName, actionName, newState)) {
+            console.log(this.storeName + '.' + actionName, newState);
+        }
+        return true;
     }
 
     /**
-     * Recursively Object.freeze simple Javascript structures consisting of plain objects, arrays, and primitives. 
+     * Recursively Object.freeze simple Javascript structures consisting of plain objects, arrays, and primitives.
      * Make the data immutable.
      * @returns immutable object
      */
@@ -196,9 +199,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
         }
 
         // When already frozen, we assume its children are frozen (for better performance).
-        // This should be true if you always use `deepFreeze` to freeze objects,
-        // which is why you should have a linter rule that prevents you from using
-        // `Object.freeze` standalone.
+        // This should be true if you always use `deepFreeze` to freeze objects.
         //
         // Note that Object.isFrozen will also return `true` for primitives (numbers,
         // strings, booleans, undefined, null), so there is no need to check for
