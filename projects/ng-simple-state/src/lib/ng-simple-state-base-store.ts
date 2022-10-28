@@ -104,16 +104,17 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     /**
      * Select a store state
      * @param selectFn State selector (if not provided return full state)
+     * @param comparator A function used to compare the previous and current keys for equality. Defaults to a `===` check.
      * @returns Observable of the selected state
      */
     // eslint-disable-next-line no-unused-vars
-    selectState<K>(selectFn?: (state: Readonly<S>) => K): Observable<K> {
+    selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): Observable<K> {
         if (!selectFn) {
             selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as unknown as K;
         }
         return this.state$.pipe(
             map(state => (selectFn as any)(state as Readonly<S>)),
-            distinctUntilChanged(),
+            distinctUntilChanged(comparator),
             observeOn(asyncScheduler)
         );
     }
