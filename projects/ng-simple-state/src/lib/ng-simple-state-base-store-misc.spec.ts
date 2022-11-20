@@ -18,7 +18,8 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
         return {
             enableDevTool: true,
             enableLocalStorage: true,
-            storeName: 'storeName'
+            storeName: 'storeName',
+            comparator: (previous, current) => previous === current,
         };
     }
 

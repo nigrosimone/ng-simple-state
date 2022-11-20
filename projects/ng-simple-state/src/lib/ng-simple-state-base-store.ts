@@ -22,6 +22,8 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     private firstState: S | null = null;
     private isArray: boolean;
     private devMode: boolean = isDevMode();
+    // eslint-disable-next-line no-unused-vars
+    private comparator!: <K>(previous: K, current: K) => boolean;
 
     /**
      * Return the observable of the state
@@ -49,6 +51,9 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
         this.localStorageIsEnabled = typeof this.localStoreConfig.enableLocalStorage === 'boolean' ? this.localStoreConfig.enableLocalStorage : false;
         this.devToolIsEnabled = typeof this.localStoreConfig.enableDevTool === 'boolean' ? this.localStoreConfig.enableDevTool : false;
         this.storeName = typeof this.localStoreConfig.storeName === 'string' ? this.localStoreConfig.storeName : this.constructor.name;
+        if (typeof this.localStoreConfig.comparator === 'function') {
+            this.comparator = this.localStoreConfig.comparator;
+        }
 
         if (this.localStorageIsEnabled) {
             this.firstState = this.persistentStorage.getItem<S>(this.storeName);
@@ -104,13 +109,16 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     /**
      * Select a store state
      * @param selectFn State selector (if not provided return full state)
-     * @param comparator A function used to compare the previous and current keys for equality. Defaults to a `===` check.
+     * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
      * @returns Observable of the selected state
      */
     // eslint-disable-next-line no-unused-vars
     selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): Observable<K> {
         if (!selectFn) {
             selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as unknown as K;
+        }
+        if (!comparator && this.comparator) {
+            comparator = this.comparator;
         }
         return this.state$.pipe(
             map(state => (selectFn as any)(state as Readonly<S>)),

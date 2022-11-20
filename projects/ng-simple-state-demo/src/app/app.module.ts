@@ -17,7 +17,8 @@ import { TestComponent } from './component/test.component';
     NgSimpleStateModule.forRoot({
       enableDevTool: !environment.production,
       enableLocalStorage: true,
-      persistentStorage: 'local'
+      persistentStorage: 'local',
+      comparator: (previous, current) => JSON.stringify(previous) === JSON.stringify(current)
     }),
     AppRoutingModule
   ],

@@ -113,7 +113,6 @@ describe('NgSimpleStateBaseStore: Service', () => {
     });
 
     it('deepFreeze', () => {
-        
         try {
             expect(service['devMode']).toEqual(true);
             const state = service.getFirstState();
@@ -142,7 +141,6 @@ describe('NgSimpleStateBaseStore: Service', () => {
             service['devMode'] = true;
             expect(service['devMode']).toEqual(true);
         }
-
     });
 
 });

@@ -7,6 +7,8 @@ export interface NgSimpleStateConfig {
     enableDevTool?: boolean;
     enableLocalStorage?: boolean;
     persistentStorage?: 'session' | 'local';
+    // eslint-disable-next-line no-unused-vars
+    comparator?: <K>(previous: K, current: K) => boolean;
 }
 
 /**

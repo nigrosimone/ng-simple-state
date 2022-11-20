@@ -27,7 +27,8 @@ npm i ng-simple-state
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
 | *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
-| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `local`    |
+| *persistentStorage*  | Set the persistent storage `local` or `session`.                                                | `local`    |
+| *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
 
 _Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
 
@@ -324,6 +325,7 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
 | *storeName*          | The name used into `Redux DevTools` and local storage key.                                      | Class name |
 | *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `local`    |
+| *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
 
 
 ## Testing
