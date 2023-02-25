@@ -2,12 +2,19 @@ import { Injectable, Injector } from '@angular/core';
 import { inject } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
+import { NgSimpleStateStoreConfig } from './ng-simple-state-models';
 
 
 export type NumbersState = number[];
 
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<NumbersState> {
+
+    protected storeConfig(): NgSimpleStateStoreConfig {
+        return {
+            storeName: 'CounterStore'
+        };
+    }
 
     initialState(): NumbersState {
         return [1];

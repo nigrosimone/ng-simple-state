@@ -84,11 +84,11 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 ```
 
-3) Implement `initialState()` method and provide the initial state of the store, eg.:
+3) Implement `initialState()` and `storeConfig()` methods and provide the initial state of the store, eg.:
 
 ```ts
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 export interface CounterState {
     count: number;
@@ -96,6 +96,12 @@ export interface CounterState {
  
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'CounterStore'
+    };
+  }
   
   initialState(): CounterState {
     return {
@@ -110,7 +116,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
 ```ts
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 import { Observable } from 'rxjs';
 
 export interface CounterState {
@@ -119,6 +125,12 @@ export interface CounterState {
  
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'CounterStore'
+    };
+  }
   
   initialState(): CounterState {
     return {
@@ -136,7 +148,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
 ```ts
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 import { Observable } from 'rxjs';
 
 export interface CounterState {
@@ -145,6 +157,12 @@ export interface CounterState {
 
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'CounterStore'
+    };
+  }
 
   initialState(): CounterState {
     return {
@@ -250,6 +268,12 @@ export class CounterComponent extends NgSimpleStateBaseStore<CounterState> {
 
     constructor(injector: Injector) {
       super(injector);
+    }
+
+    storeConfig(): NgSimpleStateStoreConfig {
+      return {
+        storeName: 'CounterComponent'
+      };
     }
 
     initialState(): CounterState {
@@ -397,6 +421,12 @@ export type TodoState = Array<Todo>;
 
 @Injectable()
 export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'TodoStore'
+    };
+  }
 
   initialState(): TodoState {
     return [];

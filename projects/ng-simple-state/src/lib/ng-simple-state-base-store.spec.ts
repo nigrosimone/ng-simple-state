@@ -3,6 +3,7 @@ import { Component, DebugElement, Injectable, Injector } from '@angular/core';
 import { ComponentFixture, fakeAsync, inject, TestBed, tick } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
+import { NgSimpleStateStoreConfig } from './ng-simple-state-models';
 import { NgSimpleStateModule } from './ng-simple-state.module';
 export interface CounterState {
     count: number;
@@ -10,6 +11,12 @@ export interface CounterState {
 
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+
+    protected storeConfig(): NgSimpleStateStoreConfig {
+        return {
+            storeName: 'CounterStore'
+        };
+    }
 
     initialState(): CounterState {
         return {
@@ -152,6 +159,12 @@ describe('NgSimpleStateBaseStore: Service', () => {
 export class TestComponent extends NgSimpleStateBaseStore<CounterState> {
 
     public counter$: Observable<number> = this.selectState(state => state.count);
+
+    protected storeConfig(): NgSimpleStateStoreConfig {
+        return {
+            storeName: 'TestComponent'
+        };
+    }
 
     initialState(): CounterState {
         return {

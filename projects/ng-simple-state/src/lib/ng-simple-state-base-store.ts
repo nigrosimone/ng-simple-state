@@ -59,7 +59,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
             this.firstState = this.persistentStorage.getItem<S>(this.storeName);
         }
         if (!this.firstState) {
-            this.firstState = this.initialState();
+            this.firstState = this.initialState(injector);
         }
 
         this.devToolSend(this.firstState, `initialState`);
@@ -96,15 +96,15 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * Override this method for set a specific config for the store
      * @returns NgSimpleStateStoreConfig
      */
-    storeConfig(): NgSimpleStateStoreConfig | null {
-        return null;
-    }
+    protected abstract storeConfig(): NgSimpleStateStoreConfig;
 
     /**
      * Set into the store the initial state
+     * @param injector current Injector
      * @returns The state object
      */
-    protected abstract initialState(): S;
+    // eslint-disable-next-line no-unused-vars
+    protected abstract initialState(injector?: Injector): S;
 
     /**
      * Select a store state

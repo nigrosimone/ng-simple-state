@@ -1,5 +1,5 @@
 
-import { NgSimpleStateBaseStore, NgSimpleStateModule } from '../../../../ng-simple-state/src/public-api';
+import { NgSimpleStateBaseStore, NgSimpleStateModule, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
 import { Observable } from 'rxjs';
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -24,6 +24,12 @@ export interface CounterState {
 export class TestComponent extends NgSimpleStateBaseStore<CounterState> {
 
     public counter$: Observable<number> = this.selectState(state => state.count);
+
+    protected storeConfig(): NgSimpleStateStoreConfig {
+        return {
+            storeName: 'TestComponent'
+        };
+    }
 
     initialState(): CounterState {
         return {
