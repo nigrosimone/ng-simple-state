@@ -15,8 +15,8 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     private state$: BehaviorSubject<S>;
     private localStorageIsEnabled: boolean;
     private devToolIsEnabled: boolean;
-    private devTool: NgSimpleStateDevTool;
-    private persistentStorage: NgSimpleStateBrowserStorage;
+    private devTool!: NgSimpleStateDevTool;
+    private persistentStorage!: NgSimpleStateBrowserStorage;
     private localStoreConfig: NgSimpleStateStoreConfig;
     private storeName: string;
     private firstState: S | null = null;
@@ -34,28 +34,34 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     }
 
     constructor(@Inject(Injector) injector: Injector) {
-        this.devTool = injector.get(NgSimpleStateDevTool);
 
         const globalConfig = injector.get(NG_SIMPLE_STORE_CONFIG, {});
         const storeConfig = this.storeConfig() || {};
         this.localStoreConfig = { ...globalConfig, ...storeConfig };
 
-        if (this.localStoreConfig.persistentStorage === 'local') {
-            this.persistentStorage = injector.get(NgSimpleStateLocalStorage);
-        } else if (this.localStoreConfig.persistentStorage === 'session') {
-            this.persistentStorage = injector.get(NgSimpleStateSessionStorage);
-        } else {
-            this.persistentStorage = injector.get(NgSimpleStateLocalStorage);
+        this.localStorageIsEnabled = typeof this.localStoreConfig.enableLocalStorage === 'boolean' ? this.localStoreConfig.enableLocalStorage : false;
+
+        if (this.localStorageIsEnabled) {
+            if (this.localStoreConfig.persistentStorage === 'local') {
+                this.persistentStorage = injector.get(NgSimpleStateLocalStorage);
+            } else if (this.localStoreConfig.persistentStorage === 'session') {
+                this.persistentStorage = injector.get(NgSimpleStateSessionStorage);
+            }
         }
 
-        this.localStorageIsEnabled = typeof this.localStoreConfig.enableLocalStorage === 'boolean' ? this.localStoreConfig.enableLocalStorage : false;
+
         this.devToolIsEnabled = typeof this.localStoreConfig.enableDevTool === 'boolean' ? this.localStoreConfig.enableDevTool : false;
+        if (this.devToolIsEnabled) {
+            this.devTool = injector.get(NgSimpleStateDevTool);
+        }
+
+
         this.storeName = typeof this.localStoreConfig.storeName === 'string' ? this.localStoreConfig.storeName : this.constructor.name;
         if (typeof this.localStoreConfig.comparator === 'function') {
             this.comparator = this.localStoreConfig.comparator;
         }
 
-        if (this.localStorageIsEnabled) {
+        if (this.localStorageIsEnabled && this.persistentStorage) {
             this.firstState = this.persistentStorage.getItem<S>(this.storeName);
         }
         if (!this.firstState) {
@@ -166,7 +172,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
         }
         this.state$.next(state);
         this.devToolSend(state, actionName);
-        if (this.localStorageIsEnabled) {
+        if (this.localStorageIsEnabled && this.persistentStorage) {
             this.persistentStorage.setItem<S>(this.storeName, state);
         }
         return true;
@@ -179,7 +185,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @returns True if fìdev tools are enabled
      */
     private devToolSend(newState: S | undefined, actionName?: string): boolean {
-        if (!this.devToolIsEnabled) {
+        if (!this.devToolIsEnabled || !this.devTool) {
             return false;
         }
         if (!actionName) {
