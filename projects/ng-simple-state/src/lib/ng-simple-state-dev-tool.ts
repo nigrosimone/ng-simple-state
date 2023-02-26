@@ -1,14 +1,20 @@
 import { Injectable, NgZone } from '@angular/core';
 
+declare global {
+    interface Window {
+        __REDUX_DEVTOOLS_EXTENSION__: any;
+        devToolsExtension: any;
+    }
+}
+
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateDevTool {
 
-    // tslint:disable-next-line: no-string-literal
-    private globalDevtools: any = (window as any)['__REDUX_DEVTOOLS_EXTENSION__'] || (window as any)['devToolsExtension'];
+    private globalDevtools: any = window.__REDUX_DEVTOOLS_EXTENSION__ || window.devToolsExtension;
     private localDevTool: any;
     private isActiveDevtool = false;
     private instanceId = `ng-simple-state-${Date.now()}`;
-    private baseState: { [key: string]: any } = {};
+    private baseState: Record<string, object> = {};
 
     constructor(ngZone: NgZone) {
         if (this.globalDevtools) {
@@ -44,7 +50,7 @@ export class NgSimpleStateDevTool {
      * @param state the state
      * @returns True if dev tool is enabled and action is send
      */
-    send(storeName: string, actionName: string, state: any): boolean {
+    send<T>(storeName: string, actionName: string, state: T): boolean {
         if (this.isActiveDevtool) {
             this.localDevTool.send(`${storeName}.${actionName}`, Object.assign(this.baseState, { [storeName]: state }), false, this.instanceId);
             return true;
