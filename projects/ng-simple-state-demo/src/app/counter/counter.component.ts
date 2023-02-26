@@ -12,7 +12,6 @@ export class CounterComponent {
 
   public counter$: Observable<number>;
 
-  // eslint-disable-next-line no-unused-vars
   constructor(public counterStore: CounterStore) {
     this.counter$ = this.counterStore.selectCount();
   }

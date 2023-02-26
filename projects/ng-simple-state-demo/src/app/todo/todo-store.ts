@@ -12,7 +12,7 @@ export type TodoState = Array<Todo>;
 @Injectable()
 export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
 
-  protected storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig {
     return {
       storeName: 'TodoStore'
     };

@@ -19,10 +19,9 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     private persistentStorage!: NgSimpleStateBrowserStorage;
     private localStoreConfig: NgSimpleStateStoreConfig;
     private storeName: string;
-    private firstState: S | null = null;
+    private firstState!: S;
     private isArray: boolean;
     private devMode: boolean = isDevMode();
-    // eslint-disable-next-line no-unused-vars
     private comparator!: <K>(previous: K, current: K) => boolean;
 
     /**
@@ -49,12 +48,10 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
             }
         }
 
-
         this.devToolIsEnabled = typeof this.localStoreConfig.enableDevTool === 'boolean' ? this.localStoreConfig.enableDevTool : false;
         if (this.devToolIsEnabled) {
             this.devTool = injector.get(NgSimpleStateDevTool);
         }
-
 
         this.storeName = typeof this.localStoreConfig.storeName === 'string' ? this.localStoreConfig.storeName : this.constructor.name;
         if (typeof this.localStoreConfig.comparator === 'function') {
@@ -62,7 +59,10 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
         }
 
         if (this.localStorageIsEnabled && this.persistentStorage) {
-            this.firstState = this.persistentStorage.getItem<S>(this.storeName);
+            const firstState = this.persistentStorage.getItem<S>(this.storeName);
+            if (firstState) {
+                this.firstState = firstState;
+            }
         }
         if (!this.firstState) {
             this.firstState = this.initialState(injector);
@@ -88,14 +88,14 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      *  - otherwise the initial state provided from `initialState()` method.
      */
     resetState(): boolean {
-        return this.setState(() => (this.firstState as S), 'resetState');
+        return this.setState(() => this.firstState, 'resetState');
     }
 
     /**
      * Restart the store to initial state provided from `initialState()` method
      */
     restartState(): boolean {
-        return this.setState(() => (this.initialState()), 'restartState');
+        return this.setState(() => this.initialState(), 'restartState');
     }
 
     /**
@@ -109,7 +109,6 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @param injector current Injector
      * @returns The state object
      */
-    // eslint-disable-next-line no-unused-vars
     protected abstract initialState(injector?: Injector): S;
 
     /**
@@ -118,7 +117,6 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
      * @returns Observable of the selected state
      */
-    // eslint-disable-next-line no-unused-vars
     selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): Observable<K> {
         if (!selectFn) {
             selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as unknown as K;
@@ -127,7 +125,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
             comparator = this.comparator;
         }
         return this.state$.pipe(
-            map(state => (selectFn as any)(state as Readonly<S>)),
+            map(state => (selectFn as (state: Readonly<S>) => K)(state as Readonly<S>)),
             distinctUntilChanged(comparator),
             observeOn(asyncScheduler)
         );
@@ -157,7 +155,6 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
-    // eslint-disable-next-line no-unused-vars
     setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean {
         const currState = this.getCurrentState();
         const newState = stateFn(currState);

@@ -13,7 +13,7 @@ export class TodoComponent {
   public todoList$: Observable<Todo[]>;
   public newTodo = '';
 
-  // eslint-disable-next-line no-unused-vars
+
   constructor(public todoStore: TodoStore) {
     this.todoList$ = this.todoStore.selectState();
   }

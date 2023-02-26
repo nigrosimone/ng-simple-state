@@ -5,6 +5,7 @@ export class DevToolsExtension {
     state: string | null = null;
 
     connect(): any {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const self = this;
         return {
             send: (name: string, state: any) => {
