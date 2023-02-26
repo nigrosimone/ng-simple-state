@@ -119,7 +119,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      */
     selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): Observable<K> {
         if (!selectFn) {
-            selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as unknown as K;
+            selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as K;
         }
         if (!comparator && this.comparator) {
             comparator = this.comparator;
