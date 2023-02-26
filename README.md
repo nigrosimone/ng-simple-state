@@ -477,6 +477,85 @@ export class AppComponent {
 }
 ```
 
+
+## NgSimpleStateBaseStore API
+
+```ts
+@Injectable()
+@Directive()
+export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> implements OnDestroy {
+
+    /**
+     * Return the observable of the state
+     * @returns Observable of the state
+     */
+    public get state(): BehaviorSubject<S>;
+
+    constructor(@Inject(Injector) injector: Injector);
+
+    /**
+     * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
+     */
+    ngOnDestroy(): void;
+
+    /**
+     * Reset store to first loaded store state:
+     *  - the last saved state, if `enableLocalStorage` config is `true`
+     *  - otherwise the initial state provided from `initialState()` method.
+     */
+    resetState(): boolean;
+
+    /**
+     * Restart the store to initial state provided from `initialState()` method
+     */
+    restartState(): boolean;
+
+    /**
+     * Override this method for set a specific config for the store
+     * @returns NgSimpleStateStoreConfig
+     */
+    storeConfig(): NgSimpleStateStoreConfig;
+
+    /**
+     * Set into the store the initial state
+     * @param injector current Injector
+     * @returns The state object
+     */
+    initialState(injector?: Injector): S;
+
+    /**
+     * Select a store state
+     * @param selectFn State selector (if not provided return full state)
+     * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
+     * @returns Observable of the selected state
+     */
+    selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): Observable<K>;
+
+    /**
+     * Return the current store state (snapshot)
+     * @returns The current state
+     */
+    getCurrentState(): Readonly<S>;
+
+    /**
+     * Return the first loaded store state:
+     * the last saved state, if `enableLocalStorage` config is `true`;
+     * otherwise the initial state provided from `initialState()` method.
+     * @returns The first state
+     */
+    getFirstState(): Readonly<S> | null;
+
+    /**
+     * Set a new state
+     * @param selectFn State reducer
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean; 
+}
+```
+
+
 ## Alternatives
 
 Aren't you satisfied? there are some valid alternatives:
