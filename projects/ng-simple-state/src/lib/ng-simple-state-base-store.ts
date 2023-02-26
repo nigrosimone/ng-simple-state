@@ -9,7 +9,6 @@ import { NgSimpleStateSessionStorage } from './ng-simple-state-session-storage';
 
 @Injectable()
 @Directive()
-// tslint:disable-next-line: directive-class-suffix
 export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> implements OnDestroy {
 
     private state$: BehaviorSubject<S>;

@@ -1,17 +1,27 @@
 import { Injectable, NgZone } from '@angular/core';
 
+
+
+interface DevtoolsLocal {
+    init: (state: object) => void;
+    send: <T>(action: string, state: Record<string, T>, options: any, instanceId: string) => void;
+}
+interface Devtools {
+    connect(options: { name: string, instanceId: string }): DevtoolsLocal;
+}
+
 declare global {
     interface Window {
-        __REDUX_DEVTOOLS_EXTENSION__: any;
-        devToolsExtension: any;
+        __REDUX_DEVTOOLS_EXTENSION__: Devtools;
+        devToolsExtension: Devtools;
     }
 }
 
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateDevTool {
 
-    private globalDevtools: any = window.__REDUX_DEVTOOLS_EXTENSION__ || window.devToolsExtension;
-    private localDevTool: any;
+    private globalDevtools: Devtools = window.__REDUX_DEVTOOLS_EXTENSION__ || window.devToolsExtension;
+    private localDevTool!: DevtoolsLocal;
     private isActiveDevtool = false;
     private instanceId = `ng-simple-state-${Date.now()}`;
     private baseState: Record<string, object> = {};
@@ -51,8 +61,8 @@ export class NgSimpleStateDevTool {
      * @returns True if dev tool is enabled and action is send
      */
     send<T>(storeName: string, actionName: string, state: T): boolean {
-        if (this.isActiveDevtool) {
-            this.localDevTool.send(`${storeName}.${actionName}`, Object.assign(this.baseState, { [storeName]: state }), false, this.instanceId);
+        if (this.isActiveDevtool && this.localDevTool) {
+            this.localDevTool.send<T>(`${storeName}.${actionName}`, Object.assign(this.baseState, { [storeName]: state }), false, this.instanceId);
             return true;
         }
         return false;

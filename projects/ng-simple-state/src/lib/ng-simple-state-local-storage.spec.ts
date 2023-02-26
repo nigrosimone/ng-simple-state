@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NgSimpleStateLocalStorage } from './ng-simple-state-local-storage';
 
 describe('NgSimpleStateLocalStorage', () => {

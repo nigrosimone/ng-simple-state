@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 
 export class DevToolsExtension {
@@ -12,7 +13,9 @@ export class DevToolsExtension {
                 self.name = name;
                 self.state = state;
             },
-            init: () => {}
+            init: () => {
+                // ...
+            }
         };
     }
 }
