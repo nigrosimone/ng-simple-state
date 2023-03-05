@@ -57,4 +57,21 @@ export abstract class NgSimpleStateBrowserStorage {
         }
         return false;
     }
+
+    /**
+     * Removes all key/value pairs, if there are any.
+     * @returns True if storage is cleared
+     */
+    clear(): boolean {
+        if (this.isStorageActive) {
+            for (let i = 0, e = this.storage.length; i < e; i++) {
+                const key = this.storage.key(i);
+                if (key && key.startsWith(BASE_KEY)) {
+                    this.storage.removeItem(key);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }

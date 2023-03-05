@@ -3,12 +3,17 @@ import { NgSimpleStateLocalStorage } from './ng-simple-state-local-storage';
 
 describe('NgSimpleStateLocalStorage', () => {
 
+    let service: NgSimpleStateLocalStorage;
+
+    beforeEach(() => {
+        service = new NgSimpleStateLocalStorage();
+    });
+
     afterEach(() => {
-        localStorage.clear();
+        service.clear();
     });
 
     it('localstorage active', () => {
-        const service = new NgSimpleStateLocalStorage();
         expect(service.isActive()).toBe(true);
         expect(service.setItem('test', '1')).toBe(true);
         expect(service.getItem<string>('test')).toBe('1');
@@ -17,7 +22,6 @@ describe('NgSimpleStateLocalStorage', () => {
     });
 
     it('localstorage not activee', () => {
-        const service = new NgSimpleStateLocalStorage();
         (service as any).isStorageActive = false;
         expect(service.isActive()).toBe(false);
         expect(service.setItem('test', '1')).toBe(false);
