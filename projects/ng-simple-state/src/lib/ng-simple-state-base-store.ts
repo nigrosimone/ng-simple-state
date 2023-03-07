@@ -205,7 +205,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      */
     private deepFreeze(object: S | null): Readonly<S> {
         // No freezing in production (for better performance).
-        if (this.devMode || !object) {
+        if (!this.devMode || !object) {
             return object as Readonly<S>;
         }
 
