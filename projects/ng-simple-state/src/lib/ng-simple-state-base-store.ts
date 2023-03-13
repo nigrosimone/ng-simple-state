@@ -203,7 +203,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * Make the data immutable.
      * @returns immutable object
      */
-    private deepFreeze(object: S | null): Readonly<S> {
+    private deepFreeze(object: S): Readonly<S> {
         // No freezing in production (for better performance).
         if (!this.devMode || !object) {
             return object as Readonly<S>;

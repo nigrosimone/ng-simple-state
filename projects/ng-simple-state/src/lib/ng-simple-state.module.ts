@@ -4,14 +4,14 @@ import { NgSimpleStateConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-m
 @NgModule()
 export class NgSimpleStateModule {
     static forRoot(
-        ngHttpCachingConfig?: NgSimpleStateConfig
+        ngSimpleStateConfig?: NgSimpleStateConfig
     ): ModuleWithProviders<NgSimpleStateModule> {
         return {
             ngModule: NgSimpleStateModule,
             providers: [
                 {
                     provide: NG_SIMPLE_STORE_CONFIG,
-                    useValue: ngHttpCachingConfig,
+                    useValue: ngSimpleStateConfig,
                 },
             ],
         };
