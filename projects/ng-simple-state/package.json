@@ -1,6 +1,6 @@
 {
   "name": "ng-simple-state",
-  "version": "15.1.4",
+  "version": "16.0.0",
   "description": "Simple state management in Angular with only Services and RxJS.",
   "repository": {
     "type": "git",
@@ -19,8 +19,8 @@
   },
   "homepage": "https://github.com/nigrosimone/ng-simple-state",
   "peerDependencies": {
-    "@angular/common": "^15.0.0",
-    "@angular/core": "^15.0.0"
+    "@angular/common": ">15.0.0",
+    "@angular/core": ">15.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
