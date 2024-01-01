@@ -4,6 +4,7 @@ import { Injectable, NgZone } from '@angular/core';
 
 interface DevtoolsLocal {
     init: (state: object) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     send: <T>(action: string, state: Record<string, T>, options: any, instanceId: string) => void;
 }
 interface Devtools {
@@ -46,8 +47,8 @@ export class NgSimpleStateDevTool {
     }
 
     /**
-     * Return true if dev tool is actvice
-     * @returns True if dev tool is actvice
+     * Return true if dev tool is active
+     * @returns True if dev tool is active
      */
     isActive(): boolean {
         return this.isActiveDevtool;

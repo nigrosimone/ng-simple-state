@@ -19,7 +19,7 @@ export abstract class NgSimpleStateBrowserStorage {
     /**
      * Set item into storage
      * @param key key name
-     * @param state state valie
+     * @param state state value
      * @returns True if item is stored into storage
      */
     setItem<K>(key: string, state: K): boolean {

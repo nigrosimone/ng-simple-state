@@ -17,7 +17,7 @@ describe('NgSimpleStateSessionStorage', () => {
         expect(service.clear()).toBe(true);
     });
 
-    it('sessionStorage not activee', () => {
+    it('sessionStorage not active', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (service as any).isStorageActive = false;
         expect(service.isActive()).toBe(false);
