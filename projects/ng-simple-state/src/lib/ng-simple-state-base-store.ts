@@ -9,6 +9,7 @@ import { NgSimpleStateSessionStorage } from './ng-simple-state-session-storage';
 
 @Injectable()
 @Directive()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> implements OnDestroy {
 
     private state$: BehaviorSubject<S>;
@@ -178,14 +179,14 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
      * Send to dev tool a new state
      * @param newState new state
      * @param actionName The action name
-     * @returns True if fìdev tools are enabled
+     * @returns True if dev tools are enabled
      */
     private devToolSend(newState: S | undefined, actionName?: string): boolean {
         if (!this.devToolIsEnabled || !this.devTool) {
             return false;
         }
         if (!actionName) {
-            // retrive the parent (of parent) method into the stack trace
+            // retrieve the parent (of parent) method into the stack trace
             actionName = new Error().stack
                 ?.split('\n')[3]
                 .trim()
@@ -222,6 +223,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
         // At this point we know that we're dealing with either an array or plain object, so
         // just freeze it and recurse on its values.
         Object.freeze(object);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Object.keys(object).forEach(key => this.deepFreeze((object as any)[key]));
 
         return object as Readonly<S>;
