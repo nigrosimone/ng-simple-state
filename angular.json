@@ -112,10 +112,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "ng-simple-state-demo:build:production"
+              "buildTarget": "ng-simple-state-demo:build:production"
             },
             "development": {
-              "browserTarget": "ng-simple-state-demo:build:development"
+              "buildTarget": "ng-simple-state-demo:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -123,7 +123,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ng-simple-state-demochio:build"
+            "buildTarget": "ng-simple-state-demochio:build"
           }
         },
         "test": {

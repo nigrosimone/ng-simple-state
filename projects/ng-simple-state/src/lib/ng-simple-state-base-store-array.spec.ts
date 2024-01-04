@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Injector } from '@angular/core';
 import { inject } from '@angular/core/testing';
 import { Observable } from 'rxjs';
