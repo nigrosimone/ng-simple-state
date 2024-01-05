@@ -4,8 +4,8 @@ import { Component, DebugElement, Injectable, Injector } from '@angular/core';
 import { ComponentFixture, fakeAsync, inject, TestBed, tick } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
-import { NgSimpleStateStoreConfig } from './ng-simple-state-models';
-import { NgSimpleStateModule } from './ng-simple-state.module';
+import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
+import { NgSimpleStateModule } from './../ng-simple-state.module';
 export interface CounterState {
     count: number;
 }

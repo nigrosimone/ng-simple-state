@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, Signal } from '@angular/core';
 import { inject } from '@angular/core/testing';
-import { Observable } from 'rxjs';
-import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
-import { NgSimpleStateStoreConfig } from './ng-simple-state-models';
+import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
+import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 
 
 export type NumbersState = number[];
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<NumbersState> {
+export class CounterStore extends NgSimpleStateBaseSignalStore<NumbersState> {
 
     protected storeConfig(): NgSimpleStateStoreConfig {
         return {
@@ -21,7 +20,7 @@ export class CounterStore extends NgSimpleStateBaseStore<NumbersState> {
         return [1];
     }
 
-    selectAll(): Observable<number[]> {
+    selectAll(): Signal<number[]> {
         return this.selectState(state => [...state]);
     }
 
@@ -35,7 +34,7 @@ export class CounterStore extends NgSimpleStateBaseStore<NumbersState> {
 }
 
 
-describe('NgSimpleStateBaseStoreArray', () => {
+describe('NgSimpleStateBaseSignalStoreArray', () => {
 
     let service: CounterStore;
 
@@ -44,34 +43,28 @@ describe('NgSimpleStateBaseStoreArray', () => {
     }));
 
 
-    it('initialState -> selectState', (done) => {
-        service.selectState().subscribe(value => {
-            expect(value).toEqual([1]);
-            expect(service.getCurrentState()).toEqual([1]);
-            done();
-        });
+    it('initialState -> selectState', () => {
+        const value = service.selectState()
+        expect(value()).toEqual([1]);
+        expect(service.getCurrentState()).toEqual([1]);
     });
 
     it('no changes', () => {
         expect(service.setState((state) => state as any)).toBeFalse();
     });
 
-    it('add -> setState -> selectState', (done) => {
+    it('add -> setState -> selectState', () => {
         expect(service.add(2)).toBeTrue();
-        service.selectState().subscribe(value => {
-            expect(value).toEqual([1, 2]);
-            expect(service.getCurrentState()).toEqual([1, 2]);
-            done();
-        });
+        const value = service.selectState()
+        expect(value()).toEqual([1, 2]);
+        expect(service.getCurrentState()).toEqual([1, 2]);
     });
 
-    it('del -> setState -> selectState', (done) => {
+    it('del -> setState -> selectState', () => {
         expect(service.del(1)).toBeTrue();
-        service.selectState().subscribe(value => {
-            expect(value).toEqual([]);
-            expect(service.getCurrentState()).toEqual([]);
-            done();
-        });
+        const value = service.selectState()
+        expect(value()).toEqual([]);
+        expect(service.getCurrentState()).toEqual([]);
     });
 
     it('resetState', () => {

@@ -1,26 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable } from '@angular/core';
+import { Injectable, Signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Observable } from 'rxjs';
-import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
-import { BASE_KEY } from './ng-simple-state-browser-storage';
-import { DevToolsExtension } from './ng-simple-state-dev-tool.spec';
-import { NgSimpleStateStoreConfig } from './ng-simple-state-models';
-import { NgSimpleStateModule } from './ng-simple-state.module';
+import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
+import { BASE_KEY } from './../ng-simple-state-browser-storage';
+import { DevToolsExtension } from './../ng-simple-state-dev-tool.spec';
+import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
+import { NgSimpleStateModule } from './../ng-simple-state.module';
 
 export interface CounterState {
     count: number;
 }
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
     override storeConfig(): NgSimpleStateStoreConfig {
         return {
             enableDevTool: true,
             enableLocalStorage: true,
-            storeName: 'storeName',
-            comparator: (previous, current) => previous === current,
+            storeName: 'storeName'
         };
     }
 
@@ -30,7 +28,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
         };
     }
 
-    selectCount(): Observable<number> {
+    selectCount(): Signal<number> {
         return this.selectState(state => state.count);
     }
 
@@ -44,7 +42,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 
 
-describe('NgSimpleStateBaseStore misc 1', () => {
+describe('NgSimpleStateBaseSignalStore misc 1', () => {
 
     let service: CounterStore;
 
@@ -71,30 +69,26 @@ describe('NgSimpleStateBaseStore misc 1', () => {
         localStorage.clear();
     });
 
-    it('dev tool', (done) => {
+    it('dev tool', () => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
         expect(service.increment()).toBeTrue();
-        service.selectState(state => state.count).subscribe(value => {
-            expect(value).toBe(3);
-            expect((window as any)['devToolsExtension'].name).toBe('storeName.increment');
-            expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 3 } });
-            done();
-        });
+        const value = service.selectState(state => state.count)
+        expect(value()).toBe(3);
+        expect((window as any)['devToolsExtension'].name).toBe('storeName.increment');
+        expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 3 } });
     });
 
-    it('dev tool action name', (done) => {
+    it('dev tool action name', () => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
         expect(service.setState(() => ({ count: 5 }), 'test')).toBeTrue();
-        service.selectState(state => state.count).subscribe(value => {
-            expect(value).toBe(5);
-            expect((window as any)['devToolsExtension'].name).toBe('storeName.test');
-            expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 5 } });
-            done();
-        });
+        const value = service.selectState(state => state.count)
+        expect(value()).toBe(5);
+        expect((window as any)['devToolsExtension'].name).toBe('storeName.test');
+        expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 5 } });
     });
 
 });
@@ -102,7 +96,7 @@ describe('NgSimpleStateBaseStore misc 1', () => {
 
 
 
-describe('NgSimpleStateBaseStore misc 2', () => {
+describe('NgSimpleStateBaseSignalStore misc 2', () => {
 
     let service: CounterStore;
 
@@ -129,30 +123,26 @@ describe('NgSimpleStateBaseStore misc 2', () => {
         sessionStorage.clear();
     });
 
-    it('dev tool', (done) => {
+    it('dev tool', () => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
         expect(service.increment()).toBeTrue();
-        service.selectState(state => state.count).subscribe(value => {
-            expect(value).toBe(3);
-            expect((window as any)['devToolsExtension'].name).toBe('storeName.increment');
-            expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 3 } });
-            done();
-        });
+        const value = service.selectState(state => state.count)
+        expect(value()).toBe(3);
+        expect((window as any)['devToolsExtension'].name).toBe('storeName.increment');
+        expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 3 } });
     });
 
-    it('dev tool action name', (done) => {
+    it('dev tool action name', () => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
         expect(service.setState(() => ({ count: 5 }), 'test')).toBeTrue();
-        service.selectState(state => state.count).subscribe(value => {
-            expect(value).toBe(5);
-            expect((window as any)['devToolsExtension'].name).toBe('storeName.test');
-            expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 5 } });
-            done();
-        });
+        const value = service.selectState(state => state.count)
+        expect(value()).toBe(5);
+        expect((window as any)['devToolsExtension'].name).toBe('storeName.test');
+        expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 5 } });
     });
 
 });

@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, Signal } from '@angular/core';
 import { Todo, TodoStore } from './todo-store';
 
 @Component({
@@ -10,7 +9,7 @@ import { Todo, TodoStore } from './todo-store';
   providers: [TodoStore]
 })
 export class TodoComponent {
-  public todoList$: Observable<Todo[]>;
+  public todoList$: Signal<Todo[]>;
   public newTodo = '';
 
 

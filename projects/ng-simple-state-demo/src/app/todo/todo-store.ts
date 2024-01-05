@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
 
 export interface Todo {
   id: number;
@@ -10,7 +10,7 @@ export interface Todo {
 export type TodoState = Array<Todo>;
 
 @Injectable()
-export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
+export class TodoStore extends NgSimpleStateBaseSignalStore<TodoState> {
 
   storeConfig(): NgSimpleStateStoreConfig {
     return {

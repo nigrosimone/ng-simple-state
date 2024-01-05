@@ -1,7 +1,7 @@
 {
   "name": "ng-simple-state",
   "version": "17.0.1",
-  "description": "Simple state management in Angular with only Services and RxJS.",
+  "description": "Simple state management in Angular with only Services and RxJS or Signal.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nigrosimone/ng-simple-state.git"

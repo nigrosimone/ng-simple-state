@@ -1,13 +1,12 @@
-import { Injectable, Injector } from '@angular/core';
-import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
-import { Observable } from 'rxjs';
+import { Injectable, Injector, Signal } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
 
 export interface CounterState {
   count: number;
 }
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
   constructor(injector: Injector) {
     super(injector);
@@ -26,7 +25,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
     };
   }
 
-  selectCount(): Observable<number> {
+  selectCount(): Signal<number> {
     return this.selectState(state => state.count);
   }
 

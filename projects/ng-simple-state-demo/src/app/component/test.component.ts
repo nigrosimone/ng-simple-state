@@ -1,7 +1,6 @@
 
-import { NgSimpleStateBaseStore, NgSimpleStateModule, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
-import { Observable } from 'rxjs';
-import { Component } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateModule, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
+import { Component, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface CounterState {
@@ -16,14 +15,14 @@ export interface CounterState {
         NgSimpleStateModule
     ],
     template: `
-        {{counter$ | async}}
+        {{counter$()}}
         <button (click)="increment()">+</button>
         <button (click)="decrement()">-</button>
     `
 })
-export class TestComponent extends NgSimpleStateBaseStore<CounterState> {
+export class TestComponent extends NgSimpleStateBaseSignalStore<CounterState> {
 
-    public counter$: Observable<number> = this.selectState(state => state.count);
+    public counter$: Signal<number> = this.selectState(state => state.count);
 
     protected storeConfig(): NgSimpleStateStoreConfig {
         return {

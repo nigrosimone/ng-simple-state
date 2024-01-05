@@ -1,6 +1,6 @@
 # NgSimpleState [![Build Status](https://app.travis-ci.com/nigrosimone/ng-simple-state.svg?branch=main)](https://app.travis-ci.com/nigrosimone/ng-simple-state) [![Coverage Status](https://coveralls.io/repos/github/nigrosimone/ng-simple-state/badge.svg?branch=main)](https://coveralls.io/github/nigrosimone/ng-simple-state?branch=main) [![NPM version](https://img.shields.io/npm/v/ng-simple-state.svg)](https://www.npmjs.com/package/ng-simple-state) [![Maintainability](https://api.codeclimate.com/v1/badges/1bfc363a95053ecc3429/maintainability)](https://codeclimate.com/github/nigrosimone/ng-simple-state/maintainability)
 
-Simple state management in Angular with only Services and RxJS.
+Simple state management in Angular with only Services and RxJS or Signal.
 
 ## Description
 
@@ -11,15 +11,17 @@ See the demos:
  - [Tour of heroes](https://stackblitz.com/edit/ng-simple-state-tour-of-heroes?file=src%2Fapp%2Fhero.service.ts)
  - [To Do List](https://stackblitz.com/edit/ng-simple-state-todo?file=src%2Fapp%2Fapp.component.ts)
 
-## Get Started
+## RxJS Store
 
-### Step 1: install `ng-simple-state`
+### Get Started
+
+#### Step 1: install `ng-simple-state`
 
 ```bash
 npm i ng-simple-state
 ```
 
-### Step 2: Import `NgSimpleStateModule` into your `AppModule`
+#### Step 2: Import `NgSimpleStateModule` into your `AppModule`
 
 `NgSimpleStateModule` has some global optional config defined by `NgSimpleStateConfig` interface:
 
@@ -55,12 +57,12 @@ import { environment } from '../environments/environment';
 export class AppModule {}
 ```
 
-### Step 3: Create your store
+#### Step 3: Create your store
 
 This is an example for a counter store in a `src/app/counter-store.ts` file. 
 Obviously, you can create every store you want with every complexity you need.
 
-1) Define yuor state interface, eg.:
+1) Define your state interface, eg.:
 
 ```ts
 export interface CounterState {
@@ -184,7 +186,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 ```
 
-### Step 3: Inject your store into the providers of the module you want (or the providers of component), eg.:
+#### Step 3: Inject your store into the providers of the module you want (or the providers of component), eg.:
 
 ```ts
 import { BrowserModule } from '@angular/platform-browser';
@@ -211,7 +213,7 @@ import { CounterStore } from './counter-store';
 export class AppModule {}
 ```
 
-### Step 4: Use your store into the components, eg.:
+#### Step 4: Use your store into the components, eg.:
 
 ```ts
 import { Component } from '@angular/core';
@@ -236,11 +238,11 @@ export class AppComponent {
 }
 ```
 
-### That's all!
+#### That's all!
 
 ![alt text](https://github.com/nigrosimone/ng-simple-state/blob/main/projects/ng-simple-state-demo/src/assets/dev-tool.gif?raw=true)
 
-## Manage component state without service
+### Manage component state without service
 
 If you want manage just a component state without make a new service, your component can extend directly `NgSimpleStateBaseStore`:
 
@@ -292,7 +294,7 @@ export class CounterComponent extends NgSimpleStateBaseStore<CounterState> {
 }
 ```
 
-## Store's dependency injection
+### Store's dependency injection
 
 If you need to inject something into your store (eg. `HttpClient`), you need to also inject the Angular `Injector` service to the super, eg.:
 
@@ -319,7 +321,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 ```
 
-## Override global config
+### Override global config
 
 If you need to override the global module configuration provided by `NgSimpleStateModule.forRoot()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
 
@@ -352,7 +354,7 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
 
 
-## Testing
+### Testing
 
 `ng-simple-state` is simple to test. Eg.:
 
@@ -402,7 +404,7 @@ describe('CounterStore', () => {
 });
 ```
 
-## Example: array store
+### Example: array store
 
 This is an example for a todo list store in a `src/app/todo-store.ts` file. 
 
@@ -478,7 +480,7 @@ export class AppComponent {
 ```
 
 
-## NgSimpleStateBaseStore API
+### NgSimpleStateBaseStore API
 
 ```ts
 @Injectable()
@@ -554,7 +556,539 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
     setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean; 
 }
 ```
+## Signal Store
 
+### Get Started
+
+#### Step 1: install `ng-simple-state`
+
+```bash
+npm i ng-simple-state
+```
+
+#### Step 2: Import `NgSimpleStateModule` into your `AppModule`
+
+`NgSimpleStateModule` has some global optional config defined by `NgSimpleStateConfig` interface:
+
+| Option               | Description                                                                                     | Default    |
+| -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
+| *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
+| *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
+| *persistentStorage*  | Set the persistent storage `local` or `session`.                                                | `local`    |
+
+_Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
+
+```ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { CommonModule } from '@angular/common';
+import { NgSimpleStateModule } from 'ng-simple-state';
+import { environment } from '../environments/environment';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    BrowserModule,
+    CommonModule,
+    NgSimpleStateModule.forRoot({
+      enableDevTool: !environment.production, // Enable Redux DevTools only in development mode
+      enableLocalStorage: false // Local storage state persistence is globally disabled
+    }) 
+  ],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+```
+
+#### Step 3: Create your store
+
+This is an example for a counter store in a `src/app/counter-store.ts` file. 
+Obviously, you can create every store you want with every complexity you need.
+
+1) Define your state interface, eg.:
+
+```ts
+export interface CounterState {
+    count: number;
+}
+```
+
+2) Define your store service by extending `NgSimpleStateBaseSignalStore`, eg.:
+
+```ts
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseSignalStore } from 'ng-simple-state';
+
+export interface CounterState {
+    count: number;
+}
+ 
+@Injectable()
+export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
+ 
+}
+```
+
+3) Implement `initialState()` and `storeConfig()` methods and provide the initial state of the store, eg.:
+
+```ts
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+export interface CounterState {
+    count: number;
+}
+ 
+@Injectable()
+export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'CounterStore'
+    };
+  }
+  
+  initialState(): CounterState {
+    return {
+      count: 0
+    };
+  }
+
+}
+```
+
+4) Implement one or more selectors of the partial state you want, in this example `selectCount()` eg.:
+
+```ts
+import { Injectable, Signal } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+export interface CounterState {
+    count: number;
+}
+ 
+@Injectable()
+export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'CounterStore'
+    };
+  }
+  
+  initialState(): CounterState {
+    return {
+      count: 0
+    };
+  }
+
+  selectCount(): Signal<number> {
+    return this.selectState(state => state.count);
+  }
+}
+```
+ 
+5) Implement one or more actions for change the store state, in this example `increment()` and `decrement()` eg.:
+
+```ts
+import { Injectable, Signal } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+export interface CounterState {
+  count: number;
+}
+
+@Injectable()
+export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'CounterStore'
+    };
+  }
+
+  initialState(): CounterState {
+    return {
+      count: 0
+    };
+  }
+
+  selectCount(): Signal<number> {
+    return this.selectState(state => state.count);
+  }
+
+  increment(increment: number = 1): void {
+    this.setState(state => ({ count: state.count + increment }));
+  }
+
+  decrement(decrement: number = 1): void {
+    this.setState(state => ({ count: state.count - decrement }));
+  }
+}
+```
+
+#### Step 3: Inject your store into the providers of the module you want (or the providers of component), eg.:
+
+```ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { CommonModule } from '@angular/common';
+import { NgSimpleStateModule } from 'ng-simple-state';
+import { environment } from '../environments/environment';
+import { CounterStore } from './counter-store';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    BrowserModule,
+    CommonModule,
+    NgSimpleStateModule.forRoot({
+      enableDevTool: !environment.production, // Enable Redux DevTools only in developing
+      enableLocalStorage: false // Local storage state persistence is globally disabled
+    })
+  ],
+  bootstrap: [AppComponent],
+  providers: [CounterStore]  // The CounterStore state is shared at AppModule level
+})
+export class AppModule {}
+```
+
+#### Step 4: Use your store into the components, eg.:
+
+```ts
+import { Component, Signal } from '@angular/core';
+import { CounterStore } from './counter-store';
+
+@Component({
+  selector: 'app-root',
+  template: `
+  <h1>Counter: {{ counterSig() }}</h1>
+  <button (click)="counterStore.decrement()">Decrement</button>
+  <button (click)="counterStore.resetState()">Reset</button>
+  <button (click)="counterStore.increment()">Increment</button>
+  `,
+})
+export class AppComponent {
+  public counterSig: Signal<number>;
+
+  constructor(public counterStore: CounterStore) {
+    this.counterSig = this.counterStore.selectCount();
+  }
+}
+```
+
+#### That's all!
+
+![alt text](https://github.com/nigrosimone/ng-simple-state/blob/main/projects/ng-simple-state-demo/src/assets/dev-tool.gif?raw=true)
+
+### Manage component state without service
+
+If you want manage just a component state without make a new service, your component can extend directly `NgSimpleStateBaseSignalStore`:
+
+```ts
+import { Component, Injector, Signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NgSimpleStateBaseSignalStore } from 'ng-simple-state';
+
+export interface CounterState {
+    count: number;
+}
+
+@Component({
+    selector: 'ng-counter',
+    template: `
+        {{counterSig()}}
+        <button (click)="increment()">+</button>
+        <button (click)="decrement()">-</button>
+    `
+})
+export class CounterComponent extends NgSimpleStateBaseSignalStore<CounterState> {
+
+    public counterSig: Signal<number> = this.selectState(state => state.count);
+
+    constructor(injector: Injector) {
+      super(injector);
+    }
+
+    storeConfig(): NgSimpleStateStoreConfig {
+      return {
+        storeName: 'CounterComponent'
+      };
+    }
+
+    initialState(): CounterState {
+        return {
+            count: 0
+        };
+    }
+
+    increment(): void {
+        this.setState(state => ({ count: state.count + 1 }));
+    }
+
+    decrement(): void {
+        this.setState(state => ({ count: state.count - 1 }));
+    }
+}
+```
+
+### Store's dependency injection
+
+If you need to inject something into your store (eg. `HttpClient`), you need to also inject the Angular `Injector` service to the super, eg.:
+
+```ts
+import { Injectable, Injector } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { NgSimpleStateBaseSignalStore } from 'ng-simple-state';
+
+@Injectable()
+export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
+
+  constructor(injector: Injector, private http: HttpClient) {
+    super(injector);
+  }
+
+  increment(increment: number = 1): void {
+    this.http.post<CounterState>('https://localhost:300/api/increment', { increment }).subscribe(response => {
+      // setState() from default use parent function name as action name for Redux DevTools.
+      // In this case we provide a second parameter `actionName` because the parent function is anonymous function
+      this.setState(() => ({ count: response.count }), 'increment');
+    });
+  }
+
+}
+```
+
+### Override global config
+
+If you need to override the global module configuration provided by `NgSimpleStateModule.forRoot()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
+
+```ts
+import { Injectable } from '@angular/core';
+import { NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+
+@Injectable()
+export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
+
+  override storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      enableLocalStorage: true, // enable local storage for this store
+      persistentStorage: 'session', // persistentStorage can be 'session' or 'local' (default is localStorage)
+      storeName: 'CounterStore2', // For default the store name is the class name, you can set a specific name for this store (must be be unique)
+    }
+  }
+}
+```
+
+The options are defined by `NgSimpleStateStoreConfig` interface:
+
+| Option               | Description                                                                                     | Default    |
+| -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
+| *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
+| *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
+| *storeName*          | The name used into `Redux DevTools` and local storage key.                                      | Class name |
+| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `local`    |
+
+### Testing
+
+`ng-simple-state` is simple to test. Eg.:
+
+```ts
+import { TestBed } from '@angular/core/testing';
+import { NgSimpleStateModule } from 'ng-simple-state';
+import { CounterStore } from './counter-store';
+
+describe('CounterStore', () => {
+
+  let counterStore: CounterStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        NgSimpleStateModule.forRoot({
+          enableDevTool: false,
+          enableLocalStorage: false
+        })
+      ]
+    });
+
+    counterStore = new CounterStore(TestBed);
+  });
+
+  it('initialState', () => {
+    expect(counterStore.getCurrentState()).toEqual({ count: 0 });
+  });
+
+  it('increment', () => {
+    counterStore.increment();
+    expect(counterStore.getCurrentState()).toEqual({ count: 1 });
+  });
+
+  it('decrement', () => {
+    counterStore.decrement();
+    expect(counterStore.getCurrentState()).toEqual({ count: -1 });
+  });
+
+  it('selectCount', () => {
+    const valueSig = counterStore.selectCount();
+    expect(valueSig()).toBe(0);
+  });
+
+});
+```
+
+### Example: array store
+
+This is an example for a todo list store in a `src/app/todo-store.ts` file. 
+
+```ts
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseSignalStore } from 'ng-simple-state';
+
+export interface Todo {
+  id: number;
+  name: string;
+  completed: boolean;
+}
+
+export type TodoState = Array<Todo>;
+
+@Injectable()
+export class TodoStore extends NgSimpleStateBaseSignalStore<TodoState> {
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'TodoStore'
+    };
+  }
+
+  initialState(): TodoState {
+    return [];
+  }
+
+  add(todo: Omit<Todo, 'id'>): void {
+    this.setState(state =>  [...state, {...todo, id: Date.now()}]);
+  }
+
+  delete(id: number): void {
+    this.setState(state => state.filter(item => item.id !== id) );
+  }
+
+  setComplete(id: number, completed: boolean = true): void {
+    this.setState(state => state.map(item => item.id === id ? {...item, completed} : item) );
+  }
+}
+```
+
+usage:
+
+```ts
+import { Component, Signal } from '@angular/core';
+import { Todo, TodoStore } from './todo-store';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <input #newTodo> <button (click)="todoStore.add({name: newTodo.value, completed: false})">Add todo</button>
+    <ol>
+        <li *ngFor="let todo of todoListSig()">
+            <ng-container *ngIf="todo.completed">✅</ng-container> 
+            {{ todo.name }} 
+            <button (click)="todoStore.setComplete(todo.id, !todo.completed)">Mark as {{ todo.completed ? 'Not completed' : 'Completed' }}</button> 
+            <button (click)="todoStore.delete(todo.id)">Delete</button>
+        </li>
+    </ol>
+  `,
+  providers: [TodoStore]
+})
+export class AppComponent {
+  public todoListSig: Signal<Todo[]>;
+
+  constructor(public todoStore: TodoStore) {
+    this.todoListSig = this.todoStore.selectState();
+  }
+}
+```
+
+
+### NgSimpleStateBaseSignalStore API
+
+```ts
+@Injectable()
+@Directive()
+export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> implements OnDestroy {
+
+    /**
+     * Return the Signal of the state
+     * @returns Signal of the state
+     */
+    public get state(): Signal<S>;
+
+    constructor(@Inject(Injector) injector: Injector);
+
+    /**
+     * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
+     */
+    ngOnDestroy(): void;
+
+    /**
+     * Reset store to first loaded store state:
+     *  - the last saved state, if `enableLocalStorage` config is `true`
+     *  - otherwise the initial state provided from `initialState()` method.
+     */
+    resetState(): boolean;
+
+    /**
+     * Restart the store to initial state provided from `initialState()` method
+     */
+    restartState(): boolean;
+
+    /**
+     * Override this method for set a specific config for the store
+     * @returns NgSimpleStateStoreConfig
+     */
+    storeConfig(): NgSimpleStateStoreConfig;
+
+    /**
+     * Set into the store the initial state
+     * @param injector current Injector
+     * @returns The state object
+     */
+    initialState(injector?: Injector): S;
+
+    /**
+     * Select a store state
+     * @param selectFn State selector (if not provided return full state)
+     * @returns Signal of the selected state
+     */
+    selectState<K>(selectFn?: (state: Readonly<S>) => K): Signal<K>;
+
+    /**
+     * Return the current store state (snapshot)
+     * @returns The current state
+     */
+    getCurrentState(): Readonly<S>;
+
+    /**
+     * Return the first loaded store state:
+     * the last saved state, if `enableLocalStorage` config is `true`;
+     * otherwise the initial state provided from `initialState()` method.
+     * @returns The first state
+     */
+    getFirstState(): Readonly<S> | null;
+
+    /**
+     * Set a new state
+     * @param selectFn State reducer
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean; 
+}
+```
 
 ## Alternatives
 

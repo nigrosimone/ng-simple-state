@@ -64,7 +64,7 @@ export abstract class NgSimpleStateBrowserStorage {
      */
     clear(): boolean {
         if (this.isStorageActive) {
-            for (let i = 0, e = this.storage.length; i < e; i++) {
+            for (let i = this.storage.length; i >= 0; i--) {
                 const key = this.storage.key(i);
                 if (key && key.startsWith(BASE_KEY)) {
                     this.storage.removeItem(key);

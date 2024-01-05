@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, Signal } from '@angular/core';
 import { CounterStore } from './counter-store';
 
 @Component({
@@ -10,7 +9,7 @@ import { CounterStore } from './counter-store';
 })
 export class CounterComponent {
 
-  public counter$: Observable<number>;
+  public counter$: Signal<number>;
 
   constructor(public counterStore: CounterStore) {
     this.counter$ = this.counterStore.selectCount();
