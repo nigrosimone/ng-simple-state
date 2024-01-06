@@ -1,7 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
 
-
-
 interface DevtoolsLocal {
     init: (state: object) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -2,8 +2,8 @@
 import { Injectable, Signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
-import { BASE_KEY } from './../ng-simple-state-browser-storage';
-import { DevToolsExtension } from './../ng-simple-state-dev-tool.spec';
+import { BASE_KEY } from '../storage/ng-simple-state-browser-storage';
+import { DevToolsExtension } from '../tool/ng-simple-state-dev-tool.spec';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 import { NgSimpleStateModule } from './../ng-simple-state.module';
 

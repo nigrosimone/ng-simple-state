@@ -63,9 +63,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
                 state = Object.assign({}, currState, newState);
             }
             this.devToolSend(state, actionName);
-            if (this.localStorageIsEnabled && this.persistentStorage) {
-                this.persistentStorage.setItem<S>(this.storeName, state);
-            }
+            this.statePersist(state);
             return state;
         })
         return result;

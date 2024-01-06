@@ -1,9 +1,9 @@
 import { Inject, Injectable, Injector, OnDestroy, Directive, isDevMode } from '@angular/core';
-import { NgSimpleStateBrowserStorage } from './ng-simple-state-browser-storage';
-import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
-import { NgSimpleStateLocalStorage } from './ng-simple-state-local-storage';
+import { NgSimpleStateBrowserStorage } from './storage/ng-simple-state-browser-storage';
+import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
+import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
 import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-models';
-import { NgSimpleStateSessionStorage } from './ng-simple-state-session-storage';
+import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
 
 @Injectable()
 @Directive()
@@ -185,5 +185,11 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
         Object.keys(object).forEach(key => this.deepFreeze((object as any)[key]));
 
         return object as Readonly<S>;
+    }
+
+    protected statePersist(state: S) {
+        if (this.localStorageIsEnabled && this.persistentStorage) {
+            this.persistentStorage.setItem<S>(this.storeName, state);
+        }
     }
 }

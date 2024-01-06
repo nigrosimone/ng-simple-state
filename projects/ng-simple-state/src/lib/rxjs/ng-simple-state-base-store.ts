@@ -80,9 +80,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> exte
         }
         this.state$.next(state);
         this.devToolSend(state, actionName);
-        if (this.localStorageIsEnabled && this.persistentStorage) {
-            this.persistentStorage.setItem<S>(this.storeName, state);
-        }
+        this.statePersist(state);
         return true;
     }
 }

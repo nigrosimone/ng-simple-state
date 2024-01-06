@@ -156,7 +156,9 @@ describe('NgSimpleStateBaseStore: Service', () => {
 
 @Component({
     selector: 'ng-test',
-    template: `{{counter$ | async}}`
+    template: `{{counter$ | async}}`,
+    standalone: true,
+    imports: [CommonModule]
 })
 export class TestComponent extends NgSimpleStateBaseStore<CounterState> {
 
@@ -191,8 +193,7 @@ describe('NgSimpleStateBaseStore: Component', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [TestComponent],
-            imports: [NgSimpleStateModule, CommonModule]
+            imports: [NgSimpleStateModule, TestComponent]
         });
         fixture = TestBed.createComponent(TestComponent);
         debugElement = fixture.debugElement;
