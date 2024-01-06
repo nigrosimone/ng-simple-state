@@ -8,3 +8,4 @@ export * from './lib/ng-simple-state-dev-tool';
 export * from './lib/ng-simple-state-local-storage';
 export * from './lib/ng-simple-state-session-storage';
 export * from './lib/ng-simple-state-models';
+export * from './lib/ng-simple-state-common';
