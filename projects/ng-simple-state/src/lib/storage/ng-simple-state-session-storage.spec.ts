@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NgSimpleStateSessionStorage } from './ng-simple-state-session-storage';
 
 describe('NgSimpleStateSessionStorage', () => {
@@ -18,7 +19,6 @@ describe('NgSimpleStateSessionStorage', () => {
     });
 
     it('sessionStorage not active', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (service as any).isStorageActive = false;
         expect(service.isActive()).toBe(false);
         expect(service.setItem('test', '1')).toBe(false);
