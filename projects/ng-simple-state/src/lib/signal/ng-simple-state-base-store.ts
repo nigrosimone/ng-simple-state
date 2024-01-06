@@ -1,10 +1,10 @@
-import { Inject, Injectable, Injector, OnDestroy, Directive, Signal, signal, computed, WritableSignal } from '@angular/core';
+import { Inject, Injectable, Injector, Directive, Signal, signal, computed, WritableSignal } from '@angular/core';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
 
 @Injectable()
 @Directive()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> implements OnDestroy {
+export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
     protected stackPoint: number = 6;
     private stateSig: WritableSignal<S>;
