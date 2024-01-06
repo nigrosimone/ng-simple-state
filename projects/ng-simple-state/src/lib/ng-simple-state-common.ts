@@ -116,7 +116,6 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
         return this.deepFreeze(this.firstState);
     }
 
-
     /**
      * Reset store to first loaded store state:
      *  - the last saved state, if `enableLocalStorage` config is `true`
