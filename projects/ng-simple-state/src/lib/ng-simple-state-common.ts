@@ -187,6 +187,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
         return object as Readonly<S>;
     }
 
+    /**
+     * Persist state to storage
+     */
     protected statePersist(state: S) {
         if (this.localStorageIsEnabled && this.persistentStorage) {
             this.persistentStorage.setItem<S>(this.storeName, state);
