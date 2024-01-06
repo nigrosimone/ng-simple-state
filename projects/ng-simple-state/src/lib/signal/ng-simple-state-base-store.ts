@@ -25,13 +25,17 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     /**
      * Select a store state
      * @param selectFn State selector (if not provided return full state)
+     * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
      * @returns Signal of the selected state
      */
-    selectState<K>(selectFn?: (state: Readonly<S>) => K): Signal<K> {
+    selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): Signal<K> {
         if (!selectFn) {
             selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as K;
         }
-        return computed(() => (selectFn as (state: Readonly<S>) => K)(this.stateSig() as Readonly<S>));
+        if (!comparator && this.comparator) {
+            comparator = this.comparator;
+        }
+        return computed(() => (selectFn as (state: Readonly<S>) => K)(this.stateSig() as Readonly<S>), { equal: comparator });
     }
 
     /**
