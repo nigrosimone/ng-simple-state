@@ -5,6 +5,9 @@ import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
 
 @Injectable()
 @Directive()
+/**
+ * @deprecated use NgSimpleStateBaseRxjsStore
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> implements OnDestroy {
 
@@ -84,3 +87,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> exte
         return true;
     }
 }
+
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseStore<S> { }

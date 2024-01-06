@@ -11,17 +11,15 @@ See the demos:
  - [Tour of heroes](https://stackblitz.com/edit/ng-simple-state-tour-of-heroes?file=src%2Fapp%2Fhero.service.ts)
  - [To Do List](https://stackblitz.com/edit/ng-simple-state-todo?file=src%2Fapp%2Fapp.component.ts)
 
-## RxJS Store
+## Get Started
 
-### Get Started
-
-#### Step 1: install `ng-simple-state`
+### Step 1: install `ng-simple-state`
 
 ```bash
 npm i ng-simple-state
 ```
 
-#### Step 2: Import `NgSimpleStateModule` into your `AppModule`
+### Step 2: Import `NgSimpleStateModule` into your `AppModule`
 
 `NgSimpleStateModule` has some global optional config defined by `NgSimpleStateConfig` interface:
 
@@ -57,7 +55,14 @@ import { environment } from '../environments/environment';
 export class AppModule {}
 ```
 
-#### Step 3: Create your store
+### Step 3: Chose your store
+
+There are two type of store `NgSimpleStateBaseRxjsStore` based on RxJS `BehaviorSubject` and `NgSimpleStateBaseSignalStore` based on Angular `Signal`:
+
+- [RxJS Store](#rxjs-store)
+- [Signal Store](#signal-store)
+
+## RxJS Store
 
 This is an example for a counter store in a `src/app/counter-store.ts` file. 
 Obviously, you can create every store you want with every complexity you need.
@@ -70,18 +75,18 @@ export interface CounterState {
 }
 ```
 
-2) Define your store service by extending `NgSimpleStateBaseStore`, eg.:
+2) Define your store service by extending `NgSimpleStateBaseRxjsStore`, eg.:
 
 ```ts
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { NgSimpleStateBaseRxjsStore } from 'ng-simple-state';
 
 export interface CounterState {
     count: number;
 }
  
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
  
 }
 ```
@@ -90,14 +95,14 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
 ```ts
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 export interface CounterState {
     count: number;
 }
  
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
   storeConfig(): NgSimpleStateStoreConfig {
     return {
@@ -118,7 +123,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
 ```ts
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 import { Observable } from 'rxjs';
 
 export interface CounterState {
@@ -126,7 +131,7 @@ export interface CounterState {
 }
  
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
   storeConfig(): NgSimpleStateStoreConfig {
     return {
@@ -150,7 +155,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 
 ```ts
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 import { Observable } from 'rxjs';
 
 export interface CounterState {
@@ -158,7 +163,7 @@ export interface CounterState {
 }
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
   storeConfig(): NgSimpleStateStoreConfig {
     return {
@@ -244,12 +249,12 @@ export class AppComponent {
 
 ### Manage component state without service
 
-If you want manage just a component state without make a new service, your component can extend directly `NgSimpleStateBaseStore`:
+If you want manage just a component state without make a new service, your component can extend directly `NgSimpleStateBaseRxjsStore`:
 
 ```ts
 import { Component, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { NgSimpleStateBaseRxjsStore } from 'ng-simple-state';
 import { Observable } from 'rxjs';
 
 export interface CounterState {
@@ -264,7 +269,7 @@ export interface CounterState {
         <button (click)="decrement()">-</button>
     `
 })
-export class CounterComponent extends NgSimpleStateBaseStore<CounterState> {
+export class CounterComponent extends NgSimpleStateBaseRxjsStore<CounterState> {
 
     public counter$: Observable<number> = this.selectState(state => state.count);
 
@@ -301,10 +306,10 @@ If you need to inject something into your store (eg. `HttpClient`), you need to 
 ```ts
 import { Injectable, Injector } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { NgSimpleStateBaseRxjsStore } from 'ng-simple-state';
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
   constructor(injector: Injector, private http: HttpClient) {
     super(injector);
@@ -331,7 +336,7 @@ import { NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
   override storeConfig(): NgSimpleStateStoreConfig {
     return {
@@ -410,7 +415,7 @@ This is an example for a todo list store in a `src/app/todo-store.ts` file.
 
 ```ts
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseStore } from 'ng-simple-state';
+import { NgSimpleStateBaseRxjsStore } from 'ng-simple-state';
 import { Observable } from 'rxjs';
 
 export interface Todo {
@@ -422,7 +427,7 @@ export interface Todo {
 export type TodoState = Array<Todo>;
 
 @Injectable()
-export class TodoStore extends NgSimpleStateBaseStore<TodoState> {
+export class TodoStore extends NgSimpleStateBaseRxjsStore<TodoState> {
 
   storeConfig(): NgSimpleStateStoreConfig {
     return {
@@ -480,12 +485,12 @@ export class AppComponent {
 ```
 
 
-### NgSimpleStateBaseStore API
+### NgSimpleStateBaseRxjsStore API
 
 ```ts
 @Injectable()
 @Directive()
-export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> implements OnDestroy {
+export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> implements OnDestroy {
 
     /**
      * Return the observable of the state
@@ -557,52 +562,6 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> impl
 }
 ```
 ## Signal Store
-
-### Get Started
-
-#### Step 1: install `ng-simple-state`
-
-```bash
-npm i ng-simple-state
-```
-
-#### Step 2: Import `NgSimpleStateModule` into your `AppModule`
-
-`NgSimpleStateModule` has some global optional config defined by `NgSimpleStateConfig` interface:
-
-| Option               | Description                                                                                     | Default    |
-| -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
-| *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
-| *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
-| *persistentStorage*  | Set the persistent storage `local` or `session`.                                                | `local`    |
-| *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
-
-_Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
-
-```ts
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { AppComponent } from './app.component';
-import { CommonModule } from '@angular/common';
-import { NgSimpleStateModule } from 'ng-simple-state';
-import { environment } from '../environments/environment';
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    NgSimpleStateModule.forRoot({
-      enableDevTool: !environment.production, // Enable Redux DevTools only in development mode
-      enableLocalStorage: false // Local storage state persistence is globally disabled
-    }) 
-  ],
-  bootstrap: [AppComponent],
-})
-export class AppModule {}
-```
-
-#### Step 3: Create your store
 
 This is an example for a counter store in a `src/app/counter-store.ts` file. 
 Obviously, you can create every store you want with every complexity you need.

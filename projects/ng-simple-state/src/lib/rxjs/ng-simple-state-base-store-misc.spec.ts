@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
-import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
+import { NgSimpleStateBaseRxjsStore } from './ng-simple-state-base-store';
 import { BASE_KEY } from '../storage/ng-simple-state-browser-storage';
 import { DevToolsExtension } from '../tool/ng-simple-state-dev-tool.spec';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
@@ -13,7 +13,7 @@ export interface CounterState {
 }
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
     override storeConfig(): NgSimpleStateStoreConfig {
         return {
@@ -44,7 +44,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 
 
-describe('NgSimpleStateBaseStore misc 1', () => {
+describe('NgSimpleStateBaseRxjsStore misc 1', () => {
 
     let service: CounterStore;
 
@@ -102,7 +102,7 @@ describe('NgSimpleStateBaseStore misc 1', () => {
 
 
 
-describe('NgSimpleStateBaseStore misc 2', () => {
+describe('NgSimpleStateBaseRxjsStore misc 2', () => {
 
     let service: CounterStore;
 

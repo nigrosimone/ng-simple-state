@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DebugElement, Injectable, Injector } from '@angular/core';
 import { ComponentFixture, fakeAsync, inject, TestBed, tick } from '@angular/core/testing';
 import { Observable } from 'rxjs';
-import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
+import { NgSimpleStateBaseRxjsStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 import { NgSimpleStateModule } from './../ng-simple-state.module';
 export interface CounterState {
@@ -11,7 +11,7 @@ export interface CounterState {
 }
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
     protected storeConfig(): NgSimpleStateStoreConfig {
         return {
@@ -39,7 +39,7 @@ export class CounterStore extends NgSimpleStateBaseStore<CounterState> {
 }
 
 
-describe('NgSimpleStateBaseStore: Service', () => {
+describe('NgSimpleStateBaseRxjsStore: Service', () => {
 
     let service: CounterStore;
 
@@ -160,7 +160,7 @@ describe('NgSimpleStateBaseStore: Service', () => {
     standalone: true,
     imports: [CommonModule]
 })
-export class TestComponent extends NgSimpleStateBaseStore<CounterState> {
+export class TestComponent extends NgSimpleStateBaseRxjsStore<CounterState> {
 
     public counter$: Observable<number> = this.selectState(state => state.count);
 
@@ -184,7 +184,7 @@ export class TestComponent extends NgSimpleStateBaseStore<CounterState> {
         return this.setState(state => ({ count: state.count - 1 }));
     }
 }
-describe('NgSimpleStateBaseStore: Component', () => {
+describe('NgSimpleStateBaseRxjsStore: Component', () => {
 
     let fixture: ComponentFixture<TestComponent>;
     let debugElement: DebugElement;

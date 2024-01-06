@@ -2,14 +2,14 @@
 import { Injectable, Injector } from '@angular/core';
 import { inject } from '@angular/core/testing';
 import { Observable } from 'rxjs';
-import { NgSimpleStateBaseStore } from './ng-simple-state-base-store';
+import { NgSimpleStateBaseRxjsStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 
 
 export type NumbersState = number[];
 
 @Injectable()
-export class CounterStore extends NgSimpleStateBaseStore<NumbersState> {
+export class CounterStore extends NgSimpleStateBaseRxjsStore<NumbersState> {
 
     protected storeConfig(): NgSimpleStateStoreConfig {
         return {
@@ -35,7 +35,7 @@ export class CounterStore extends NgSimpleStateBaseStore<NumbersState> {
 }
 
 
-describe('NgSimpleStateBaseStoreArray', () => {
+describe('NgSimpleStateBaseRxjsStoreArray', () => {
 
     let service: CounterStore;
 
