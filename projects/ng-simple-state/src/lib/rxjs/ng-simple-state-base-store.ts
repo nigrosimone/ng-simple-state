@@ -9,14 +9,14 @@ import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
 export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> implements OnDestroy {
 
     protected stackPoint: number = 3;
-    private state$: BehaviorSubject<S>;
+    private readonly state$: BehaviorSubject<S>;
 
     /**
      * Return the observable of the state
      * @returns Observable of the state
      */
-    public get state(): BehaviorSubject<S> {
-        return this.state$;
+    public get state(): Observable<S> {
+        return this.state$.asObservable();
     }
 
     constructor(@Inject(Injector) injector: Injector) {
@@ -91,4 +91,11 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
  * @deprecated use NgSimpleStateBaseRxjsStore
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> extends NgSimpleStateBaseRxjsStore<S> { }
+export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> extends NgSimpleStateBaseRxjsStore<S> {
+    constructor(@Inject(Injector) injector: Injector) {
+        super(injector);
+        if (this.devMode) {
+            console.warn('NgSimpleStateBaseStore is deprecated. Please use NgSimpleStateBaseRxjsStore')
+        }
+    }
+}

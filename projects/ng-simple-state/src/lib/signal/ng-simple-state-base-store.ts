@@ -7,7 +7,7 @@ import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
 export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
     protected stackPoint: number = 6;
-    private stateSig: WritableSignal<S>;
+    private readonly stateSig: WritableSignal<S>;
 
     /**
      * Return the Signal of the state
