@@ -144,11 +144,15 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
         }
         if (!actionName) {
             // retrieve the parent (of parent) method into the stack trace
-            actionName = new Error().stack
-                ?.split('\n')[this.stackPoint]
-                .trim()
-                .split(' ')[1]
-                .split('.')[1] || 'unknown';
+            try {
+                actionName = new Error().stack
+                    ?.split('\n')[this.stackPoint]
+                    ?.trim()
+                    ?.split(' ')[1]
+                    ?.split('.')[1] || 'unknown';
+            } catch (_) {
+                actionName = 'unknown';
+            }
         }
         if (!this.devTool.send(this.storeName, actionName, newState)) {
             console.log(this.storeName + '.' + actionName, newState);
