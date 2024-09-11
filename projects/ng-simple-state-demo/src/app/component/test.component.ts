@@ -7,6 +7,8 @@ export interface CounterState {
     count: number;
 }
 
+let id = 0;
+
 @Component({
     selector: 'ng-test',
     standalone: true,
@@ -15,6 +17,7 @@ export interface CounterState {
         NgSimpleStateModule
     ],
     template: `
+        {{ id }} - 
         {{counter$()}}
         <button (click)="increment()">+</button>
         <button (click)="decrement()">-</button>
@@ -22,11 +25,14 @@ export interface CounterState {
 })
 export class TestComponent extends NgSimpleStateBaseSignalStore<CounterState> {
 
+    public id = id;
+
     public counter$: Signal<number> = this.selectState(state => state.count);
 
     protected storeConfig(): NgSimpleStateStoreConfig {
+        id++;
         return {
-            storeName: 'TestComponent'
+            storeName: 'TestComponent-'+id
         };
     }
 

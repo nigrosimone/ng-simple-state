@@ -16,13 +16,14 @@ declare global {
     }
 }
 
+const instanceId = `ng-simple-state-${Date.now()}-${Math.random()}`
+
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateDevTool {
 
     private globalDevtools: Devtools = window.__REDUX_DEVTOOLS_EXTENSION__ || window.devToolsExtension;
     private localDevTool!: DevtoolsLocal;
     private isActiveDevtool = false;
-    private instanceId = `ng-simple-state-${Date.now()}`;
     private baseState: Record<string, object> = {};
 
     constructor(ngZone: NgZone) {
@@ -34,7 +35,7 @@ export class NgSimpleStateDevTool {
             ngZone.runOutsideAngular(() => {
                 this.localDevTool = this.globalDevtools.connect({
                     name: 'NgSimpleState',
-                    instanceId: this.instanceId
+                    instanceId: instanceId
                 });
                 this.isActiveDevtool = !!this.localDevTool;
                 if (this.isActiveDevtool) {
@@ -61,7 +62,7 @@ export class NgSimpleStateDevTool {
      */
     send<T>(storeName: string, actionName: string, state: T): boolean {
         if (this.isActiveDevtool && this.localDevTool) {
-            this.localDevTool.send<T>(`${storeName}.${actionName}`, Object.assign(this.baseState, { [storeName]: state }), false, this.instanceId);
+            this.localDevTool.send<T>(`${storeName}.${actionName}`, Object.assign(this.baseState, { [storeName]: state }), false, instanceId);
             return true;
         }
         return false;
