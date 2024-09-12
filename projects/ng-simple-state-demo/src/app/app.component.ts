@@ -7,7 +7,19 @@ import { RouterModule } from '@angular/router';
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-root',
-  templateUrl: './app.component.html',
+  template: `<h1>NgSimpleState demos</h1>
+  <nav>
+      <ul>
+        <li><a routerLink="/todo" routerLinkActive="active">Todo</a></li>
+        <li><a routerLink="/counter" routerLinkActive="active">Counter</a></li>
+      </ul>
+  </nav>
+  <router-outlet></router-outlet>
+  
+  <br /><br /><br />
+  <ng-test></ng-test><br />
+  <ng-test></ng-test><br />
+  <ng-test></ng-test><br />`,
   styleUrls: ['./app.component.css'],
   standalone: true,
   imports: [
