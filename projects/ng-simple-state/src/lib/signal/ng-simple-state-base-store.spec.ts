@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common';
-import { Component, DebugElement, Injectable, Injector, Signal } from '@angular/core';
-import { ComponentFixture, fakeAsync, inject, TestBed, tick } from '@angular/core/testing';
+import { Component, DebugElement, Injectable, Signal } from '@angular/core';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
-import { NgSimpleStateModule } from './../ng-simple-state.module';
+
 export interface CounterState {
     count: number;
 }
@@ -185,7 +185,7 @@ describe('NgSimpleStateBaseSignalStore: Component', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [TestComponent],
-            imports: [NgSimpleStateModule, CommonModule]
+            imports: [CommonModule]
         });
         fixture = TestBed.createComponent(TestComponent);
         debugElement = fixture.debugElement;

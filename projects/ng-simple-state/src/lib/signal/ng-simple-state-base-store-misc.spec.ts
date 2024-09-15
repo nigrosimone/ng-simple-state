@@ -5,7 +5,7 @@ import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { BASE_KEY } from '../storage/ng-simple-state-browser-storage';
 import { DevToolsExtension } from '../tool/ng-simple-state-dev-tool.spec';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
-import { NgSimpleStateModule } from './../ng-simple-state.module';
+import { provideNgSimpleState } from '../ng-simple-state-provider';
 
 export interface CounterState {
     count: number;
@@ -48,14 +48,14 @@ describe('NgSimpleStateBaseSignalStore misc 1', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                NgSimpleStateModule.forRoot({
+            providers: [
+                provideNgSimpleState({
                     enableDevTool: false,
                     enableLocalStorage: false,
                     persistentStorage: 'local'
-                })
-            ], 
-            providers: [CounterStore]
+                }),
+                CounterStore
+            ]
         });
         (window as any)['devToolsExtension'] = new DevToolsExtension();
 
@@ -103,14 +103,14 @@ describe('NgSimpleStateBaseSignalStore misc 2', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                NgSimpleStateModule.forRoot({
+            providers: [
+                provideNgSimpleState({
                     enableDevTool: false,
                     enableLocalStorage: false,
                     persistentStorage: 'session'
-                })
-            ],
-            providers: [CounterStore]
+                }),
+                CounterStore
+            ]
         });
         (window as any)['devToolsExtension'] = new DevToolsExtension();
 

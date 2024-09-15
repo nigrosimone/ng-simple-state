@@ -1,5 +1,5 @@
 
-import { NgSimpleStateBaseSignalStore, NgSimpleStateModule, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
 import { Component, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -13,8 +13,7 @@ let id = 0;
     selector: 'ng-test',
     standalone: true,
     imports: [
-        CommonModule,
-        NgSimpleStateModule
+        CommonModule
     ],
     template: `
         {{ id }} - 
