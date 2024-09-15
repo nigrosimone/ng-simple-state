@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Injector, Signal } from '@angular/core';
-import { inject } from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 
@@ -38,9 +38,10 @@ describe('NgSimpleStateBaseSignalStoreArray', () => {
 
     let service: CounterStore;
 
-    beforeEach(inject([Injector], (injector: Injector) => {
-        service = new CounterStore(injector);
-    }));
+    beforeEach(() => {
+        TestBed.configureTestingModule({ providers: [CounterStore] });
+        service = TestBed.inject(CounterStore);
+    });
 
 
     it('initialState -> selectState', () => {

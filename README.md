@@ -19,9 +19,9 @@ See the demos:
 npm i ng-simple-state
 ```
 
-### Step 2: Import `NgSimpleStateModule` into your `AppModule`
+### Step 2: Import `provideNgSimpleState` into your providers
 
-`NgSimpleStateModule` has some global optional config defined by `NgSimpleStateConfig` interface:
+`provideNgSimpleState` has some global optional config defined by `NgSimpleStateConfig` interface:
 
 | Option               | Description                                                                                     | Default    |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
@@ -33,26 +33,21 @@ npm i ng-simple-state
 _Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
 
 ```ts
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { AppComponent } from './app.component';
-import { CommonModule } from '@angular/common';
-import { NgSimpleStateModule } from 'ng-simple-state';
-import { environment } from '../environments/environment';
+import { isDevMode } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
 
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    NgSimpleStateModule.forRoot({
-      enableDevTool: !environment.production, // Enable Redux DevTools only in development mode
-      enableLocalStorage: false // Local storage state persistence is globally disabled
-    }) 
-  ],
-  bootstrap: [AppComponent],
-})
-export class AppModule {}
+import { AppComponent } from './app.component';
+import { provideNgSimpleState } from 'ng-simple-state';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideNgSimpleState({
+      enableDevTool: isDevMode(),
+      enableLocalStorage: true,
+      persistentStorage: 'local'
+    })
+  ]
+});
 ```
 
 ### Step 3: Chose your store
@@ -191,31 +186,19 @@ export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 }
 ```
 
-#### Step 3: Inject your store into the providers of the module you want (or the providers of component), eg.:
+#### Step 3: Inject your store into the providers, eg.:
 
 ```ts
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { AppComponent } from './app.component';
-import { CommonModule } from '@angular/common';
-import { NgSimpleStateModule } from 'ng-simple-state';
-import { environment } from '../environments/environment';
+import { Component } from '@angular/core';
 import { CounterStore } from './counter-store';
 
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    NgSimpleStateModule.forRoot({
-      enableDevTool: !environment.production, // Enable Redux DevTools only in developing
-      enableLocalStorage: false // Local storage state persistence is globally disabled
-    })
-  ],
-  bootstrap: [AppComponent],
-  providers: [CounterStore]  // The CounterStore state is shared at AppModule level
+@Component({
+  selector: 'app-root',
+  imports: [CounterStore]
 })
-export class AppModule {}
+export class AppComponent {
+
+}
 ```
 
 #### Step 4: Use your store into the components, eg.:
@@ -227,6 +210,7 @@ import { CounterStore } from './counter-store';
 
 @Component({
   selector: 'app-root',
+  imports: [CounterStore],
   template: `
   <h1>Counter: {{ counter$ | async }}</h1>
   <button (click)="counterStore.decrement()">Decrement</button>
@@ -273,10 +257,6 @@ export class CounterComponent extends NgSimpleStateBaseRxjsStore<CounterState> {
 
     public counter$: Observable<number> = this.selectState(state => state.count);
 
-    constructor(injector: Injector) {
-      super(injector);
-    }
-
     storeConfig(): NgSimpleStateStoreConfig {
       return {
         storeName: 'CounterComponent'
@@ -296,33 +276,6 @@ export class CounterComponent extends NgSimpleStateBaseRxjsStore<CounterState> {
     decrement(): void {
         this.setState(state => ({ count: state.count - 1 }));
     }
-}
-```
-
-### Store's dependency injection
-
-If you need to inject something into your store (eg. `HttpClient`), you need to also inject the Angular `Injector` service to the super, eg.:
-
-```ts
-import { Injectable, Injector } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { NgSimpleStateBaseRxjsStore } from 'ng-simple-state';
-
-@Injectable()
-export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
-
-  constructor(injector: Injector, private http: HttpClient) {
-    super(injector);
-  }
-
-  increment(increment: number = 1): void {
-    this.http.post<CounterState>('https://localhost:300/api/increment', { increment }).subscribe(response => {
-      // setState() from default use parent function name as action name for Redux DevTools.
-      // In this case we provide a second parameter `actionName` because the parent function is anonymous function
-      this.setState(() => ({ count: response.count }), 'increment');
-    });
-  }
-
 }
 ```
 
@@ -365,7 +318,7 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 
 ```ts
 import { TestBed } from '@angular/core/testing';
-import { NgSimpleStateModule } from 'ng-simple-state';
+import { provideNgSimpleState } from 'ng-simple-state';
 import { CounterStore } from './counter-store';
 
 describe('CounterStore', () => {
@@ -373,16 +326,17 @@ describe('CounterStore', () => {
   let counterStore: CounterStore;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        NgSimpleStateModule.forRoot({
+    const injector = TestBed.configureTestingModule({
+      providers: [
+        provideNgSimpleState({
           enableDevTool: false,
           enableLocalStorage: false
-        })
+        }),
+        CounterStore
       ]
     });
 
-    counterStore = new CounterStore(TestBed);
+    counterStore = injector.get(CounterStore);
   });
 
   it('initialState', () => {

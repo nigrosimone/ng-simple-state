@@ -19,8 +19,8 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
         return this.state$.asObservable();
     }
 
-    constructor(@Inject(Injector) injector: Injector) {
-        super(injector)
+    constructor() {
+        super()
         this.state$ = new BehaviorSubject<S>(Object.assign(this.isArray ? [] : {}, this.firstState));
     }
 
@@ -92,8 +92,8 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> extends NgSimpleStateBaseRxjsStore<S> {
-    constructor(@Inject(Injector) injector: Injector) {
-        super(injector);
+    constructor() {
+        super();
         if (this.devMode) {
             console.warn('NgSimpleStateBaseStore is deprecated. Please use NgSimpleStateBaseRxjsStore')
         }

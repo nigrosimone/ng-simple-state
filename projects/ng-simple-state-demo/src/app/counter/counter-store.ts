@@ -8,10 +8,6 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
-  constructor(injector: Injector) {
-    super(injector);
-  }
-
   override storeConfig(): NgSimpleStateStoreConfig {
     return {
       storeName: 'MyCounterStore',

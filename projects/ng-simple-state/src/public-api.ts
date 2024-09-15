@@ -9,3 +9,4 @@ export * from './lib/storage/ng-simple-state-local-storage';
 export * from './lib/storage/ng-simple-state-session-storage';
 export * from './lib/ng-simple-state-models';
 export * from './lib/ng-simple-state-common';
+export * from './lib/ng-simple-state-provider';

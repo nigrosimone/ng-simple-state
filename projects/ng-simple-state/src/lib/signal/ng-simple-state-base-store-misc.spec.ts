@@ -54,7 +54,8 @@ describe('NgSimpleStateBaseSignalStore misc 1', () => {
                     enableLocalStorage: false,
                     persistentStorage: 'local'
                 })
-            ]
+            ], 
+            providers: [CounterStore]
         });
         (window as any)['devToolsExtension'] = new DevToolsExtension();
 
@@ -62,7 +63,7 @@ describe('NgSimpleStateBaseSignalStore misc 1', () => {
             count: 2
         }));
 
-        service = new CounterStore(TestBed);
+        service = TestBed.inject(CounterStore);
     });
 
     afterEach(() => {
@@ -108,7 +109,8 @@ describe('NgSimpleStateBaseSignalStore misc 2', () => {
                     enableLocalStorage: false,
                     persistentStorage: 'session'
                 })
-            ]
+            ],
+            providers: [CounterStore]
         });
         (window as any)['devToolsExtension'] = new DevToolsExtension();
 
@@ -116,7 +118,7 @@ describe('NgSimpleStateBaseSignalStore misc 2', () => {
             count: 2
         }));
 
-        service = new CounterStore(TestBed);
+        service = TestBed.inject(CounterStore);
     });
 
     afterEach(() => {

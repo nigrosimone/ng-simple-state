@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector, OnDestroy, Directive, isDevMode } from '@angular/core';
+import { Inject, Injectable, Injector, OnDestroy, Directive, isDevMode, inject } from '@angular/core';
 import { NgSimpleStateBrowserStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
@@ -21,26 +21,27 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
     protected comparator!: <K>(previous: K, current: K) => boolean;
+    protected globalConfig = inject(NG_SIMPLE_STORE_CONFIG, {optional: true})
 
-    constructor(@Inject(Injector) injector: Injector) {
+    constructor() {
 
-        const globalConfig = injector.get(NG_SIMPLE_STORE_CONFIG, {});
+
         const storeConfig = this.storeConfig() || {};
-        this.localStoreConfig = { ...globalConfig, ...storeConfig };
+        this.localStoreConfig = { ...this.globalConfig, ...storeConfig };
 
         this.localStorageIsEnabled = typeof this.localStoreConfig.enableLocalStorage === 'boolean' ? this.localStoreConfig.enableLocalStorage : false;
 
         if (this.localStorageIsEnabled) {
             if (this.localStoreConfig.persistentStorage === 'local') {
-                this.persistentStorage = injector.get(NgSimpleStateLocalStorage);
+                this.persistentStorage = inject(NgSimpleStateLocalStorage);
             } else if (this.localStoreConfig.persistentStorage === 'session') {
-                this.persistentStorage = injector.get(NgSimpleStateSessionStorage);
+                this.persistentStorage = inject(NgSimpleStateSessionStorage);
             }
         }
 
         this.devToolIsEnabled = typeof this.localStoreConfig.enableDevTool === 'boolean' ? this.localStoreConfig.enableDevTool : false;
         if (this.devToolIsEnabled) {
-            this.devTool = injector.get(NgSimpleStateDevTool);
+            this.devTool = inject(NgSimpleStateDevTool);
         }
 
         this.storeName = typeof this.localStoreConfig.storeName === 'string' ? this.localStoreConfig.storeName : this.constructor.name;
@@ -55,7 +56,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
             }
         }
         if (!this.firstState) {
-            this.firstState = this.initialState(injector);
+            this.firstState = this.initialState();
         }
 
         this.devToolSend(this.firstState, `initialState`);
@@ -78,10 +79,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
 
     /**
      * Set into the store the initial state
-     * @param injector current Injector
      * @returns The state object
      */
-    protected abstract initialState(injector?: Injector): S;
+    protected abstract initialState(): S;
 
     /**
      * Select a store state

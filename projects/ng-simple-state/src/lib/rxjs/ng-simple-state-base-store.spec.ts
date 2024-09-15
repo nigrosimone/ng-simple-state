@@ -43,9 +43,10 @@ describe('NgSimpleStateBaseRxjsStore: Service', () => {
 
     let service: CounterStore;
 
-    beforeEach(inject([Injector], (injector: Injector) => {
-        service = new CounterStore(injector);
-    }));
+    beforeEach(() => {
+        TestBed.configureTestingModule({ providers: [CounterStore] });
+        service = TestBed.inject(CounterStore);
+    });
 
 
     it('initialState -> selectState', (done) => {

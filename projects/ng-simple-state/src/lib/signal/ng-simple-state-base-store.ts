@@ -17,8 +17,8 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         return this.stateSig.asReadonly();
     }
 
-    constructor(@Inject(Injector) injector: Injector) {
-        super(injector);
+    constructor() {
+        super();
         this.stateSig = signal<S>(Object.assign(this.isArray ? [] : {}, this.firstState));
     }
 

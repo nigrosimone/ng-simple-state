@@ -1,11 +1,10 @@
-import { enableProdMode, importProvidersFrom, provideExperimentalZonelessChangeDetection } from '@angular/core';
-import { environment } from './environments/environment';
+import { enableProdMode, isDevMode, provideExperimentalZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app/app.component';
-import { NgSimpleStateModule } from 'projects/ng-simple-state/src/public-api';
+import { provideNgSimpleState } from 'projects/ng-simple-state/src/public-api';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
 
-if (environment.production) {
+if (!isDevMode()) {
   enableProdMode();
 }
 
@@ -18,10 +17,10 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideExperimentalZonelessChangeDetection(),
     provideRouter(routes),
-    importProvidersFrom(NgSimpleStateModule.forRoot({
-      enableDevTool: !environment.production,
+    provideNgSimpleState({
+      enableDevTool: isDevMode(),
       enableLocalStorage: true,
       persistentStorage: 'local'
-    }))
+    })
   ]
 });
