@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector, OnDestroy, Directive } from '@angular/core';
+import { Injectable, OnDestroy, Directive } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';

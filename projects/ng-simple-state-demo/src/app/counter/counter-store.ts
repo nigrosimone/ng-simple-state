@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal } from '@angular/core';
+import { Injectable, Signal } from '@angular/core';
 import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
 
 export interface CounterState {

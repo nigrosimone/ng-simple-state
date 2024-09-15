@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector, OnDestroy, Directive, isDevMode, inject } from '@angular/core';
+import { Injectable, OnDestroy, Directive, isDevMode, inject } from '@angular/core';
 import { NgSimpleStateBrowserStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
@@ -7,8 +7,7 @@ import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-s
 
 @Injectable()
 @Directive()
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>> implements OnDestroy {
+export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> implements OnDestroy {
 
     protected abstract stackPoint: number;
     protected localStorageIsEnabled: boolean;
@@ -24,7 +23,6 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
     protected globalConfig = inject(NG_SIMPLE_STORE_CONFIG, {optional: true})
 
     constructor() {
-
 
         const storeConfig = this.storeConfig() || {};
         this.localStoreConfig = { ...this.globalConfig, ...storeConfig };
@@ -184,7 +182,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<any>
         // At this point we know that we're dealing with either an array or plain object, so
         // just freeze it and recurse on its values.
         Object.freeze(object);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         Object.keys(object).forEach(key => this.deepFreeze((object as any)[key]));
 
         return object as Readonly<S>;
