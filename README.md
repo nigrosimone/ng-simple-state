@@ -281,7 +281,7 @@ export class CounterComponent extends NgSimpleStateBaseRxjsStore<CounterState> {
 
 ### Override global config
 
-If you need to override the global module configuration provided by `NgSimpleStateModule.forRoot()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
+If you need to override the global configuration provided by `provideNgSimpleState()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
 
 ```ts
 import { Injectable } from '@angular/core';
@@ -326,7 +326,7 @@ describe('CounterStore', () => {
   let counterStore: CounterStore;
 
   beforeEach(() => {
-    const injector = TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       providers: [
         provideNgSimpleState({
           enableDevTool: false,
@@ -336,7 +336,7 @@ describe('CounterStore', () => {
       ]
     });
 
-    counterStore = injector.get(CounterStore);
+    counterStore = TestBed.inject(CounterStore);
   });
 
   it('initialState', () => {
@@ -452,8 +452,6 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      */
     public get state(): BehaviorSubject<S>;
 
-    constructor(@Inject(Injector) injector: Injector);
-
     /**
      * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
      */
@@ -479,10 +477,9 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
 
     /**
      * Set into the store the initial state
-     * @param injector current Injector
      * @returns The state object
      */
-    initialState(injector?: Injector): S;
+    initialState(): S;
 
     /**
      * Select a store state
@@ -642,31 +639,19 @@ export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 }
 ```
 
-#### Step 3: Inject your store into the providers of the module you want (or the providers of component), eg.:
+#### Step 3: Inject your store into the providers, eg.:
 
 ```ts
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { AppComponent } from './app.component';
-import { CommonModule } from '@angular/common';
-import { NgSimpleStateModule } from 'ng-simple-state';
-import { environment } from '../environments/environment';
+import { Component } from '@angular/core';
 import { CounterStore } from './counter-store';
 
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    NgSimpleStateModule.forRoot({
-      enableDevTool: !environment.production, // Enable Redux DevTools only in developing
-      enableLocalStorage: false // Local storage state persistence is globally disabled
-    })
-  ],
-  bootstrap: [AppComponent],
-  providers: [CounterStore]  // The CounterStore state is shared at AppModule level
+@Component({
+  selector: 'app-root',
+  imports: [CounterStore]
 })
-export class AppModule {}
+export class AppComponent {
+
+}
 ```
 
 #### Step 4: Use your store into the components, eg.:
@@ -777,7 +762,7 @@ export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
 ### Override global config
 
-If you need to override the global module configuration provided by `NgSimpleStateModule.forRoot()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
+If you need to override the global configuration provided by `provideNgSimpleState()` you can implement `storeConfig()` and return a specific configuration for the single store, eg.:
 
 ```ts
 import { Injectable } from '@angular/core';
@@ -813,7 +798,7 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 
 ```ts
 import { TestBed } from '@angular/core/testing';
-import { NgSimpleStateModule } from 'ng-simple-state';
+import { provideNgSimpleState } from 'ng-simple-state';
 import { CounterStore } from './counter-store';
 
 describe('CounterStore', () => {
@@ -822,15 +807,16 @@ describe('CounterStore', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        NgSimpleStateModule.forRoot({
+      providers: [
+        provideNgSimpleState({
           enableDevTool: false,
           enableLocalStorage: false
-        })
+        }),
+        CounterStore
       ]
     });
 
-    counterStore = new CounterStore(TestBed);
+    counterStore = TestBed.inject(CounterStore);
   });
 
   it('initialState', () => {
