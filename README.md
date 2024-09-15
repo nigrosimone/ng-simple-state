@@ -236,7 +236,7 @@ export class AppComponent {
 If you want manage just a component state without make a new service, your component can extend directly `NgSimpleStateBaseRxjsStore`:
 
 ```ts
-import { Component, Injector } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgSimpleStateBaseRxjsStore } from 'ng-simple-state';
 import { Observable } from 'rxjs';
@@ -687,7 +687,7 @@ export class AppComponent {
 If you want manage just a component state without make a new service, your component can extend directly `NgSimpleStateBaseSignalStore`:
 
 ```ts
-import { Component, Injector, Signal } from '@angular/core';
+import { Component, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgSimpleStateBaseSignalStore } from 'ng-simple-state';
 
@@ -706,10 +706,6 @@ export interface CounterState {
 export class CounterComponent extends NgSimpleStateBaseSignalStore<CounterState> {
 
     public counterSig: Signal<number> = this.selectState(state => state.count);
-
-    constructor(injector: Injector) {
-      super(injector);
-    }
 
     storeConfig(): NgSimpleStateStoreConfig {
       return {
@@ -730,33 +726,6 @@ export class CounterComponent extends NgSimpleStateBaseSignalStore<CounterState>
     decrement(): void {
         this.setState(state => ({ count: state.count - 1 }));
     }
-}
-```
-
-### Store's dependency injection
-
-If you need to inject something into your store (eg. `HttpClient`), you need to also inject the Angular `Injector` service to the super, eg.:
-
-```ts
-import { Injectable, Injector } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { NgSimpleStateBaseSignalStore } from 'ng-simple-state';
-
-@Injectable()
-export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
-
-  constructor(injector: Injector, private http: HttpClient) {
-    super(injector);
-  }
-
-  increment(increment: number = 1): void {
-    this.http.post<CounterState>('https://localhost:300/api/increment', { increment }).subscribe(response => {
-      // setState() from default use parent function name as action name for Redux DevTools.
-      // In this case we provide a second parameter `actionName` because the parent function is anonymous function
-      this.setState(() => ({ count: response.count }), 'increment');
-    });
-  }
-
 }
 ```
 
@@ -928,8 +897,6 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      */
     public get state(): Signal<S>;
 
-    constructor(@Inject(Injector) injector: Injector);
-
     /**
      * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
      */
@@ -955,10 +922,9 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
 
     /**
      * Set into the store the initial state
-     * @param injector current Injector
      * @returns The state object
      */
-    initialState(injector?: Injector): S;
+    initialState(): S;
 
     /**
      * Select a store state
