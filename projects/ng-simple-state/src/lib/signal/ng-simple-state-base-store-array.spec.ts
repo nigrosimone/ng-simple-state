@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, Injector, Signal } from '@angular/core';
-import { inject, TestBed } from '@angular/core/testing';
+import { Injectable, Signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 

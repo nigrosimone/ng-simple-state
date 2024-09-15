@@ -1,4 +1,4 @@
-import { Inject, Injectable, Injector, Directive, Signal, signal, computed, WritableSignal } from '@angular/core';
+import { Injectable, Directive, Signal, signal, computed, WritableSignal } from '@angular/core';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
 
 @Injectable()
