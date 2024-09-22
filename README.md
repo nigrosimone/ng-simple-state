@@ -237,7 +237,6 @@ If you want manage just a component state without make a new service, your compo
 
 ```ts
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { NgSimpleStateBaseRxjsStore } from 'ng-simple-state';
 import { Observable } from 'rxjs';
 
@@ -688,7 +687,6 @@ If you want manage just a component state without make a new service, your compo
 
 ```ts
 import { Component, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { NgSimpleStateBaseSignalStore } from 'ng-simple-state';
 
 export interface CounterState {
