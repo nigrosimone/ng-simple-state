@@ -2,13 +2,14 @@ import { Injectable, OnDestroy, Directive } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
+import { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState } from '../ng-simple-state-models';
 
 @Injectable()
 @Directive()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> implements OnDestroy {
 
-    protected stackPoint: number = 3;
+    protected stackPoint: number = 4;
     private readonly state$: BehaviorSubject<S>;
 
     /**
@@ -21,7 +22,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
 
     constructor() {
         super()
-        this.state$ = new BehaviorSubject<S>(Object.assign(this.isArray ? [] : {}, this.firstState));
+        this.state$ = new BehaviorSubject<S>(this.selectFn(this.firstState));
     }
 
     /**
@@ -38,15 +39,11 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
      * @returns Observable of the selected state
      */
-    selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): Observable<K> {
-        if (!selectFn) {
-            selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as K;
-        }
-        if (!comparator && this.comparator) {
-            comparator = this.comparator;
-        }
+    selectState<K>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Observable<K> {
+        selectFn ??= this.selectFn.bind(this);
+        comparator ??= this.comparator;
         return this.state$.pipe(
-            map(state => (selectFn as (state: Readonly<S>) => K)(state as Readonly<S>)),
+            map(state => selectFn(state as Readonly<S>)),
             distinctUntilChanged(comparator),
             observeOn(asyncScheduler)
         );
@@ -66,22 +63,14 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
-    setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean {
+    setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean {
         const currState = this.getCurrentState();
-        const newState = stateFn(currState);
-        if (currState === newState) {
-            return false;
+        const state = this.patchState(currState, stateFn(currState), actionName);
+        if (typeof state !== 'undefined') {
+            this.state$.next(state);
+            return true;
         }
-        let state: S;
-        if (this.isArray) {
-            state = Object.assign([] as S, newState);
-        } else {
-            state = Object.assign({}, currState, newState);
-        }
-        this.state$.next(state);
-        this.devToolSend(state, actionName);
-        this.statePersist(state);
-        return true;
+        return false;
     }
 }
 

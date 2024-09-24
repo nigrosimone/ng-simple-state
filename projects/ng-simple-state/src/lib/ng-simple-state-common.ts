@@ -2,7 +2,7 @@ import { Injectable, OnDestroy, Directive, isDevMode, inject } from '@angular/co
 import { NgSimpleStateBrowserStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
-import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG } from './ng-simple-state-models';
+import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, NgSimpleStateSetState, NgSimpleStateComparator, NgSimpleStateSelectState } from './ng-simple-state-models';
 import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
 
 @Injectable()
@@ -20,7 +20,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
     protected comparator!: <K>(previous: K, current: K) => boolean;
-    protected globalConfig = inject(NG_SIMPLE_STORE_CONFIG, {optional: true})
+    protected globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true })
 
     constructor() {
 
@@ -88,7 +88,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @returns Observable of the selected state
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    abstract selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): any;
+    abstract selectState<K>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): any;
 
     /**
      * Set a new state
@@ -96,7 +96,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
-    abstract setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean;
+    abstract setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
 
     /**
      * Return the current store state (snapshot)
@@ -128,6 +128,31 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     restartState(): boolean {
         return this.setState(() => this.initialState(), 'restartState');
+    }
+
+    /**
+     * Set a new state
+     * @param selectFn State reducer
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns state
+     */
+    protected patchState(currState: S, newState: Partial<S>, actionName?: string): S | undefined {
+        let state: S;
+        if (this.isArray) {
+            state = Object.assign([] as S, newState);
+        } else {
+            state = Object.assign({}, currState, newState);
+        }
+        if (currState === newState) {
+            return undefined;
+        }
+        this.devToolSend(state, actionName);
+        this.statePersist(state);
+        return state;
+    }
+
+    protected selectFn<K>(tmpState: Readonly<S>) {
+        return Object.assign(this.isArray ? [] : {}, tmpState) as K;
     }
 
     /**

@@ -1,5 +1,9 @@
 import { InjectionToken } from '@angular/core';
 
+export type NgSimpleStateSetState<S> = (currentState: Readonly<S>) => Partial<S>;
+export type NgSimpleStateSelectState<S, K> = (state: Readonly<S>) => K;
+export type NgSimpleStateComparator<K> = (previous: K, current: K) => boolean;
+
 /**
  * NgSimpleState config option
  */

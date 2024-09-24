@@ -1,12 +1,13 @@
 import { Injectable, Directive, Signal, signal, computed, WritableSignal } from '@angular/core';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
+import { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState } from '../ng-simple-state-models';
 
 @Injectable()
 @Directive()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
-    protected stackPoint: number = 6;
+    protected stackPoint: number = 4;
     private readonly stateSig: WritableSignal<S>;
 
     /**
@@ -19,7 +20,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
 
     constructor() {
         super();
-        this.stateSig = signal<S>(Object.assign(this.isArray ? [] : {}, this.firstState));
+        this.stateSig = signal<S>(this.selectFn(this.firstState));
     }
 
     /**
@@ -28,14 +29,10 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
      * @returns Signal of the selected state
      */
-    selectState<K>(selectFn?: (state: Readonly<S>) => K, comparator?: (previous: K, current: K) => boolean): Signal<K> {
-        if (!selectFn) {
-            selectFn = (tmpState: Readonly<S>) => Object.assign(this.isArray ? [] : {}, tmpState) as K;
-        }
-        if (!comparator && this.comparator) {
-            comparator = this.comparator;
-        }
-        return computed(() => (selectFn as (state: Readonly<S>) => K)(this.stateSig() as Readonly<S>), { equal: comparator });
+    selectState<K>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Signal<K> {
+        selectFn ??= this.selectFn.bind(this);
+        comparator ??= this.comparator;
+        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator });
     }
 
     /**
@@ -52,24 +49,13 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
-    setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean {
-        let result = true;
-        this.stateSig.update(currState => {
-            const newState = stateFn(currState);
-            if (currState === newState) {
-                result = false;
-                return currState;
-            }
-            let state: S;
-            if (this.isArray) {
-                state = Object.assign([] as S, newState);
-            } else {
-                state = Object.assign({}, currState, newState);
-            }
-            this.devToolSend(state, actionName);
-            this.statePersist(state);
-            return state;
-        })
-        return result;
+    setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean {
+        const currState = this.getCurrentState();
+        const state = this.patchState(currState, stateFn(currState), actionName);
+        if (typeof state !== 'undefined') {
+            this.stateSig.set(state);
+            return true;
+        }
+        return false;
     }
 }
