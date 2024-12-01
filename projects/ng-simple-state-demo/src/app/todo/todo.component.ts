@@ -15,7 +15,6 @@ import { CommonModule } from '@angular/common';
           <button (click)="todoStore.delete(todo.id)">&#10005;</button>
       </li>
   </ol>`,
-  standalone: true,
   imports: [FormsModule, CommonModule],
   providers: [TodoStore]
 })

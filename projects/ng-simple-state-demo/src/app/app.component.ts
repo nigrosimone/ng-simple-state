@@ -20,7 +20,6 @@ import { RouterModule } from '@angular/router';
   <ng-test></ng-test><br />
   <ng-test></ng-test><br />
   <ng-test></ng-test><br />`,
-  standalone: true,
   imports: [
     TestComponent,
     FormsModule,

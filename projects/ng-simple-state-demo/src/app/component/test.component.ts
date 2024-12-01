@@ -11,7 +11,6 @@ let id = 0;
 
 @Component({
     selector: 'ng-test',
-    standalone: true,
     imports: [
         CommonModule
     ],
@@ -31,7 +30,7 @@ export class TestComponent extends NgSimpleStateBaseSignalStore<CounterState> {
     protected storeConfig(): NgSimpleStateStoreConfig {
         id++;
         return {
-            storeName: 'TestComponent-'+id
+            storeName: 'TestComponent-' + id
         };
     }
 

@@ -158,7 +158,6 @@ describe('NgSimpleStateBaseRxjsStore: Service', () => {
 @Component({
     selector: 'ng-test',
     template: `{{counter$ | async}}`,
-    standalone: true,
     imports: [CommonModule]
 })
 export class TestComponent extends NgSimpleStateBaseRxjsStore<CounterState> {

@@ -10,7 +10,6 @@ import { CommonModule } from '@angular/common';
   <button (click)="counterStore.decrement()">Decrement</button>
   <button (click)="counterStore.resetState()">Reset</button>
   <button (click)="counterStore.increment()">Increment</button>`,
-  standalone: true,
   providers: [CounterStore],
   imports: [CommonModule]
 })
