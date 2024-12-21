@@ -9,18 +9,20 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
 
     protected stackPoint: number = 4;
     private readonly stateSig: WritableSignal<S>;
+    private readonly stateSigRo: Signal<S>
 
     /**
      * Return the Signal of the state
      * @returns Signal of the state
      */
     public get state(): Signal<S> {
-        return this.stateSig.asReadonly();
+        return this.stateSigRo;
     }
 
     constructor() {
         super();
         this.stateSig = signal<S>(this.selectFn(this.firstState));
+        this.stateSigRo = this.stateSig.asReadonly();
     }
 
     /**
@@ -31,8 +33,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      */
     selectState<K>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Signal<K> {
         selectFn ??= this.selectFn.bind(this);
-        comparator ??= this.comparator;
-        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator });
+        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator ?? this.comparator });
     }
 
     /**

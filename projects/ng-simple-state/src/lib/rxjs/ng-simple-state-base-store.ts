@@ -11,18 +11,20 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
 
     protected stackPoint: number = 4;
     private readonly state$: BehaviorSubject<S>;
+    private readonly stateObs: Observable<S>;
 
     /**
      * Return the observable of the state
      * @returns Observable of the state
      */
     public get state(): Observable<S> {
-        return this.state$.asObservable();
+        return this.stateObs;
     }
 
     constructor() {
         super()
         this.state$ = new BehaviorSubject<S>(this.selectFn(this.firstState));
+        this.stateObs = this.state$.asObservable();
     }
 
     /**
@@ -41,10 +43,9 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      */
     selectState<K>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Observable<K> {
         selectFn ??= this.selectFn.bind(this);
-        comparator ??= this.comparator;
         return this.state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
-            distinctUntilChanged(comparator),
+            distinctUntilChanged(comparator ?? this.comparator),
             observeOn(asyncScheduler)
         );
     }
