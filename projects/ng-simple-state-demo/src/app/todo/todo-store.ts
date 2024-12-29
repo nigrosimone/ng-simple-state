@@ -12,9 +12,10 @@ export type TodoState = Array<Todo>;
 @Injectable()
 export class TodoStore extends NgSimpleStateBaseSignalStore<TodoState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<TodoState> {
     return {
-      storeName: 'TodoStore'
+      storeName: 'TodoStore',
+      comparator: (a, b) => a === b,
     };
   }
 

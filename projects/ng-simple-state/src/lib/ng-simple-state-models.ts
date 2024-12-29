@@ -7,7 +7,7 @@ export type NgSimpleStateComparator<K> = (previous: K, current: K) => boolean;
 /**
  * NgSimpleState config option
  */
-export interface NgSimpleStateConfig {
+export interface NgSimpleStateConfig<K = any> {
     /**
      * if `true` enable `Redux DevTools` browser extension for inspect the state of the store.
      */
@@ -23,13 +23,13 @@ export interface NgSimpleStateConfig {
     /**
      * A function used to compare the previous and current state for equality. 
      */
-    comparator?: <K>(previous: K, current: K) => boolean;
+    comparator?: (previous: K, current: K) => boolean;
 }
 
 /**
  * NgSimpleState config option for store
  */
-export interface NgSimpleStateStoreConfig extends NgSimpleStateConfig {
+export interface NgSimpleStateStoreConfig<K = any> extends NgSimpleStateConfig<K> {
     /** 
      * The store name 
      */
