@@ -8,10 +8,12 @@
   />
 
   <ul class="search-result">
-    <li *ngFor="let hero of heroes$ | async">
-      <a routerLink="/tour/detail/{{ hero.id }}">
-        {{ hero.name }}
-      </a>
-    </li>
+    @for(hero of heroes$ | async; track hero.id){
+      <li>
+        <a routerLink="/tour/detail/{{ hero.id }}">
+          {{ hero.name }}
+        </a>
+      </li>
+    }
   </ul>
 </div>

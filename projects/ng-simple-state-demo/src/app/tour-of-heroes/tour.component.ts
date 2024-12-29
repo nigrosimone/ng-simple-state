@@ -9,5 +9,5 @@ import { RouterModule } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TourComponent {
-  title = 'Tour of Heroes';
+
 }
