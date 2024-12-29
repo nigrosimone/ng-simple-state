@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from '../../../../ng-simple-state/src/public-api';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig, stateComparator } from '../../../../ng-simple-state/src/public-api';
 
 export interface Todo {
   id: number;
@@ -15,7 +15,7 @@ export class TodoStore extends NgSimpleStateBaseSignalStore<TodoState> {
   storeConfig(): NgSimpleStateStoreConfig<TodoState> {
     return {
       storeName: 'TodoStore',
-      comparator: (a, b) => a === b,
+      comparator: stateComparator,
     };
   }
 

@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './signal/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './ng-simple-state-models';
 import { provideNgSimpleState } from './ng-simple-state-provider';
+import { stateComparator } from './ng-simple-state-utils';
 
 export interface CounterState {
     count: number;
@@ -45,15 +46,15 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
     beforeEach(() => {
         const injector = TestBed.configureTestingModule({
             providers: [
-              provideNgSimpleState({
-                enableDevTool: false,
-                enableLocalStorage: false,
-                comparator: (previous, current) => previous === current,
-              }),
-              CounterStore
+                provideNgSimpleState({
+                    enableDevTool: false,
+                    enableLocalStorage: false,
+                    comparator: (previous, current) => previous === current,
+                }),
+                CounterStore
             ]
-          });
-          service = injector.inject(CounterStore);
+        });
+        service = injector.inject(CounterStore);
     });
 
 
@@ -79,5 +80,24 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
         expect(value()).toEqual({ count: 0 });
         expect(service.getFirstState()).toEqual({ count: 1 });
         expect(service.getCurrentState()).toEqual({ count: 0 });
+    });
+});
+
+describe('NgSimpleStateUtils: stateComparator', () => {
+    it('stateComparator: should be equal', () => {
+        expect(stateComparator(1, 1)).toBeTrue();
+        expect(stateComparator([1], [1])).toBeTrue();
+        expect(stateComparator({ a: 1 }, { a: 1 })).toBeTrue();
+        expect(stateComparator([{ a: 1 }], [{ a: 1 }])).toBeTrue();
+        expect(stateComparator({ a: [1] }, { a: [1] })).toBeTrue();
+        expect(stateComparator({ a: [{ a: 1 }] }, { a: [{ a: 1 }] })).toBeTrue();
+    });
+    it('stateComparator: should be not equal', () => {
+        expect(stateComparator(1, 2)).toBeFalse();
+        expect(stateComparator([1], [2])).toBeFalse();
+        expect(stateComparator({ a: 1 }, { a: 2 })).toBeFalse();
+        expect(stateComparator([{ a: 1 }], [{ a: 2 }])).toBeFalse();
+        expect(stateComparator({ a: [1] }, { a: [2] })).toBeFalse();
+        expect(stateComparator({ a: [{ a: 1 }] }, { a: [{ a: 2 }] })).toBeFalse();
     });
 });
