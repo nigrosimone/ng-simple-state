@@ -66,7 +66,7 @@ export class HeroService extends NgSimpleStateBaseRxjsStore<HeroState> {
   deleteHero(id: number) {
     this.setState((state) => ({
       ...state,
-      heroes: [...state.heroes.filter((h) => h.id !== id)],
+      heroes: state.heroes.filter((h) => h.id !== id),
     }));
   }
 
