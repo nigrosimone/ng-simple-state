@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { TestComponent } from './component/test.component';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -15,17 +14,13 @@ import { RouterModule } from '@angular/router';
       </ul>
   </nav>
   <router-outlet></router-outlet>
-  
-  <br /><br /><br />
-  <ng-test></ng-test><br />
-  <ng-test></ng-test><br />
-  <ng-test></ng-test><br />`,
+  `,
   imports: [
-    TestComponent,
     FormsModule,
     CommonModule,
     RouterModule
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
 

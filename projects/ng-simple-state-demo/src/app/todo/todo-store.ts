@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig, stateComparator } from '../../../../ng-simple-state/src/public-api';
+import {
+  NgSimpleStateBaseRxjsStore,
+  NgSimpleStateStoreConfig,
+  stateComparator
+} from 'projects/ng-simple-state/src/public-api';
 
 export interface Todo {
   id: number;
@@ -10,32 +14,35 @@ export interface Todo {
 export type TodoState = Array<Todo>;
 
 @Injectable()
-export class TodoStore extends NgSimpleStateBaseSignalStore<TodoState> {
-
-  storeConfig(): NgSimpleStateStoreConfig<TodoState> {
+export class TodoStore extends NgSimpleStateBaseRxjsStore<TodoState> {
+  storeConfig(): NgSimpleStateStoreConfig {
     return {
       storeName: 'TodoStore',
-      comparator: stateComparator,
+      comparator: stateComparator
     };
   }
 
   initialState(): TodoState {
-    return [];
+    return [
+      { id: 0, name: 'foo', completed: false },
+      { id: 1, name: 'bar', completed: true },
+    ];
   }
 
-  add(name: string): void {
-    this.setState(state => [...state, { name, completed: false, id: Date.now() }]);
+  add(name: string, completed: boolean = false): void {
+    this.setState((state) => [
+      ...state,
+      { name, completed, id: state.length + 1 },
+    ]);
   }
 
   delete(id: number): void {
-    this.setState(state => state.filter(item => item.id !== id));
+    this.setState((state) => state.filter((item) => item.id !== id));
   }
 
   setComplete(id: number, completed: boolean = true): void {
-    this.setState(state => state.map(item => item.id === id ? { ...item, completed } : item));
-  }
-
-  trackBy(index: number, item: Todo): number {
-    return item.id;
+    this.setState((state) =>
+      state.map((item) => (item.id === id ? { ...item, completed } : item))
+    );
   }
 }

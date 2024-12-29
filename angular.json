@@ -47,7 +47,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "sass"
+          "style": "scss"
         },
         "@schematics/angular:application": {
           "strict": true
@@ -68,13 +68,13 @@
               "projects/ng-simple-state-demo/src/polyfills.ts"
             ],
             "tsConfig": "projects/ng-simple-state-demo/tsconfig.app.json",
-            "inlineStyleLanguage": "sass",
+            "inlineStyleLanguage": "scss",
             "assets": [
               "projects/ng-simple-state-demo/src/favicon.ico",
               "projects/ng-simple-state-demo/src/assets"
             ],
             "styles": [
-              "projects/ng-simple-state-demo/src/styles.sass"
+              "projects/ng-simple-state-demo/src/styles.scss"
             ],
             "scripts": [],
             "browser": "projects/ng-simple-state-demo/src/main.ts"
@@ -135,13 +135,13 @@
             "polyfills": "projects/ng-simple-state-demo/src/polyfills.ts",
             "tsConfig": "projects/ng-simple-state-demo/tsconfig.spec.json",
             "karmaConfig": "projects/ng-simple-state-demo/karma.conf.js",
-            "inlineStyleLanguage": "sass",
+            "inlineStyleLanguage": "scss",
             "assets": [
               "projects/ng-simple-state-demo/src/favicon.ico",
               "projects/ng-simple-state-demo/src/assets"
             ],
             "styles": [
-              "projects/ng-simple-state-demo/src/styles.sass"
+              "projects/ng-simple-state-demo/src/styles.scss"
             ],
             "scripts": []
           }
