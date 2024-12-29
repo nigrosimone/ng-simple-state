@@ -10,7 +10,8 @@ if (!isDevMode()) {
 
 const routes: Routes = [
   { path: 'todo', loadChildren: () => import('./app/todo/todo-routing').then(m => m.routes) },
-  { path: 'counter', loadChildren: () => import('./app/counter/counter-routing').then(m => m.routes) }
+  { path: 'counter', loadChildren: () => import('./app/counter/counter-routing').then(m => m.routes) },
+  { path: 'tour', loadChildren: () => import('./app/tour-of-heroes/tour-routing').then(m => m.routes) },
 ];
 
 bootstrapApplication(AppComponent, {
