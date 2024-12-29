@@ -15,7 +15,7 @@ export type TodoState = Array<Todo>;
 
 @Injectable()
 export class TodoStore extends NgSimpleStateBaseRxjsStore<TodoState> {
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<TodoState> {
     return {
       storeName: 'TodoStore',
       comparator: stateComparator
