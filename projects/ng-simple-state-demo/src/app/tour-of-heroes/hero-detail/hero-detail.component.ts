@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  inject,
   model,
   signal,
 } from '@angular/core';
@@ -19,14 +20,12 @@ import { HeroService } from '../hero.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeroDetailComponent implements OnInit {
+  private readonly heroService = inject(HeroService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
+
   hero = signal<Hero | undefined>(undefined);
   name = model<string>('');
-
-  constructor(
-    private route: ActivatedRoute,
-    private heroService: HeroService,
-    private location: Location
-  ) {}
 
   ngOnInit(): void {
     this.getHero();

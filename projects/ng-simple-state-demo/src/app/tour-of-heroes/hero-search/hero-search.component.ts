@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { Hero } from '../hero';
@@ -14,10 +14,9 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeroSearchComponent implements OnInit {
-  heroes$!: Observable<Hero[]>;
+  private readonly heroService = inject(HeroService);
+  public heroes$!: Observable<Hero[]>;
   private searchTerms = new Subject<string>();
-
-  constructor(private heroService: HeroService) {}
 
   // Push a search term into the observable stream.
   search(term: string): void {

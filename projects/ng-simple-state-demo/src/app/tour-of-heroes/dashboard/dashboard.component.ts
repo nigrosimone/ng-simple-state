@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Hero } from '../hero';
 import { HeroService } from '../hero.service';
@@ -14,7 +14,6 @@ import { RouterModule } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {
-  public heroes$: Observable<Hero[]> = this.heroService.getHeroes();
-
-  constructor(private heroService: HeroService) {}
+  private readonly heroService = inject(HeroService);
+  public readonly heroes$: Observable<Hero[]> = this.heroService.getHeroes();
 }
