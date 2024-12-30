@@ -11,7 +11,6 @@ import { CommonModule } from '@angular/common';
   templateUrl: './hero-search.component.html',
   styleUrls: ['./hero-search.component.css'],
   imports: [RouterModule, CommonModule],
-  providers: [HeroService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeroSearchComponent implements OnInit {

@@ -10,7 +10,6 @@ import { RouterModule } from '@angular/router';
   templateUrl: './heroes.component.html',
   styleUrls: ['./heroes.component.css'],
   imports: [CommonModule, RouterModule],
-  providers: [HeroService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeroesComponent {

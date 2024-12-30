@@ -11,7 +11,6 @@ import { RouterModule } from '@angular/router';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
   imports: [HeroSearchComponent, CommonModule, RouterModule],
-  providers: [HeroService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {

@@ -16,7 +16,6 @@ import { HeroService } from '../hero.service';
   templateUrl: './hero-detail.component.html',
   styleUrls: ['./hero-detail.component.css'],
   imports: [CommonModule, FormsModule],
-  providers: [HeroService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeroDetailComponent implements OnInit {

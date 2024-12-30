@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { HeroService } from './tour-of-heroes/hero.service';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -22,6 +23,7 @@ import { RouterModule } from '@angular/router';
     CommonModule,
     RouterModule
   ],
+  providers: [HeroService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {

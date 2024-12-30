@@ -8,7 +8,7 @@ export interface HeroState {
   heroes: Array<Hero>;
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class HeroService extends NgSimpleStateBaseRxjsStore<HeroState> {
   storeConfig(): NgSimpleStateStoreConfig<HeroState> {
     return {
