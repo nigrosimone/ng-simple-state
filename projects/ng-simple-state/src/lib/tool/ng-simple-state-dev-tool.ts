@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 
 interface DevtoolsLocal {
     init: (state: object) => void;
@@ -26,13 +26,13 @@ export class NgSimpleStateDevTool {
     private isActiveDevtool = false;
     private baseState: Record<string, object> = {};
 
-    constructor(ngZone: NgZone) {
+    constructor() {
         if (this.globalDevtools) {
             // The `connect` method adds `message` event listener since it communicates
             // with an extension through `window.postMessage` and message events.
             // We handle only 2 events; thus, we don't want to run many change detections
             // because the extension sends events that we don't have to handle.
-            ngZone.runOutsideAngular(() => {
+            inject(NgZone).runOutsideAngular(() => {
                 this.localDevTool = this.globalDevtools.connect({
                     name: 'NgSimpleState',
                     instanceId: instanceId
