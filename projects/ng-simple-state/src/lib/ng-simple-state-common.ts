@@ -5,6 +5,8 @@ import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-stora
 import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, NgSimpleStateSetState, NgSimpleStateComparator, NgSimpleStateSelectState } from './ng-simple-state-models';
 import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
 
+export type StateFnOrNewState<S> = Partial<S> | NgSimpleStateSetState<S>;
+
 @Injectable()
 @Directive()
 export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> implements OnDestroy {
@@ -97,7 +99,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @returns True if the state is changed
      */
     abstract setState(newState: Partial<S>, actionName?: string): boolean;
-    
+
     /**
      * Set a new state
      * @param selectFn State reducer
@@ -140,11 +142,32 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
     /**
      * Set a new state
+     * @param newState New state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns state
+     */
+    protected patchState(currState: S, newState: Partial<S>, actionName?: string): S | undefined;
+    /**
+     * Set a new state
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
      */
-    protected patchState(currState: S, newState: Partial<S>, actionName?: string): S | undefined {
+    protected patchState(currState: S, stateFn: NgSimpleStateSetState<S>, actionName?: string): S | undefined;
+    /**
+     * Set a new state
+     * @param stateFnOrNewState State reducer or new state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns state
+     */
+    protected patchState(currState: S, stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined;
+    protected patchState(currState: S, stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined {
+        let newState: Partial<S>;
+        if (typeof stateFnOrNewState === 'function') {
+            newState = stateFnOrNewState(currState);
+        } else {
+            newState = stateFnOrNewState;
+        }
         let state: S;
         if (this.isArray) {
             state = Object.assign([] as S, newState);

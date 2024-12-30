@@ -1,5 +1,5 @@
 import { Injectable, Directive, Signal, signal, computed, WritableSignal } from '@angular/core';
-import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
+import { NgSimpleStateBaseCommonStore, StateFnOrNewState } from '../ng-simple-state-common';
 import { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState } from '../ng-simple-state-models';
 
 @Injectable()
@@ -58,15 +58,9 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * @returns True if the state is changed
      */
     setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
-    setState(stateFnOrNewState: NgSimpleStateSetState<S> | Partial<S>, actionName?: string): boolean {
+    setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): boolean {
         const currState = this.getCurrentState();
-        let newState: Partial<S>;
-        if (typeof stateFnOrNewState === 'function') {
-            newState = stateFnOrNewState(currState);
-        } else {
-            newState = stateFnOrNewState;
-        }
-        const state = this.patchState(currState, newState, actionName);
+        const state = this.patchState(currState, stateFnOrNewState, actionName);
         if (typeof state !== 'undefined') {
             this.stateSig.set(state);
             return true;
