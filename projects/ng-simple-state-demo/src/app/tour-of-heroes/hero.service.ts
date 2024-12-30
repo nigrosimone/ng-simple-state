@@ -4,9 +4,7 @@ import { Hero } from './hero';
 import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig, stateComparator } from 'projects/ng-simple-state/src/public-api';
 
 
-export interface HeroState {
-  heroes: Array<Hero>;
-}
+export type HeroState = Array<Hero>;
 
 const HEROES = [
   'Dr. Nice',
@@ -30,25 +28,23 @@ export class HeroService extends NgSimpleStateBaseRxjsStore<HeroState> {
   }
 
   initialState(): HeroState {
-    return {
-      heroes: HEROES.map((name, id) => ({ id, name })),
-    };
+    return HEROES.map((name, id) => ({ id, name }));
   }
 
   /** heroes */
   getHeroes(): Observable<Hero[]> {
-    return this.selectState((state) => state.heroes);
+    return this.selectState();
   }
 
   /** hero by id */
   getHero(id: number): Observable<Hero | undefined> {
-    return this.selectState((state) => state.heroes.find((h) => h.id === id));
+    return this.selectState((state) => state.find((h) => h.id === id));
   }
 
   /* heroes whose name contains search term */
   searchHeroes(term: string): Observable<Hero[]> {
     return this.selectState((state) =>
-      state.heroes.filter((h) =>
+      state.filter((h) =>
         h.name.toLowerCase().includes(term.toLowerCase())
       )
     );
@@ -58,34 +54,25 @@ export class HeroService extends NgSimpleStateBaseRxjsStore<HeroState> {
 
   /** add a new hero */
   addHero(name: string) {
-    this.setState((state) => ({
-      ...state,
-      heroes: [...state.heroes, { name: name, id: state.heroes.length }],
-    }));
+    this.setState((state) => ([...state, { name: name, id: state.length }]));
   }
 
   /** delete the hero */
   deleteHero(id: number) {
-    this.setState((state) => ({
-      ...state,
-      heroes: state.heroes.filter((h) => h.id !== id),
-    }));
+    this.setState((state) => (state.filter((h) => h.id !== id)));
   }
 
   /** update the hero */
   updateHero(hero: Hero) {
     this.setState((state) => {
-      const newHeroes = [...state.heroes];
+      const newHeroes = [...state];
       const idx = newHeroes.findIndex((h) => h.id === hero.id);
       if (idx !== -1) {
         newHeroes.splice(idx, 1, hero);
       } else {
         newHeroes.push(hero);
       }
-      return {
-        ...state,
-        heroes: newHeroes,
-      };
+      return newHeroes;
     });
   }
 }
