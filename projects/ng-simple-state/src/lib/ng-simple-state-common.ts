@@ -59,7 +59,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.firstState = this.initialState();
         }
 
-        this.devToolSend(this.firstState, `initialState`);
+        this.devToolSend(this.firstState, 'initialState');
 
         this.isArray = Array.isArray(this.firstState);
     }
