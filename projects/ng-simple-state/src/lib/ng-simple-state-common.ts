@@ -88,8 +88,16 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @returns Observable of the selected state
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    abstract selectState<K>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): any;
+    abstract selectState<K = Partial<S>>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): any;
 
+    /**
+     * Set a new state
+     * @param newState New state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    abstract setState(newState: Partial<S>, actionName?: string): boolean;
+    
     /**
      * Set a new state
      * @param selectFn State reducer

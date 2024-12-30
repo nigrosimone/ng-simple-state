@@ -81,6 +81,14 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
         expect(service.getFirstState()).toEqual({ count: 1 });
         expect(service.getCurrentState()).toEqual({ count: 0 });
     });
+
+    it('decrement -> setState', () => {
+        expect(service.setState({ count: 9 })).toBeTrue();
+        const value = service.selectState()
+        expect(value()).toEqual({ count: 9 });
+        expect(service.getFirstState()).toEqual({ count: 1 });
+        expect(service.getCurrentState()).toEqual({ count: 9 });
+    });
 });
 
 describe('NgSimpleStateUtils: stateComparator', () => {

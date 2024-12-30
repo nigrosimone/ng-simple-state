@@ -41,7 +41,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
      * @returns Observable of the selected state
      */
-    selectState<K>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Observable<K> {
+    selectState<K = Partial<S>>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Observable<K> {
         selectFn ??= this.selectFn.bind(this);
         return this.state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
@@ -60,13 +60,27 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
 
     /**
      * Set a new state
+     * @param newState New state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    setState(newState: Partial<S>, actionName?: string): boolean;
+    /**
+     * Set a new state
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
-    setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean {
+    setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
+    setState(stateFnOrNewState: NgSimpleStateSetState<S> | Partial<S>, actionName?: string): boolean {
         const currState = this.getCurrentState();
-        const state = this.patchState(currState, stateFn(currState), actionName);
+        let newState: Partial<S>;
+        if (typeof stateFnOrNewState === 'function') {
+            newState = stateFnOrNewState(currState);
+        } else {
+            newState = stateFnOrNewState;
+        }
+        const state = this.patchState(currState, newState, actionName);
         if (typeof state !== 'undefined') {
             this.state$.next(state);
             return true;
