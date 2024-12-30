@@ -12,6 +12,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     protected stackPoint: number = 4;
     private readonly state$: BehaviorSubject<S>;
     private readonly stateObs: Observable<S>;
+    private readonly selectFnRef = this.selectFn.bind(this);
 
     /**
      * Return the observable of the state
@@ -42,7 +43,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @returns Observable of the selected state
      */
     selectState<K = Partial<S>>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Observable<K> {
-        selectFn ??= this.selectFn.bind(this);
+        selectFn ??= this.selectFnRef;
         return this.state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
             distinctUntilChanged(comparator ?? this.comparator),
