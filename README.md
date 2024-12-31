@@ -418,12 +418,16 @@ import { Todo, TodoStore } from './todo-store';
   template: `
     <input #newTodo> <button (click)="todoStore.add({name: newTodo.value, completed: false})">Add todo</button>
     <ol>
-        <li *ngFor="let todo of todoList$ | async">
-            <ng-container *ngIf="todo.completed">✅</ng-container> 
+      @for(todo of todoList$ | async; track todo.id) {
+        <li>
+            @if(todo.completed) {
+              ✅
+            } 
             {{ todo.name }} 
             <button (click)="todoStore.setComplete(todo.id, !todo.completed)">Mark as {{ todo.completed ? 'Not completed' : 'Completed' }}</button> 
             <button (click)="todoStore.delete(todo.id)">Delete</button>
         </li>
+      }
     </ol>
   `,
   providers: [TodoStore]
@@ -859,12 +863,16 @@ import { Todo, TodoStore } from './todo-store';
   template: `
     <input #newTodo> <button (click)="todoStore.add({name: newTodo.value, completed: false})">Add todo</button>
     <ol>
-        <li *ngFor="let todo of todoListSig()">
-            <ng-container *ngIf="todo.completed">✅</ng-container> 
+      @for(todo of todoListSig() | async; track todo.id) {
+        <li>
+            @if(todo.completed) {
+              ✅
+            }
             {{ todo.name }} 
             <button (click)="todoStore.setComplete(todo.id, !todo.completed)">Mark as {{ todo.completed ? 'Not completed' : 'Completed' }}</button> 
             <button (click)="todoStore.delete(todo.id)">Delete</button>
         </li>
+      }
     </ol>
   `,
   providers: [TodoStore]
