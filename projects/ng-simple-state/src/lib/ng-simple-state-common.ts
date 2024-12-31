@@ -178,6 +178,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         } else {
             state = Object.assign({}, currState, newState);
         }
+        if (this.comparator && this.comparator(currState, newState)) {
+            return undefined;
+        }
         this.devToolSend(state, actionName);
         this.statePersist(state);
         return state;
@@ -205,7 +208,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
                     ?.trim()
                     ?.split(' ')[1]
                     ?.split('.')[1] || 'unknown';
-            /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+                /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
             } catch (_) {
                 actionName = 'unknown';
             }
