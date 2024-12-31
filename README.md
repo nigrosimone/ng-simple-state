@@ -99,7 +99,7 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'CounterStore'
     };
@@ -128,7 +128,7 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'CounterStore'
     };
@@ -160,7 +160,7 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'CounterStore'
     };
@@ -256,7 +256,7 @@ export class CounterComponent extends NgSimpleStateBaseRxjsStore<CounterState> {
 
     public counter$: Observable<number> = this.selectState(state => state.count);
 
-    storeConfig(): NgSimpleStateStoreConfig {
+    storeConfig(): NgSimpleStateStoreConfig<CounterState> {
       return {
         storeName: 'CounterComponent'
       };
@@ -290,7 +290,7 @@ import { NgSimpleStateStoreConfig } from 'ng-simple-state';
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
-  override storeConfig(): NgSimpleStateStoreConfig {
+  override storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       enableLocalStorage: true, // enable local storage for this store
       persistentStorage: 'session', // persistentStorage can be 'session' or 'local' (default is localStorage)
@@ -382,7 +382,7 @@ export type TodoState = Array<Todo>;
 @Injectable()
 export class TodoStore extends NgSimpleStateBaseRxjsStore<TodoState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'TodoStore'
     };
@@ -472,7 +472,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * Override this method for set a specific config for the store
      * @returns NgSimpleStateStoreConfig
      */
-    storeConfig(): NgSimpleStateStoreConfig;
+    storeConfig(): NgSimpleStateStoreConfig<S>;
 
     /**
      * Set into the store the initial state
@@ -553,7 +553,7 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'CounterStore'
     };
@@ -581,7 +581,7 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'CounterStore'
     };
@@ -612,7 +612,7 @@ export interface CounterState {
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'CounterStore'
     };
@@ -705,7 +705,7 @@ export class CounterComponent extends NgSimpleStateBaseSignalStore<CounterState>
 
     public counterSig: Signal<number> = this.selectState(state => state.count);
 
-    storeConfig(): NgSimpleStateStoreConfig {
+    storeConfig(): NgSimpleStateStoreConfig<CounterState> {
       return {
         storeName: 'CounterComponent'
       };
@@ -739,7 +739,7 @@ import { NgSimpleStateStoreConfig } from 'ng-simple-state';
 @Injectable()
 export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
-  override storeConfig(): NgSimpleStateStoreConfig {
+  override storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       enableLocalStorage: true, // enable local storage for this store
       persistentStorage: 'session', // persistentStorage can be 'session' or 'local' (default is localStorage)
@@ -827,7 +827,7 @@ export type TodoState = Array<Todo>;
 @Injectable()
 export class TodoStore extends NgSimpleStateBaseSignalStore<TodoState> {
 
-  storeConfig(): NgSimpleStateStoreConfig {
+  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'TodoStore'
     };
@@ -916,7 +916,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * Override this method for set a specific config for the store
      * @returns NgSimpleStateStoreConfig
      */
-    storeConfig(): NgSimpleStateStoreConfig;
+    storeConfig(): NgSimpleStateStoreConfig<S>;
 
     /**
      * Set into the store the initial state
