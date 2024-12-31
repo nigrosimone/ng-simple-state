@@ -23,7 +23,6 @@ export class NgSimpleStateDevTool {
 
     private globalDevtools: Devtools = window.__REDUX_DEVTOOLS_EXTENSION__ || window.devToolsExtension;
     private localDevTool!: DevtoolsLocal;
-    private isActiveDevtool = false;
     private baseState: Record<string, object> = {};
 
     constructor() {
@@ -37,8 +36,7 @@ export class NgSimpleStateDevTool {
                     name: 'NgSimpleState',
                     instanceId: instanceId
                 });
-                this.isActiveDevtool = !!this.localDevTool;
-                if (this.isActiveDevtool) {
+                if (this.localDevTool) {
                     this.localDevTool.init(this.baseState);
                 }
             });
@@ -50,7 +48,7 @@ export class NgSimpleStateDevTool {
      * @returns True if dev tool is active
      */
     isActive(): boolean {
-        return this.isActiveDevtool;
+        return !!this.localDevTool;
     }
 
     /**
@@ -61,7 +59,7 @@ export class NgSimpleStateDevTool {
      * @returns True if dev tool is enabled and action is send
      */
     send<T>(storeName: string, actionName: string, state: T): boolean {
-        if (this.isActiveDevtool && this.localDevTool) {
+        if (this.localDevTool) {
             this.localDevTool.send<T>(`${storeName}.${actionName}`, Object.assign(this.baseState, { [storeName]: state }), false, instanceId);
             return true;
         }

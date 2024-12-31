@@ -2,19 +2,7 @@ export const BASE_KEY = 'NgSimpleState::';
 
 export abstract class NgSimpleStateBrowserStorage {
 
-    private isStorageActive = false;
-
-    constructor(private storage: Storage) {
-        this.isStorageActive = !!storage;
-    }
-
-    /**
-     * Return true if storage is active
-     * @returns True if storage is active
-     */
-    isActive(): boolean {
-        return this.isStorageActive;
-    }
+    constructor(private storage: Storage) { }
 
     /**
      * Set item into storage
@@ -23,11 +11,8 @@ export abstract class NgSimpleStateBrowserStorage {
      * @returns True if item is stored into storage
      */
     setItem<K>(key: string, state: K): boolean {
-        if (this.isStorageActive) {
-            this.storage.setItem(BASE_KEY + key, JSON.stringify(state));
-            return true;
-        }
-        return false;
+        this.storage.setItem(BASE_KEY + key, JSON.stringify(state));
+        return true;
     }
 
     /**
@@ -36,11 +21,9 @@ export abstract class NgSimpleStateBrowserStorage {
      * @returns the item
      */
     getItem<K>(key: string): K | null {
-        if (this.isStorageActive) {
-            const state = this.storage.getItem(BASE_KEY + key);
-            if (state) {
-                return JSON.parse(state);
-            }
+        const state = this.storage.getItem(BASE_KEY + key);
+        if (state) {
+            return JSON.parse(state);
         }
         return null;
     }
@@ -51,11 +34,8 @@ export abstract class NgSimpleStateBrowserStorage {
      * @returns True if item is removed
      */
     removeItem(key: string): boolean {
-        if (this.isStorageActive) {
-            this.storage.removeItem(BASE_KEY + key);
-            return true;
-        }
-        return false;
+        this.storage.removeItem(BASE_KEY + key);
+        return true;
     }
 
     /**
@@ -63,15 +43,12 @@ export abstract class NgSimpleStateBrowserStorage {
      * @returns True if storage is cleared
      */
     clear(): boolean {
-        if (this.isStorageActive) {
-            for (let i = this.storage.length; i >= 0; i--) {
-                const key = this.storage.key(i);
-                if (key && key.startsWith(BASE_KEY)) {
-                    this.storage.removeItem(key);
-                }
+        for (let i = this.storage.length; i >= 0; i--) {
+            const key = this.storage.key(i);
+            if (key && key.startsWith(BASE_KEY)) {
+                this.storage.removeItem(key);
             }
-            return true;
         }
-        return false;
+        return true;
     }
 }

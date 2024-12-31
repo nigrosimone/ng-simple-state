@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
+import { provideNgSimpleState } from '../ng-simple-state-provider';
+import { NgZone } from '@angular/core';
 
 export class DevToolsExtension {
     name: string | null = null;
@@ -24,7 +27,14 @@ describe('NgSimpleStateDevTool', () => {
 
     it('enableDevTool active', () => {
         (window as any)['devToolsExtension'] = new DevToolsExtension();
-        const service = new NgSimpleStateDevTool({runOutsideAngular: (cbk: any) => cbk() } as any);
+
+        TestBed.configureTestingModule({
+            providers: [provideNgSimpleState({ enableDevTool: true })]
+        });
+        const ngZone = TestBed.inject(NgZone);
+        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        const service = TestBed.inject(NgSimpleStateDevTool);
+
         expect(service.isActive()).toBe(true);
         expect(service.send('test', 'test1', 'test2')).toBe(true);
         expect((window as any)['devToolsExtension'].name).toBe('test.test1');
@@ -33,7 +43,14 @@ describe('NgSimpleStateDevTool', () => {
 
     it('no devToolsExtension', () => {
         (window as any)['devToolsExtension'] = null;
-        const service = new NgSimpleStateDevTool({runOutsideAngular: (cbk: any) => cbk() } as any);
+
+        TestBed.configureTestingModule({
+            providers: [provideNgSimpleState({ enableDevTool: true })]
+        });
+        const ngZone = TestBed.inject(NgZone);
+        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        const service = TestBed.inject(NgSimpleStateDevTool);
+
         service.send('test', 'test', 'test');
         expect(service.send('test', 'test', 'test')).toBe(false);
         expect(service.isActive()).toBe(false);
@@ -48,7 +65,14 @@ describe('NgSimpleStateDevTool', () => {
                 return null;
             }
         };
-        const service = new NgSimpleStateDevTool({runOutsideAngular: (cbk: any) => cbk() } as any);
+
+        TestBed.configureTestingModule({
+            providers: [provideNgSimpleState({ enableDevTool: true })]
+        });
+        const ngZone = TestBed.inject(NgZone);
+        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
         service.send('test', 'test', 'test');
         expect(service.send('test', 'test', 'test')).toBe(false);
         expect(service.isActive()).toBe(false);
