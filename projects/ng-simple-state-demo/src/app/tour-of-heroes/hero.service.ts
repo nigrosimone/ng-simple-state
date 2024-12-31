@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Hero } from './hero';
-import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig, stateComparator } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig, ngstStateComparator } from 'projects/ng-simple-state/src/public-api';
 
 
 export type HeroState = Array<Hero>;
@@ -23,7 +23,7 @@ export class HeroService extends NgSimpleStateBaseRxjsStore<HeroState> {
   storeConfig(): NgSimpleStateStoreConfig<HeroState> {
     return {
       storeName: 'HeroStore',
-      comparator: stateComparator
+      comparator: ngstStateComparator
     };
   }
 

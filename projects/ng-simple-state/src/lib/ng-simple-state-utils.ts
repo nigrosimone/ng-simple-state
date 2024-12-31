@@ -25,7 +25,7 @@
  * stateComparator(NaN, NaN); // true
  * stateComparator(/abc/i, /abc/i); // true
  */
-export function stateComparator<K>(a: K, b: K): boolean {
+export function ngstStateComparator<K>(a: K, b: K): boolean {
     if (a === b) return true;
 
     if (a && b && typeof a == 'object' && typeof b == 'object') {
@@ -37,7 +37,7 @@ export function stateComparator<K>(a: K, b: K): boolean {
             length = a.length;
             if (length !== b.length) return false;
             for (i = length; i-- !== 0;)
-                if (!stateComparator(a[i], b[i])) return false;
+                if (!ngstStateComparator(a[i], b[i])) return false;
             return true;
         }
 
@@ -54,7 +54,7 @@ export function stateComparator<K>(a: K, b: K): boolean {
 
         for (i = length; i-- !== 0;) {
             const key = keys[i];
-            if (!stateComparator((a as any)[key], (b as any)[key])) return false;
+            if (!ngstStateComparator((a as any)[key], (b as any)[key])) return false;
         }
 
         return true;

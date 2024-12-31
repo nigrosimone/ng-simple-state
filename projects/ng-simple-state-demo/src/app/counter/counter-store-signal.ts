@@ -1,5 +1,5 @@
 import { Injectable, Signal } from '@angular/core';
-import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig, stateComparator } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig, ngstStateComparator } from 'projects/ng-simple-state/src/public-api';
 import { CounterState } from './state-model';
 
 
@@ -8,7 +8,7 @@ export class CounterStoreSignal extends NgSimpleStateBaseSignalStore<CounterStat
   storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'CounterStoreSignal',
-      comparator: stateComparator
+      comparator: ngstStateComparator
     };
   }
 

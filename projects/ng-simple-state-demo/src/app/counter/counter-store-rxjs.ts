@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { CounterState } from './state-model';
-import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig, stateComparator } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig, ngstStateComparator } from 'projects/ng-simple-state/src/public-api';
 
 
 @Injectable()
@@ -9,7 +9,7 @@ export class CounterStoreRxjs extends NgSimpleStateBaseRxjsStore<CounterState> {
   storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       storeName: 'CounterStoreRxjs',
-      comparator: stateComparator,
+      comparator: ngstStateComparator,
     };
   }
 
