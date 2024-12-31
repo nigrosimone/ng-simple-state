@@ -22,7 +22,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
     protected comparator!: <S>(previous: S, current: S) => boolean;
-    protected globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true })
+    protected globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true });
 
     constructor() {
 
