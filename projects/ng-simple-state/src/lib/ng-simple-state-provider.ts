@@ -1,7 +1,7 @@
 import { EnvironmentProviders, makeEnvironmentProviders } from "@angular/core";
 import { NG_SIMPLE_STORE_CONFIG, NgSimpleStateConfig } from "./ng-simple-state-models";
 
-export function provideNgSimpleState(ngSimpleStateConfig?: NgSimpleStateConfig) {
+export function provideNgSimpleState(ngSimpleStateConfig?: NgSimpleStateConfig): EnvironmentProviders[] {
     const providers: EnvironmentProviders[] = [];
     if (ngSimpleStateConfig) {
         providers.push(makeEnvironmentProviders([{

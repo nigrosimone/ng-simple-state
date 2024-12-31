@@ -7,7 +7,7 @@ export function ngstStateComparator<K>(a: K, b: K): boolean {
         return true;
     }
 
-    if (a && b && typeof a == 'object' && typeof b == 'object') {
+    if (a && b && typeof a === 'object' && typeof b === 'object') {
         if (a.constructor !== b.constructor) {
             return false;
         }
@@ -61,4 +61,4 @@ export function ngstStateComparator<K>(a: K, b: K): boolean {
     }
 
     return a !== a && b !== b;
-};
+}
