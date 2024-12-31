@@ -240,7 +240,7 @@ export interface CounterState {
 }
 
 @Component({
-    selector: 'ng-counter',
+    selector: 'app-counter',
     template: `
         {{counter$ | async}}
         <button (click)="increment()">+</button>
@@ -684,7 +684,7 @@ export interface CounterState {
 }
 
 @Component({
-    selector: 'ng-counter',
+    selector: 'app-counter',
     template: `
         {{counterSig()}}
         <button (click)="increment()">+</button>
