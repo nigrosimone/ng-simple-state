@@ -2,7 +2,7 @@
  * Compares two values of type `K` to determine if they are equal.
  * This function performs a deep comparison for objects and arrays, and a shallow comparison for primitive values.
  */
-export function ngstStateComparator<K>(a: K, b: K): boolean {
+export function ngstStateComparator<K>(a: K, b: K, onlyJson = true): boolean {
     if (a === b) {
         return true;
     }
@@ -27,14 +27,61 @@ export function ngstStateComparator<K>(a: K, b: K): boolean {
             return true;
         }
 
-        if (a.constructor === RegExp && b.constructor === RegExp) {
-            return (a as RegExp).source === (b as RegExp).source && (a as RegExp).flags === (b as RegExp).flags;
-        }
-        if (a.valueOf !== Object.prototype.valueOf) {
-            return a.valueOf() === b.valueOf();
-        }
-        if (a.toString !== Object.prototype.toString) {
-            return a.toString() === b.toString();
+        if (!onlyJson) {
+            if ((a instanceof Map) && (b instanceof Map)) {
+                if (a.size !== b.size) {
+                    return false;
+                }
+                for (const i of a.entries()) {
+                    if (!b.has(i[0])) {
+                        return false;
+                    }
+                }
+                for (const i of a.entries()) {
+                    if (!ngstStateComparator(i[1], b.get(i[0]))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            if ((a instanceof Set) && (b instanceof Set)) {
+                if (a.size !== b.size) {
+                    return false;
+                }
+                for (const i of a.entries()) {
+                    if (!b.has(i[0])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
+                /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                length = (a as Array<any>).length;
+                /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                if (length !== (b as Array<any>).length) {
+                    return false;
+                }
+                for (i = length; i-- !== 0;) {
+                    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                    if ((a as Array<any>)[i] !== (b as Array<any>)[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            if (a.constructor === RegExp && b.constructor === RegExp) {
+                return (a as RegExp).source === (b as RegExp).source && (a as RegExp).flags === (b as RegExp).flags;
+            }
+            if (a.valueOf !== Object.prototype.valueOf && typeof a.valueOf === 'function' && typeof b.valueOf === 'function') {
+                return a.valueOf() === b.valueOf();
+            }
+            if (a.toString !== Object.prototype.toString && typeof a.toString === 'function' && typeof b.toString === 'function') {
+                return a.toString() === b.toString();
+            }
         }
 
         const keys = Object.keys(a);

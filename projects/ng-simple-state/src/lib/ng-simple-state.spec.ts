@@ -93,6 +93,11 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
 
 describe('NgSimpleStateUtils: stateComparator', () => {
     it('stateComparator: should be equal', () => {
+        expect(ngstStateComparator(BigInt(1), BigInt(1))).toBeTrue();
+        const aMap = new Map(); const bMap = new Map();
+        aMap.set('a', 1); bMap.set('a', 1);
+        expect(ngstStateComparator(aMap, bMap, false)).toBeTrue();
+        expect(ngstStateComparator(new Set([1]), new Set([1]), false)).toBeTrue();
         expect(ngstStateComparator(1, 1)).toBeTrue();
         expect(ngstStateComparator([1], [1])).toBeTrue();
         expect(ngstStateComparator({ a: 1 }, { a: 1 })).toBeTrue();
@@ -101,6 +106,11 @@ describe('NgSimpleStateUtils: stateComparator', () => {
         expect(ngstStateComparator({ a: [{ a: 1 }] }, { a: [{ a: 1 }] })).toBeTrue();
     });
     it('stateComparator: should be not equal', () => {
+        expect(ngstStateComparator(BigInt(1), BigInt(2))).toBeFalse();
+        const aMap = new Map(); const bMap = new Map();
+        aMap.set('a', 1); bMap.set('a', 2);
+        expect(ngstStateComparator(aMap, bMap, false)).toBeFalse();
+        expect(ngstStateComparator(new Set([1]), new Set([2]), false)).toBeFalse();
         expect(ngstStateComparator(1, 2)).toBeFalse();
         expect(ngstStateComparator([1], [2])).toBeFalse();
         expect(ngstStateComparator({ a: 1 }, { a: 2 })).toBeFalse();
