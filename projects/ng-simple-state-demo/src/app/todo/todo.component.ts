@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { Todo, TodoStore } from './todo-store';
 
 @Component({
+  /* eslint-disable-next-line @angular-eslint/component-selector */
   selector: 'app-todo',
   template: `
   <div class="header">

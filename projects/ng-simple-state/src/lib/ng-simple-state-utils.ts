@@ -54,6 +54,7 @@ export function ngstStateComparator<K>(a: K, b: K): boolean {
 
         for (i = length; i-- !== 0;) {
             const key = keys[i];
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             if (!ngstStateComparator((a as any)[key], (b as any)[key])) return false;
         }
 

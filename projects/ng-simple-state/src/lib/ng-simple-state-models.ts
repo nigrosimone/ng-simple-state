@@ -7,6 +7,7 @@ export type NgSimpleStateComparator<K> = (previous: K, current: K) => boolean;
 /**
  * NgSimpleState config option
  */
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export interface NgSimpleStateConfig<K = any> {
     /**
      * if `true` enable `Redux DevTools` browser extension for inspect the state of the store.
@@ -29,6 +30,7 @@ export interface NgSimpleStateConfig<K = any> {
 /**
  * NgSimpleState config option for store
  */
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export interface NgSimpleStateStoreConfig<K = any> extends NgSimpleStateConfig<K> {
     /** 
      * The store name 

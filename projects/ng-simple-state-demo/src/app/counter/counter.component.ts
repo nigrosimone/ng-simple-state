@@ -14,6 +14,7 @@ import { CounterState } from './state-model';
 
 
 @Component({
+  /* eslint-disable-next-line @angular-eslint/component-selector */
   selector: 'app-counter',
   template: `
     <!-- Signal version of the store -->

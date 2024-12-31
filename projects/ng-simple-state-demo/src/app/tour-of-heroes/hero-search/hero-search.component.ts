@@ -6,7 +6,9 @@ import { HeroService } from '../hero.service';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
+
 @Component({
+  /* eslint-disable-next-line @angular-eslint/component-selector */
   selector: 'app-hero-search',
   templateUrl: './hero-search.component.html',
   styleUrls: ['./hero-search.component.css'],

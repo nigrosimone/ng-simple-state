@@ -12,7 +12,9 @@ import { FormsModule } from '@angular/forms';
 import { Hero } from '../hero';
 import { HeroService } from '../hero.service';
 
+
 @Component({
+  /* eslint-disable-next-line @angular-eslint/component-selector */
   selector: 'app-hero-detail',
   templateUrl: './hero-detail.component.html',
   styleUrls: ['./hero-detail.component.css'],

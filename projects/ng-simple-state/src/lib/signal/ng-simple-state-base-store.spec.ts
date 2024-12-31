@@ -149,8 +149,7 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
 
 @Component({
     selector: 'ng-test',
-    template: `{{counter$()}}`,
-    standalone: false
+    template: `{{counter$()}}`
 })
 export class TestComponent extends NgSimpleStateBaseSignalStore<CounterState> {
 
