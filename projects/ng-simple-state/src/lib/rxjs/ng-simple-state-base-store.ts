@@ -93,7 +93,7 @@ export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> exte
     constructor() {
         super();
         if (this.devMode) {
-            console.warn('NgSimpleStateBaseStore is deprecated. Please use NgSimpleStateBaseRxjsStore')
+            console.warn('NgSimpleStateBaseStore is deprecated. Please use NgSimpleStateBaseRxjsStore');
         }
     }
 }
