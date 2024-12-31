@@ -204,7 +204,7 @@ export class AppComponent {
 #### Step 4: Use your store into the components, eg.:
 
 ```ts
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CounterStore } from './counter-store';
 
@@ -219,11 +219,8 @@ import { CounterStore } from './counter-store';
   `,
 })
 export class AppComponent {
-  public counter$: Observable<number>;
-
-  constructor(public counterStore: CounterStore) {
-    this.counter$ = this.counterStore.selectCount();
-  }
+  public counterStore = inject(CounterStore);
+  public counter$: Observable<number> = this.counterStore.selectCount();
 }
 ```
 
@@ -657,7 +654,7 @@ export class AppComponent {
 #### Step 4: Use your store into the components, eg.:
 
 ```ts
-import { Component, Signal } from '@angular/core';
+import { Component, Signal, inject } from '@angular/core';
 import { CounterStore } from './counter-store';
 
 @Component({
@@ -670,11 +667,8 @@ import { CounterStore } from './counter-store';
   `,
 })
 export class AppComponent {
-  public counterSig: Signal<number>;
-
-  constructor(public counterStore: CounterStore) {
-    this.counterSig = this.counterStore.selectCount();
-  }
+  public counterStore = inject(CounterStore);
+  public counterSig: Signal<number> = this.counterStore.selectCount();
 }
 ```
 
