@@ -1,12 +1,8 @@
-import { enableProdMode, isDevMode, provideExperimentalZonelessChangeDetection } from '@angular/core';
+import {isDevMode, provideExperimentalZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app/app.component';
-import { provideNgSimpleState } from 'projects/ng-simple-state/src/public-api';
+import { ngstStateComparator, provideNgSimpleState } from 'projects/ng-simple-state/src/public-api';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
-
-if (!isDevMode()) {
-  enableProdMode();
-}
 
 const routes: Routes = [
   { path: 'todo', loadChildren: () => import('./app/todo/todo-routing').then(m => m.routes) },
@@ -21,7 +17,8 @@ bootstrapApplication(AppComponent, {
     provideNgSimpleState({
       enableDevTool: isDevMode(),
       enableLocalStorage: true,
-      persistentStorage: 'local'
+      persistentStorage: 'local',
+      comparator: ngstStateComparator
     })
   ]
 });
