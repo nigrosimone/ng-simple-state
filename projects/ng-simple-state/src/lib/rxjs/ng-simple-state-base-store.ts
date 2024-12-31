@@ -23,7 +23,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     }
 
     constructor() {
-        super()
+        super();
         this.state$ = new BehaviorSubject<S>(this.selectFn(this.firstState));
         this.stateObs = this.state$.asObservable();
     }
