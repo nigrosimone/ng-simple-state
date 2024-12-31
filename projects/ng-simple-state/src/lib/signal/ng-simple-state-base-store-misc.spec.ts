@@ -17,7 +17,6 @@ export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
     override storeConfig(): NgSimpleStateStoreConfig {
         return {
             enableDevTool: true,
-            enableLocalStorage: true,
             storeName: 'storeName'
         };
     }
@@ -51,7 +50,6 @@ describe('NgSimpleStateBaseSignalStore misc 1', () => {
             providers: [
                 provideNgSimpleState({
                     enableDevTool: false,
-                    enableLocalStorage: false,
                     persistentStorage: 'local'
                 }),
                 CounterStore
@@ -106,7 +104,6 @@ describe('NgSimpleStateBaseSignalStore misc 2', () => {
             providers: [
                 provideNgSimpleState({
                     enableDevTool: false,
-                    enableLocalStorage: false,
                     persistentStorage: 'session'
                 }),
                 CounterStore

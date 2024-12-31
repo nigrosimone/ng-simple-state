@@ -14,10 +14,6 @@ export interface NgSimpleStateConfig<K = any> {
      */
     enableDevTool?: boolean;
     /**
-     * if `true` latest state of store is saved in local storage and reloaded on store initialization.
-     */
-    enableLocalStorage?: boolean;
-    /**
      * Set the persistent storage `local` or `session`.
      */
     persistentStorage?: 'session' | 'local';

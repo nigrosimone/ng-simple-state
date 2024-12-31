@@ -18,7 +18,6 @@ export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
     override storeConfig(): NgSimpleStateStoreConfig {
         return {
             enableDevTool: true,
-            enableLocalStorage: true,
             storeName: 'storeName',
             comparator: (previous, current) => previous === current,
         };
@@ -53,7 +52,6 @@ describe('NgSimpleStateBaseRxjsStore misc 1', () => {
             providers: [
                 provideNgSimpleState({
                     enableDevTool: false,
-                    enableLocalStorage: false,
                     persistentStorage: 'local'
                 }),
                 CounterStore
@@ -112,7 +110,6 @@ describe('NgSimpleStateBaseRxjsStore misc 2', () => {
             providers: [
                 provideNgSimpleState({
                     enableDevTool: false,
-                    enableLocalStorage: false,
                     persistentStorage: 'session'
                 }),
                 CounterStore

@@ -26,7 +26,6 @@ npm i ng-simple-state
 | Option               | Description                                                                                     | Default    |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
-| *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
 | *persistentStorage*  | Set the persistent storage `local` or `session`.                                                | `local`    |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
 
@@ -43,7 +42,6 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideNgSimpleState({
       enableDevTool: isDevMode(),
-      enableLocalStorage: true,
       persistentStorage: 'local'
     })
   ]
@@ -289,7 +287,6 @@ export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
 
   override storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
-      enableLocalStorage: true, // enable local storage for this store
       persistentStorage: 'session', // persistentStorage can be 'session' or 'local' (default is localStorage)
       storeName: 'CounterStore2', // For default the store name is the class name, you can set a specific name for this store (must be be unique)
     }
@@ -302,7 +299,6 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | Option               | Description                                                                                     | Default    |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
-| *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
 | *storeName*          | The name used into `Redux DevTools` and local storage key.                                      | Class name |
 | *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `local`    |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
@@ -325,8 +321,7 @@ describe('CounterStore', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNgSimpleState({
-          enableDevTool: false,
-          enableLocalStorage: false
+          enableDevTool: false
         }),
         CounterStore
       ]
@@ -456,7 +451,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
 
     /**
      * Reset store to first loaded store state:
-     *  - the last saved state, if `enableLocalStorage` config is `true`
+     *  - the last saved state
      *  - otherwise the initial state provided from `initialState()` method.
      */
     resetState(): boolean;
@@ -494,7 +489,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
 
     /**
      * Return the first loaded store state:
-     * the last saved state, if `enableLocalStorage` config is `true`;
+     * the last saved state
      * otherwise the initial state provided from `initialState()` method.
      * @returns The first state
      */
@@ -736,7 +731,6 @@ export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
 
   override storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
-      enableLocalStorage: true, // enable local storage for this store
       persistentStorage: 'session', // persistentStorage can be 'session' or 'local' (default is localStorage)
       storeName: 'CounterStore2', // For default the store name is the class name, you can set a specific name for this store (must be be unique)
     }
@@ -749,7 +743,6 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | Option               | Description                                                                                     | Default    |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
-| *enableLocalStorage* | if `true` latest state of store is saved in local storage and reloaded on store initialization. | `false`    |
 | *storeName*          | The name used into `Redux DevTools` and local storage key.                                      | Class name |
 | *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `local`    |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
@@ -771,8 +764,7 @@ describe('CounterStore', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNgSimpleState({
-          enableDevTool: false,
-          enableLocalStorage: false
+          enableDevTool: false
         }),
         CounterStore
       ]
@@ -898,7 +890,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
 
     /**
      * Reset store to first loaded store state:
-     *  - the last saved state, if `enableLocalStorage` config is `true`
+     *  - the last saved state
      *  - otherwise the initial state provided from `initialState()` method.
      */
     resetState(): boolean;
@@ -936,7 +928,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
 
     /**
      * Return the first loaded store state:
-     * the last saved state, if `enableLocalStorage` config is `true`;
+     * the last saved state
      * otherwise the initial state provided from `initialState()` method.
      * @returns The first state
      */

@@ -47,7 +47,6 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
             providers: [
                 provideNgSimpleState({
                     enableDevTool: false,
-                    enableLocalStorage: false,
                     comparator: (previous, current) => previous === current,
                 }),
                 CounterStore

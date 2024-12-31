@@ -17,7 +17,6 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes),
     provideNgSimpleState({
       enableDevTool: isDevMode(),
-      enableLocalStorage: true,
       persistentStorage: 'local',
       comparator: isEqual
     })

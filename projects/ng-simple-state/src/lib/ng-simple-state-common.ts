@@ -12,7 +12,6 @@ export type StateFnOrNewState<S> = Partial<S> | NgSimpleStateSetState<S>;
 export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> implements OnDestroy {
 
     protected abstract stackPoint: number;
-    protected localStorageIsEnabled: boolean;
     protected devToolIsEnabled: boolean;
     protected devTool!: NgSimpleStateDevTool;
     protected persistentStorage!: NgSimpleStateBrowserStorage;
@@ -29,14 +28,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         const storeConfig = this.storeConfig() || {};
         this.localStoreConfig = { ...this.globalConfig, ...storeConfig };
 
-        this.localStorageIsEnabled = this.localStoreConfig.enableLocalStorage ?? false;
-
-        if (this.localStorageIsEnabled) {
-            if (this.localStoreConfig.persistentStorage === 'local') {
-                this.persistentStorage = inject(NgSimpleStateLocalStorage);
-            } else if (this.localStoreConfig.persistentStorage === 'session') {
-                this.persistentStorage = inject(NgSimpleStateSessionStorage);
-            }
+        if (this.localStoreConfig.persistentStorage === 'local') {
+            this.persistentStorage = inject(NgSimpleStateLocalStorage);
+        } else if (this.localStoreConfig.persistentStorage === 'session') {
+            this.persistentStorage = inject(NgSimpleStateSessionStorage);
         }
 
         this.devToolIsEnabled = this.localStoreConfig.enableDevTool ?? false;
@@ -49,7 +44,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.comparator = this.localStoreConfig.comparator;
         }
 
-        if (this.localStorageIsEnabled && this.persistentStorage) {
+        if (this.persistentStorage) {
             const firstState = this.persistentStorage.getItem<S>(this.storeName);
             if (firstState) {
                 this.firstState = firstState;
@@ -116,7 +111,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
     /**
      * Return the first loaded store state:
-     * the last saved state, if `enableLocalStorage` config is `true`;
+     * the last saved state
      * otherwise the initial state provided from `initialState()` method.
      * @returns The first state
      */
@@ -126,7 +121,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
     /**
      * Reset store to first loaded store state:
-     *  - the last saved state, if `enableLocalStorage` config is `true`
+     *  - the last saved state
      *  - otherwise the initial state provided from `initialState()` method.
      */
     resetState(): boolean {
@@ -253,7 +248,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Persist state to storage
      */
     protected statePersist(state: S) {
-        if (this.localStorageIsEnabled && this.persistentStorage) {
+        if (this.persistentStorage) {
             this.persistentStorage.setItem<S>(this.storeName, state);
         }
     }
