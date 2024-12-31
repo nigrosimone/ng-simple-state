@@ -16,7 +16,7 @@ declare global {
     }
 }
 
-const instanceId = `ng-simple-state-${Date.now()}-${Math.random()}`
+const instanceId = `ng-simple-state-${Date.now()}-${Math.random()}`;
 
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateDevTool {
