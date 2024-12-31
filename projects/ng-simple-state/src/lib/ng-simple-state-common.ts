@@ -146,22 +146,23 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
      */
-    protected patchState(currState: S, newState: Partial<S>, actionName?: string): S | undefined;
+    protected patchState(newState: Partial<S>, actionName?: string): S | undefined;
     /**
      * Set a new state
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
      */
-    protected patchState(currState: S, stateFn: NgSimpleStateSetState<S>, actionName?: string): S | undefined;
+    protected patchState(stateFn: NgSimpleStateSetState<S>, actionName?: string): S | undefined;
     /**
      * Set a new state
      * @param stateFnOrNewState State reducer or new state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
      */
-    protected patchState(currState: S, stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined;
-    protected patchState(currState: S, stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined {
+    protected patchState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined;
+    protected patchState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined {
+        const currState = this.getCurrentState();
         let newState: Partial<S>;
         if (typeof stateFnOrNewState === 'function') {
             newState = stateFnOrNewState(currState);

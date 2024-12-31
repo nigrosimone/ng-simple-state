@@ -60,7 +60,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      */
     setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
     setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): boolean {
-        const state = this.patchState(this.getCurrentState(), stateFnOrNewState, actionName);
+        const state = this.patchState(stateFnOrNewState, actionName);
         if (typeof state !== 'undefined') {
             this.stateSig.set(state);
             return true;
