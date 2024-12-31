@@ -29,7 +29,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         const storeConfig = this.storeConfig() || {};
         this.localStoreConfig = { ...this.globalConfig, ...storeConfig };
 
-        this.localStorageIsEnabled = typeof this.localStoreConfig.enableLocalStorage === 'boolean' ? this.localStoreConfig.enableLocalStorage : false;
+        this.localStorageIsEnabled = this.localStoreConfig.enableLocalStorage ?? false;
 
         if (this.localStorageIsEnabled) {
             if (this.localStoreConfig.persistentStorage === 'local') {
@@ -39,12 +39,12 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             }
         }
 
-        this.devToolIsEnabled = typeof this.localStoreConfig.enableDevTool === 'boolean' ? this.localStoreConfig.enableDevTool : false;
+        this.devToolIsEnabled = this.localStoreConfig.enableDevTool ?? false;
         if (this.devToolIsEnabled) {
             this.devTool = inject(NgSimpleStateDevTool);
         }
 
-        this.storeName = typeof this.localStoreConfig.storeName === 'string' ? this.localStoreConfig.storeName : this.constructor.name;
+        this.storeName = this.localStoreConfig.storeName ?? this.constructor.name;
         if (typeof this.localStoreConfig.comparator === 'function') {
             this.comparator = this.localStoreConfig.comparator;
         }
