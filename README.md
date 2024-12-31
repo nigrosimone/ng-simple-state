@@ -409,7 +409,7 @@ export class TodoStore extends NgSimpleStateBaseRxjsStore<TodoState> {
 usage:
 
 ```ts
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Todo, TodoStore } from './todo-store';
 
@@ -429,11 +429,8 @@ import { Todo, TodoStore } from './todo-store';
   providers: [TodoStore]
 })
 export class AppComponent {
-  public todoList$: Observable<Todo[]>;
-
-  constructor(public todoStore: TodoStore) {
-    this.todoList$ = this.todoStore.selectState();
-  }
+  public todoStore = inject(TodoStore);
+  public todoList$: Observable<Todo[]> = this.todoStore.selectState();
 }
 ```
 
@@ -854,7 +851,7 @@ export class TodoStore extends NgSimpleStateBaseSignalStore<TodoState> {
 usage:
 
 ```ts
-import { Component, Signal } from '@angular/core';
+import { Component, Signal, inject } from '@angular/core';
 import { Todo, TodoStore } from './todo-store';
 
 @Component({
@@ -873,11 +870,8 @@ import { Todo, TodoStore } from './todo-store';
   providers: [TodoStore]
 })
 export class AppComponent {
-  public todoListSig: Signal<Todo[]>;
-
-  constructor(public todoStore: TodoStore) {
-    this.todoListSig = this.todoStore.selectState();
-  }
+  public todoStore = inject(TodoStore);
+  public todoListSig: Signal<Todo[]> = this.todoStore.selectState();
 }
 ```
 
