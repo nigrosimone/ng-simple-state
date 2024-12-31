@@ -169,14 +169,14 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         } else {
             newState = stateFnOrNewState;
         }
+        if (currState === newState) {
+            return undefined;
+        }
         let state: S;
         if (this.isArray) {
             state = Object.assign([] as S, newState);
         } else {
             state = Object.assign({}, currState, newState);
-        }
-        if (currState === newState) {
-            return undefined;
         }
         this.devToolSend(state, actionName);
         this.statePersist(state);
