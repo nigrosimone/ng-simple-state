@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   NgSimpleStateBaseRxjsStore,
-  NgSimpleStateStoreConfig,
-  ngstStateComparator
+  NgSimpleStateStoreConfig
 } from 'projects/ng-simple-state/src/public-api';
 
 export interface Todo {
@@ -17,8 +16,7 @@ export type TodoState = Array<Todo>;
 export class TodoStore extends NgSimpleStateBaseRxjsStore<TodoState> {
   storeConfig(): NgSimpleStateStoreConfig<TodoState> {
     return {
-      storeName: 'TodoStore',
-      comparator: ngstStateComparator
+      storeName: 'TodoStore'
     };
   }
 
