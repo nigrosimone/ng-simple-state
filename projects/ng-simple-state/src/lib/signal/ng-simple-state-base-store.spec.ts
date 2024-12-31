@@ -184,8 +184,7 @@ describe('NgSimpleStateBaseSignalStore: Component', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [TestComponent],
-            imports: [CommonModule]
+            imports: [CommonModule, TestComponent]
         });
         fixture = TestBed.createComponent(TestComponent);
         debugElement = fixture.debugElement;
