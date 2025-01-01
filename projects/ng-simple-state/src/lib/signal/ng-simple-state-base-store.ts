@@ -8,8 +8,8 @@ import { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetStat
 export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
     protected stackPoint: number = 4;
-    private readonly stateSig: WritableSignal<S>;
-    private readonly stateSigRo: Signal<S>;
+    private readonly stateSig: WritableSignal<S> = signal<S>(this.selectFn(this.firstState));
+    private readonly stateSigRo: Signal<S> = this.stateSig.asReadonly();
     private readonly selectFnRef = this.selectFn.bind(this);
 
     /**
@@ -18,12 +18,6 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      */
     public get state(): Signal<S> {
         return this.stateSigRo;
-    }
-
-    constructor() {
-        super();
-        this.stateSig = signal<S>(this.selectFn(this.firstState));
-        this.stateSigRo = this.stateSig.asReadonly();
     }
 
     /**

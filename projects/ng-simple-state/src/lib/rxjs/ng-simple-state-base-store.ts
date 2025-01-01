@@ -10,8 +10,8 @@ import { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetStat
 export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> implements OnDestroy {
 
     protected stackPoint: number = 4;
-    private readonly state$: BehaviorSubject<S>;
-    private readonly stateObs: Observable<S>;
+    private readonly state$: BehaviorSubject<S> = new BehaviorSubject<S>(this.selectFn(this.firstState));
+    private readonly stateObs: Observable<S> = this.state$.asObservable();
     private readonly selectFnRef = this.selectFn.bind(this);
 
     /**
@@ -20,12 +20,6 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      */
     public get state(): Observable<S> {
         return this.stateObs;
-    }
-
-    constructor() {
-        super();
-        this.state$ = new BehaviorSubject<S>(this.selectFn(this.firstState));
-        this.stateObs = this.state$.asObservable();
     }
 
     /**
