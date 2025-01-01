@@ -20,6 +20,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected devMode: boolean = isDevMode();
     protected comparator!: <S>(previous: S, current: S) => boolean;
     protected readonly globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true });
+    protected readonly selectFnRef = this.selectFn.bind(this);
 
     constructor() {
 

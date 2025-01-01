@@ -10,7 +10,6 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     protected stackPoint: number = 4;
     private readonly stateSig: WritableSignal<S> = signal<S>(this.selectFn(this.firstState));
     private readonly stateSigRo: Signal<S> = this.stateSig.asReadonly();
-    private readonly selectFnRef = this.selectFn.bind(this);
 
     /**
      * Return the Signal of the state
