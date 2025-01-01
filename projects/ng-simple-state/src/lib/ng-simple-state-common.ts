@@ -15,6 +15,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected persistentStorage!: NgSimpleStateBrowserStorage;
     protected storeName: string;
     protected firstState!: S;
+    protected initState!: S;
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
     protected comparator!: <S>(previous: S, current: S) => boolean;
@@ -48,8 +49,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
                 this.firstState = firstState;
             }
         }
+
+        this.initState = this.initialState();
         if (!this.firstState) {
-            this.firstState = this.initialState();
+            this.firstState = this.initState;
         }
 
         this.devToolSend(this.firstState, 'initialState');
@@ -130,7 +133,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Restart the store to initial state provided from `initialState()` method
      */
     restartState(): boolean {
-        return this.setState(() => this.initialState(), 'restartState');
+        return this.setState(() => this.initState, 'restartState');
     }
 
     /**
