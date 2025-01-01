@@ -126,14 +126,14 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      *  - otherwise the initial state provided from `initialState()` method.
      */
     resetState(): boolean {
-        return this.setState(() => this.firstState, 'resetState');
+        return this.setState(this.firstState, 'resetState');
     }
 
     /**
      * Restart the store to initial state provided from `initialState()` method
      */
     restartState(): boolean {
-        return this.setState(() => this.initState, 'restartState');
+        return this.setState(this.initState, 'restartState');
     }
 
     /**
