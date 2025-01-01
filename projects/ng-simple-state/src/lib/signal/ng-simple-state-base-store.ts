@@ -1,6 +1,6 @@
 import { Injectable, Directive, Signal, signal, computed, WritableSignal } from '@angular/core';
-import { NgSimpleStateBaseCommonStore, StateFnOrNewState } from '../ng-simple-state-common';
-import { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState } from '../ng-simple-state-models';
+import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
+import type { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState } from '../ng-simple-state-models';
 
 @Injectable()
 @Directive()

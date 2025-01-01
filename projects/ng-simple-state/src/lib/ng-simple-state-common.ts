@@ -2,10 +2,8 @@ import { Injectable, OnDestroy, Directive, isDevMode, inject } from '@angular/co
 import { NgSimpleStateBrowserStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
-import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, NgSimpleStateSetState, NgSimpleStateComparator, NgSimpleStateSelectState } from './ng-simple-state-models';
+import { NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, NgSimpleStateSetState, NgSimpleStateComparator, NgSimpleStateSelectState, StateFnOrNewState } from './ng-simple-state-models';
 import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
-
-export type StateFnOrNewState<S> = Partial<S> | NgSimpleStateSetState<S>;
 
 @Injectable()
 @Directive()

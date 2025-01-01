@@ -40,3 +40,5 @@ export interface NgSimpleStateStoreConfig<K = any> extends NgSimpleStateConfig<K
 export const NG_SIMPLE_STORE_CONFIG = new InjectionToken<NgSimpleStateConfig>(
     'ng-simple-state.config'
 );
+
+export type StateFnOrNewState<S> = Partial<S> | NgSimpleStateSetState<S>;

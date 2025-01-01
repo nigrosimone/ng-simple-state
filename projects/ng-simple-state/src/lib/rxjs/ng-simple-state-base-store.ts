@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy, Directive } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
-import { NgSimpleStateBaseCommonStore, StateFnOrNewState } from '../ng-simple-state-common';
-import { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState } from '../ng-simple-state-models';
+import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
+import type { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState } from '../ng-simple-state-models';
 
 @Injectable()
 @Directive()
