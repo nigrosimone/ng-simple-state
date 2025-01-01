@@ -21,9 +21,9 @@ const instanceId = `ng-simple-state-${Date.now()}-${Math.random()}`;
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateDevTool {
 
-    private globalDevtools: Devtools = window.__REDUX_DEVTOOLS_EXTENSION__ || window.devToolsExtension;
+    private readonly globalDevtools: Devtools = window.__REDUX_DEVTOOLS_EXTENSION__ || window.devToolsExtension;
     private localDevTool!: DevtoolsLocal;
-    private baseState: Record<string, object> = {};
+    private readonly baseState: Record<string, object> = {};
 
     constructor() {
         if (this.globalDevtools) {
