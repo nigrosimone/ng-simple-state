@@ -12,36 +12,34 @@ export type StateFnOrNewState<S> = Partial<S> | NgSimpleStateSetState<S>;
 export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> implements OnDestroy {
 
     protected abstract stackPoint: number;
-    protected devToolIsEnabled: boolean;
     protected devTool!: NgSimpleStateDevTool;
     protected persistentStorage!: NgSimpleStateBrowserStorage;
-    protected localStoreConfig: NgSimpleStateStoreConfig;
     protected storeName: string;
     protected firstState!: S;
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
     protected comparator!: <S>(previous: S, current: S) => boolean;
-    protected globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true });
+    protected readonly globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true });
 
     constructor() {
 
         const storeConfig = this.storeConfig() || {};
-        this.localStoreConfig = { ...this.globalConfig, ...storeConfig };
+        const localStoreConfig = { ...this.globalConfig, ...storeConfig };
 
-        if (this.localStoreConfig.persistentStorage === 'local') {
+        if (localStoreConfig.persistentStorage === 'local') {
             this.persistentStorage = inject(NgSimpleStateLocalStorage);
-        } else if (this.localStoreConfig.persistentStorage === 'session') {
+        } else if (localStoreConfig.persistentStorage === 'session') {
             this.persistentStorage = inject(NgSimpleStateSessionStorage);
         }
 
-        this.devToolIsEnabled = this.localStoreConfig.enableDevTool ?? false;
-        if (this.devToolIsEnabled) {
+        if (localStoreConfig.enableDevTool) {
             this.devTool = inject(NgSimpleStateDevTool);
         }
 
-        this.storeName = this.localStoreConfig.storeName ?? this.constructor.name;
-        if (typeof this.localStoreConfig.comparator === 'function') {
-            this.comparator = this.localStoreConfig.comparator;
+        this.storeName = localStoreConfig.storeName ?? this.constructor.name;
+
+        if (typeof localStoreConfig.comparator === 'function') {
+            this.comparator = localStoreConfig.comparator;
         }
 
         if (this.persistentStorage) {
@@ -192,7 +190,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @returns True if dev tools are enabled
      */
     protected devToolSend(newState: S | undefined, actionName?: string): boolean {
-        if (!this.devToolIsEnabled || !this.devTool) {
+        if (!this.devTool) {
             return false;
         }
         if (!actionName) {
