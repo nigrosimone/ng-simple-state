@@ -17,28 +17,28 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
     protected comparator!: <S>(previous: S, current: S) => boolean;
-    protected readonly globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true });
     protected readonly selectFnRef = this.selectFn.bind(this);
 
     constructor() {
 
+        const globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true })
         const storeConfig = this.storeConfig() || {};
-        const localStoreConfig = { ...this.globalConfig, ...storeConfig };
+        const config = { ...globalConfig, ...storeConfig };
 
-        if (localStoreConfig.persistentStorage === 'local') {
+        if (config.persistentStorage === 'local') {
             this.persistentStorage = inject(NgSimpleStateLocalStorage);
-        } else if (localStoreConfig.persistentStorage === 'session') {
+        } else if (config.persistentStorage === 'session') {
             this.persistentStorage = inject(NgSimpleStateSessionStorage);
         }
 
-        if (localStoreConfig.enableDevTool) {
+        if (config.enableDevTool) {
             this.devTool = inject(NgSimpleStateDevTool);
         }
 
-        this.storeName = localStoreConfig.storeName ?? this.constructor.name;
+        this.storeName = config.storeName ?? this.constructor.name;
 
-        if (typeof localStoreConfig.comparator === 'function') {
-            this.comparator = localStoreConfig.comparator;
+        if (typeof config.comparator === 'function') {
+            this.comparator = config.comparator;
         }
 
         if (this.persistentStorage) {
