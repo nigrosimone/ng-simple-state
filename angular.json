@@ -64,9 +64,6 @@
               "base": "dist/ng-simple-state-demo"
             },
             "index": "projects/ng-simple-state-demo/src/index.html",
-            "polyfills": [
-              "projects/ng-simple-state-demo/src/polyfills.ts"
-            ],
             "tsConfig": "projects/ng-simple-state-demo/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -132,7 +129,6 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "projects/ng-simple-state-demo/src/test.ts",
-            "polyfills": "projects/ng-simple-state-demo/src/polyfills.ts",
             "tsConfig": "projects/ng-simple-state-demo/tsconfig.spec.json",
             "karmaConfig": "projects/ng-simple-state-demo/karma.conf.js",
             "inlineStyleLanguage": "scss",
