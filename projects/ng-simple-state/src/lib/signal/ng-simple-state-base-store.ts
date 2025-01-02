@@ -27,7 +27,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      */
     selectState<K = Partial<S>>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Signal<K> {
         selectFn ??= this.selectFnRef;
-        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator ?? this.comparator });
+        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator ?? this.comparator as NgSimpleStateComparator });
     }
 
     /**

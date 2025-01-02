@@ -39,7 +39,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
         selectFn ??= this.selectFnRef;
         return this.state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
-            distinctUntilChanged(comparator ?? this.comparator),
+            distinctUntilChanged(comparator ?? this.comparator as NgSimpleStateComparator),
             observeOn(asyncScheduler)
         );
     }

@@ -2,7 +2,8 @@ import { InjectionToken } from '@angular/core';
 
 export type NgSimpleStateSetState<S> = (currentState: Readonly<S>) => Partial<S>;
 export type NgSimpleStateSelectState<S, K> = (state: Readonly<S>) => K;
-export type NgSimpleStateComparator<K> = (previous: K, current: K) => boolean;
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+export type NgSimpleStateComparator<K = any> = (previous: K, current: K) => boolean;
 
 /**
  * NgSimpleState config option
@@ -20,7 +21,7 @@ export interface NgSimpleStateConfig<K = any> {
     /**
      * A function used to compare the previous and current state for equality. 
      */
-    comparator?: (previous: K, current: K) => boolean;
+    comparator?: NgSimpleStateComparator<K>;
 }
 
 /**

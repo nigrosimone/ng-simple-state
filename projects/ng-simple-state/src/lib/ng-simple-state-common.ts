@@ -3,7 +3,7 @@ import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import type { NgSimpleStateBrowserStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
 import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
-import { type NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, type NgSimpleStateSetState, type NgSimpleStateComparator, type NgSimpleStateSelectState, type StateFnOrNewState } from './ng-simple-state-models';
+import { type NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, type NgSimpleStateSetState, type NgSimpleStateComparator, type NgSimpleStateSelectState, type StateFnOrNewState, NgSimpleStateConfig } from './ng-simple-state-models';
 
 
 @Injectable()
@@ -18,12 +18,12 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected initState!: S;
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
-    protected comparator!: <S>(previous: S, current: S) => boolean;
+    protected comparator!: NgSimpleStateComparator<S>;
     protected readonly selectFnRef = this.selectFn.bind(this);
 
     constructor() {
 
-        const globalConfig = inject(NG_SIMPLE_STORE_CONFIG, { optional: true })
+        const globalConfig: NgSimpleStateConfig<S> | null = inject(NG_SIMPLE_STORE_CONFIG, { optional: true })
         const storeConfig = this.storeConfig() || {};
         const config = { ...globalConfig, ...storeConfig };
 
@@ -174,7 +174,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         } else {
             state = Object.assign({}, currState, newState);
         }
-        if (this.comparator && this.comparator(currState, newState)) {
+        if (this.comparator && this.comparator(currState, state)) {
             return undefined;
         }
         this.devToolSend(state, actionName);
