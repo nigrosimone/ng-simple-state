@@ -42,7 +42,6 @@ ul li {
   list-style-type: none;
   background: #eee;
   font-size: 18px;
-  transition: 0.2s;
 
   /* make the list items unselectable */
   -webkit-user-select: none;
@@ -135,7 +134,6 @@ input {
   text-align: center;
   font-size: 16px;
   cursor: pointer;
-  transition: 0.3s;
   border-radius: 0;
   border: none;
 }
