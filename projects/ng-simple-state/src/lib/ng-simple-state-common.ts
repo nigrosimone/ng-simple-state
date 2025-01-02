@@ -12,7 +12,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
     protected abstract stackPoint: number;
     protected devTool!: NgSimpleStateDevTool;
-    protected persistentStorage!: NgSimpleStateBrowserStorage;
+    protected storage!: NgSimpleStateBrowserStorage;
     protected storeName: string;
     protected firstState!: S;
     protected initState!: S;
@@ -28,9 +28,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         const config = { ...globalConfig, ...storeConfig };
 
         if (config.persistentStorage === 'local') {
-            this.persistentStorage = inject(NgSimpleStateLocalStorage);
+            this.storage = inject(NgSimpleStateLocalStorage);
         } else if (config.persistentStorage === 'session') {
-            this.persistentStorage = inject(NgSimpleStateSessionStorage);
+            this.storage = inject(NgSimpleStateSessionStorage);
         }
 
         if (config.enableDevTool) {
@@ -43,8 +43,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.comparator = config.comparator;
         }
 
-        if (this.persistentStorage) {
-            const firstState = this.persistentStorage.getItem<S>(this.storeName);
+        if (this.storage) {
+            const firstState = this.storage.getItem<S>(this.storeName);
             if (firstState) {
                 this.firstState = firstState;
             }
@@ -249,8 +249,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Persist state to storage
      */
     protected statePersist(state: S) {
-        if (this.persistentStorage) {
-            this.persistentStorage.setItem<S>(this.storeName, state);
+        if (this.storage) {
+            this.storage.setItem<S>(this.storeName, state);
         }
     }
 }
