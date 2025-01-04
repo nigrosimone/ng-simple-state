@@ -24,7 +24,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     constructor() {
 
         const globalConfig: NgSimpleStateConfig<S> | null = inject(NG_SIMPLE_STORE_CONFIG, { optional: true })
-        const storeConfig = this.storeConfig() || {};
+        const storeConfig = this.storeConfig();
         const config = { ...globalConfig, ...storeConfig };
 
         if (config.persistentStorage === 'local') {
