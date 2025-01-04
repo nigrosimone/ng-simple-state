@@ -165,7 +165,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         } else {
             newState = stateFnOrNewState;
         }
-        if (currState === newState) {
+        if (Object.is(currState, newState)) {
             return undefined;
         }
         let state: S;
