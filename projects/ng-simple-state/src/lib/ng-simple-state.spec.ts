@@ -86,5 +86,6 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
         expect(value()).toEqual({ count: 9 });
         expect(service.getFirstState()).toEqual({ count: 1 });
         expect(service.getCurrentState()).toEqual({ count: 9 });
+        expect(service.setState(service.getCurrentState())).toBeFalse();
     });
 });
