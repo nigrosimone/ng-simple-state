@@ -47,7 +47,7 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
             providers: [
                 provideNgSimpleState({
                     enableDevTool: false,
-                    comparator: (previous, current) => previous === current,
+                    comparator: (previous, current) => JSON.stringify(previous) === JSON.stringify(current),
                 }),
                 CounterStore
             ]
@@ -87,5 +87,6 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
         expect(service.getFirstState()).toEqual({ count: 1 });
         expect(service.getCurrentState()).toEqual({ count: 9 });
         expect(service.setState(service.getCurrentState())).toBeFalse();
+        expect(service.setState({ count: 9 })).toBeFalse();
     });
 });
