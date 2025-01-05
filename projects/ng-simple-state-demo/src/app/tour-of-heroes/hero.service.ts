@@ -16,7 +16,7 @@ const HEROES = [
   'Dr. IQ',
   'Magma',
   'Tornado',
-]
+].map((name, id) => ({ id, name }))
 
 @Injectable()
 export class HeroService extends NgSimpleStateBaseRxjsStore<HeroState> {
@@ -27,7 +27,7 @@ export class HeroService extends NgSimpleStateBaseRxjsStore<HeroState> {
   }
 
   initialState(): HeroState {
-    return HEROES.map((name, id) => ({ id, name }));
+    return HEROES;
   }
 
   /** heroes */
