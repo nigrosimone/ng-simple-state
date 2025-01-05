@@ -6,7 +6,7 @@ import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'projects/n
 
 export type HeroState = Array<Hero>;
 
-const HEROES = [
+const HEROES: HeroState = [
   'Dr. Nice',
   'Bombasto',
   'Celeritas',
@@ -16,7 +16,7 @@ const HEROES = [
   'Dr. IQ',
   'Magma',
   'Tornado',
-].map((name, id) => ({ id, name }))
+].map<Hero>((name, id) => ({ id, name }))
 
 @Injectable()
 export class HeroService extends NgSimpleStateBaseRxjsStore<HeroState> {
