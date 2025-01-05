@@ -206,10 +206,12 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
                     ?.split('.')[1] || 'unknown';
                 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
             } catch (_) {
+                /* istanbul ignore next */
                 actionName = 'unknown';
             }
         }
         if (!this.devTool.send(this.storeName, actionName, newState)) {
+            /* istanbul ignore next */
             console.log(this.storeName + '.' + actionName, newState);
         }
         return true;

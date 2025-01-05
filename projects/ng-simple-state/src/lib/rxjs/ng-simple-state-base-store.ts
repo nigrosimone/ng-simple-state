@@ -75,18 +75,3 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
         return false;
     }
 }
-
-@Injectable()
-@Directive()
-/**
- * @deprecated use NgSimpleStateBaseRxjsStore
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export abstract class NgSimpleStateBaseStore<S extends object | Array<any>> extends NgSimpleStateBaseRxjsStore<S> {
-    constructor() {
-        super();
-        if (this.devMode) {
-            console.warn('NgSimpleStateBaseStore is deprecated. Please use NgSimpleStateBaseRxjsStore');
-        }
-    }
-}
