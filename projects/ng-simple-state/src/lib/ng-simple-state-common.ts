@@ -37,7 +37,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.devTool = inject(NgSimpleStateDevTool);
         }
 
-        this.storeName = config.storeName ?? this.constructor.name;
+        this.storeName = config.storeName;
 
         if (typeof config.comparator === 'function') {
             this.comparator = config.comparator;

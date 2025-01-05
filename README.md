@@ -288,7 +288,7 @@ export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
   override storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       persistentStorage: 'session', // persistentStorage can be 'session' or 'local' (default is localStorage)
-      storeName: 'CounterStore2', // For default the store name is the class name, you can set a specific name for this store (must be be unique)
+      storeName: 'CounterStore2', // set a specific name for this store (must be be unique)
     }
   }
 }
@@ -299,7 +299,7 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | Option               | Description                                                                                     | Default    |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
-| *storeName*          | The name used into `Redux DevTools` and local storage key.                                      | Class name |
+| *storeName*          | The store name.                                                                                 | undefined  |
 | *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | undefined  |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
 
@@ -732,7 +732,7 @@ export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
   override storeConfig(): NgSimpleStateStoreConfig<CounterState> {
     return {
       persistentStorage: 'session', // persistentStorage can be 'session' or 'local' (default is localStorage)
-      storeName: 'CounterStore2', // For default the store name is the class name, you can set a specific name for this store (must be be unique)
+      storeName: 'CounterStore2', // set a specific name for this store (must be be unique)
     }
   }
 }
@@ -743,7 +743,7 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | Option               | Description                                                                                     | Default    |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`    |
-| *storeName*          | The name used into `Redux DevTools` and local storage key.                                      | Class name |
+| *storeName*          | The store name.                                                                                 | undefined  |
 | *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | undefined  |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`  |
 
