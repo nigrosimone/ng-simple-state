@@ -849,7 +849,7 @@ import { Todo, TodoStore } from './todo-store';
   template: `
     <input #newTodo> <button (click)="todoStore.add({name: newTodo.value, completed: false})">Add todo</button>
     <ol>
-      @for(todo of todoListSig() | async; track todo.id) {
+      @for(todo of todoListSig(); track todo.id) {
         <li>
             @if(todo.completed) {
               ✅
