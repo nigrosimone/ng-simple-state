@@ -497,11 +497,18 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
 
     /**
      * Set a new state
+     * @param newState New state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    setState(newState: Partial<S>, actionName?: string): boolean;
+    /**
+     * Set a new state
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
-    setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean; 
+    setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
 }
 ```
 ## Signal Store
@@ -936,11 +943,18 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
 
     /**
      * Set a new state
+     * @param newState New state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    setState(newState: Partial<S>, actionName?: string): boolean;
+    /**
+     * Set a new state
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
-    setState(stateFn: (currentState: Readonly<S>) => Partial<S>, actionName?: string): boolean; 
+    setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean; 
 }
 ```
 
