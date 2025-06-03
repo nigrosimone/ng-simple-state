@@ -1,4 +1,4 @@
-import { isDevMode, provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { isDevMode, provideZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { provideNgSimpleState } from 'projects/ng-simple-state/src/public-api';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -13,7 +13,7 @@ const routes: Routes = [
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideExperimentalZonelessChangeDetection(),
+    provideZonelessChangeDetection(),
     provideRouter(routes),
     provideNgSimpleState({
       enableDevTool: isDevMode(),

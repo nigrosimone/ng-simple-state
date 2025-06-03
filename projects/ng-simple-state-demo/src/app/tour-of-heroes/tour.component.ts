@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HeroService } from './hero.service';
@@ -8,7 +8,7 @@ import { HeroService } from './hero.service';
   selector: 'app-root',
   templateUrl: './tour.component.html',
   styleUrls: ['./tour.component.css'],
-  imports: [RouterModule, CommonModule],
+  imports: [RouterModule],
   providers: [HeroService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

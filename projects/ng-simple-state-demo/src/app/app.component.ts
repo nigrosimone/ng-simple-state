@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -19,9 +19,8 @@ import { RouterModule } from '@angular/router';
   `,
   imports: [
     FormsModule,
-    CommonModule,
     RouterModule
-  ],
+],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common';
 import { Component, DebugElement, Injectable } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseRxjsStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
@@ -205,26 +205,29 @@ describe('NgSimpleStateBaseRxjsStore: Component', () => {
         document.body.removeChild(element);
     });
 
-    it('initialState', fakeAsync(() => {
+    it('initialState', async() => {
         fixture.detectChanges();
-        tick();
+        TestBed.tick();
+        await new Promise(resolve => setTimeout(resolve, 0)); // wait for async pipe
         fixture.detectChanges();
         expect(element.textContent?.trim()).toBe('0');
-    }));
+    });
 
-    it('increment', fakeAsync(() => {
+    it('increment', async() => {
         expect(component.increment()).toBeTrue();
         fixture.detectChanges();
-        tick();
+        await new Promise(resolve => setTimeout(resolve, 0)); // wait for async pipe
+        TestBed.tick();
         fixture.detectChanges();
         expect(element.textContent?.trim()).toBe('1');
-    }));
+    });
 
-    it('decrement', fakeAsync(() => {
+    it('decrement', async() => {
         expect(component.decrement()).toBeTrue();
         fixture.detectChanges();
-        tick();
+        TestBed.tick();
+        await new Promise(resolve => setTimeout(resolve, 0)); // wait for async pipe
         fixture.detectChanges();
         expect(element.textContent?.trim()).toBe('-1');
-    }));
+    });
 });
