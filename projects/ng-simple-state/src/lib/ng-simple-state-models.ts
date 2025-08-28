@@ -22,6 +22,14 @@ export interface NgSimpleStateConfig<K = any> {
      * A function used to compare the previous and current state for equality. 
      */
     comparator?: NgSimpleStateComparator<K>;
+    /**
+     * A function used to serialize the state to a string.
+     */
+    serializeState?: (state: K) => string;
+    /**
+     * A function used to deserialize the state from a string. 
+     */
+    deserializeState?: (state: string) => K;
 }
 
 /**

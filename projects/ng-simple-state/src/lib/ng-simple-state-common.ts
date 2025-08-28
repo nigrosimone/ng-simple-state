@@ -12,7 +12,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
     protected abstract stackPoint: number;
     protected devTool!: NgSimpleStateDevTool;
-    protected storage!: NgSimpleStateBrowserStorage;
+    protected storage!: NgSimpleStateBrowserStorage<S>;
     protected storeName: string;
     protected firstState!: S;
     protected initState!: S;
@@ -28,9 +28,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         const config = { ...globalConfig, ...storeConfig };
 
         if (config.persistentStorage === 'local') {
-            this.storage = inject(NgSimpleStateLocalStorage);
+            this.storage = new NgSimpleStateLocalStorage(config);
         } else if (config.persistentStorage === 'session') {
-            this.storage = inject(NgSimpleStateSessionStorage);
+            this.storage = new NgSimpleStateSessionStorage(config);
         }
 
         if (config.enableDevTool) {
@@ -44,7 +44,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         if (this.storage) {
-            const firstState = this.storage.getItem<S>(this.storeName);
+            const firstState = this.storage.getItem(this.storeName);
             if (firstState) {
                 this.firstState = firstState;
             }
@@ -252,7 +252,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     protected statePersist(state: S) {
         if (this.storage) {
-            this.storage.setItem<S>(this.storeName, state);
+            this.storage.setItem(this.storeName, state);
         }
     }
 }

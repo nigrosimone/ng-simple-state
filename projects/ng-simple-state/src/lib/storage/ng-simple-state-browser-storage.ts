@@ -1,8 +1,23 @@
+import { NgSimpleStateStoreConfig } from "../ng-simple-state-models";
+
 export const BASE_KEY = 'NgSimpleState::';
 
-export abstract class NgSimpleStateBrowserStorage {
+export abstract class NgSimpleStateBrowserStorage<K = any> {
 
-    constructor(private storage: Storage) { }
+     /**
+     * A function used to serialize the state to a string.
+     */
+    private serializeState: (state: K) => string;
+    
+    /**
+     * A function used to deserialize the state from a string. 
+     */
+    private deserializeState: (state: string) => K;
+
+    constructor(private storage: Storage, config?: NgSimpleStateStoreConfig<K>) { 
+        this.serializeState = config?.serializeState ? config.serializeState : JSON.stringify;
+        this.deserializeState = config?.deserializeState ? config.deserializeState : JSON.parse;
+    }
 
     /**
      * Set item into storage
@@ -10,8 +25,8 @@ export abstract class NgSimpleStateBrowserStorage {
      * @param state state value
      * @returns True if item is stored into storage
      */
-    setItem<K>(key: string, state: K): boolean {
-        this.storage.setItem(BASE_KEY + key, JSON.stringify(state));
+    setItem(key: string, state: K): boolean {
+        this.storage.setItem(BASE_KEY + key, this.serializeState(state));
         return true;
     }
 
@@ -20,10 +35,10 @@ export abstract class NgSimpleStateBrowserStorage {
      * @param key key name
      * @returns the item
      */
-    getItem<K>(key: string): K | null {
+    getItem(key: string): K | null {
         const state = this.storage.getItem(BASE_KEY + key);
         if (state) {
-            return JSON.parse(state);
+            return this.deserializeState(state);
         }
         return null;
     }
