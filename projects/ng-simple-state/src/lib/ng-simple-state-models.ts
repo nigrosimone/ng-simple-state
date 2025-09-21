@@ -1,4 +1,5 @@
 import { InjectionToken } from '@angular/core';
+import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
 
 export type NgSimpleStateSetState<S> = (currentState: Readonly<S>) => Partial<S>;
 export type NgSimpleStateSelectState<S, K> = (state: Readonly<S>) => K;
@@ -15,9 +16,9 @@ export interface NgSimpleStateConfig<K = any> {
      */
     enableDevTool?: boolean;
     /**
-     * Set the persistent storage `local` or `session`.
+     * Set the persistent storage `local`, `session` or instance of `NgSimpleStateStorage`.
      */
-    persistentStorage?: 'session' | 'local';
+    persistentStorage?: 'session' | 'local' | NgSimpleStateStorage;
     /**
      * A function used to compare the previous and current state for equality. 
      */

@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy, Directive, isDevMode, inject } from '@angular/core';
 import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
-import type { NgSimpleStateBrowserStorage } from './storage/ng-simple-state-browser-storage';
+import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
 import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
 import { type NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, type NgSimpleStateSetState, type NgSimpleStateComparator, type NgSimpleStateSelectState, type StateFnOrNewState, NgSimpleStateConfig } from './ng-simple-state-models';
@@ -12,7 +12,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
     protected abstract stackPoint: number;
     protected devTool!: NgSimpleStateDevTool;
-    protected storage!: NgSimpleStateBrowserStorage<S>;
+    protected storage!: NgSimpleStateStorage<S>;
     protected storeName: string;
     protected firstState!: S;
     protected initState!: S;
@@ -31,6 +31,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.storage = new NgSimpleStateLocalStorage(config);
         } else if (config.persistentStorage === 'session') {
             this.storage = new NgSimpleStateSessionStorage(config);
+        } else if (typeof config.persistentStorage === 'object') {
+            this.storage = config.persistentStorage;
         }
 
         if (config.enableDevTool) {

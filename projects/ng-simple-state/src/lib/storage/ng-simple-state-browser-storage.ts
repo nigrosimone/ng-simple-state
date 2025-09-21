@@ -2,7 +2,7 @@ import { NgSimpleStateStoreConfig } from "../ng-simple-state-models";
 
 export const BASE_KEY = 'NgSimpleState::';
 
-export abstract class NgSimpleStateBrowserStorage<K = any> {
+export abstract class NgSimpleStateStorage<K = any> {
 
      /**
      * A function used to serialize the state to a string.

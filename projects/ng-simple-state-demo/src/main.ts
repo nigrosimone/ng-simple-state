@@ -1,6 +1,6 @@
 import { isDevMode, provideZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app/app.component';
-import { provideNgSimpleState } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateLocalStorage, provideNgSimpleState } from 'projects/ng-simple-state/src/public-api';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
 import isEqual from 'lodash.isequal';
@@ -17,7 +17,7 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes),
     provideNgSimpleState({
       enableDevTool: isDevMode(),
-      persistentStorage: 'local',
+      persistentStorage: new NgSimpleStateLocalStorage(),
       comparator: isEqual
     })
   ]
