@@ -172,9 +172,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
         let state: S;
         if (this.isArray) {
-            state = Object.assign([] as S, newState);
+            state = ([...(newState as unknown as Array<unknown>)] as unknown) as S;
         } else {
-            state = Object.assign({}, currState, newState);
+            state = { ...currState, ...newState } as S;
         }
         if (this.comparator && this.comparator(currState, state)) {
             return undefined;
@@ -185,7 +185,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     }
 
     protected selectFn<K>(tmpState: Readonly<S>) {
-        return Object.assign(this.isArray ? [] : {}, tmpState) as K;
+        // Use spread for faster cloning
+        return this.isArray ? ([...(tmpState as unknown as Array<unknown>)] as unknown as K) : ({ ...tmpState } as K);
     }
 
     /**
