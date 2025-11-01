@@ -11,14 +11,14 @@ import { type NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, type NgSimpleSta
 export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> implements OnDestroy {
 
     protected abstract stackPoint: number;
-    protected devTool!: NgSimpleStateDevTool;
-    protected storage!: NgSimpleStateStorage<S>;
+    protected devTool?: NgSimpleStateDevTool;
+    protected storage?: NgSimpleStateStorage<S>;
     protected storeName: string;
     protected firstState!: S;
     protected initState!: S;
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
-    protected comparator!: NgSimpleStateComparator<S>;
+    protected comparator?: NgSimpleStateComparator<S>;
     protected readonly selectFnRef = this.selectFn.bind(this);
 
     constructor() {
@@ -172,10 +172,15 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
         let state: S;
         if (this.isArray) {
-            state = ([...(newState as unknown as Array<unknown>)] as unknown) as S;
+            // when working with arrays we treat payload as full replacement; avoid copying currState
+            state = (newState as unknown as S);
         } else {
-            state = { ...currState, ...newState } as S;
+            // shallow merge using Object.assign (faster than spread in hot paths)
+            // create a new object to avoid mutating current state
+            state = Object.assign({}, currState, newState) as S;
         }
+
+        // If comparator is provided, use it to detect equality (avoids further work)
         if (this.comparator && this.comparator(currState, state)) {
             return undefined;
         }
@@ -185,8 +190,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     }
 
     protected selectFn<K>(tmpState: Readonly<S>) {
-        // Use spread for faster cloning
-        return this.isArray ? ([...(tmpState as unknown as Array<unknown>)] as unknown as K) : ({ ...tmpState } as K);
+        // Return the state as-is to avoid an extra shallow clone on every select.
+        // Consumers should treat selected value as read-only. In dev mode deepFreeze will help.
+        return tmpState as unknown as K;
     }
 
     /**
