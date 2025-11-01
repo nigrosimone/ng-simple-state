@@ -2,7 +2,7 @@ import { NgSimpleStateStoreConfig } from "../ng-simple-state-models";
 
 export const BASE_KEY = 'NgSimpleState::';
 
-export abstract class NgSimpleStateStorage<K = any> {
+export abstract class NgSimpleStateStorage<K = unknown> {
 
      /**
      * A function used to serialize the state to a string.
@@ -45,7 +45,7 @@ export abstract class NgSimpleStateStorage<K = any> {
 
     /**
      * Remove item from storage
-     * @param key key name
+     * @param {string} key key name
      * @returns True if item is removed
      */
     removeItem(key: string): boolean {

@@ -32,7 +32,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         } else if (config.persistentStorage === 'session') {
             this.storage = new NgSimpleStateSessionStorage(config);
         } else if (typeof config.persistentStorage === 'object') {
-            this.storage = config.persistentStorage;
+            this.storage = config.persistentStorage as NgSimpleStateStorage<S>;
         }
 
         if (config.enableDevTool) {
