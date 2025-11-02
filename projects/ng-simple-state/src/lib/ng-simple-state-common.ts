@@ -167,7 +167,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         } else {
             newState = stateFnOrNewState;
         }
-        if (Object.is(currState, newState)) {
+        if (currState === newState) {
             return undefined;
         }
         let state: S;
@@ -184,8 +184,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         if (this.comparator && this.comparator(currState, state)) {
             return undefined;
         }
-        this.devToolSend(state, actionName);
-        this.statePersist(state);
+        // avoid function call if not necessary
+        this.devTool && this.devToolSend(state, actionName);
+        this.storage && this.statePersist(state);
         return state;
     }
 
