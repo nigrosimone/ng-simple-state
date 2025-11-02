@@ -2,6 +2,12 @@
 
 Simple state management in Angular with only Services and RxJS or Signal.
 
+## Features
+
+✅ Fast! 1.03× faster than NgRx (see [benchmark](https://github.com/nigrosimone/angular-state-manager-benchmark))
+✅ Tiny! only 4,00 KB (gzipped)
+✅ Simple! use only Angular services and RxJS or Signal
+
 ## Description
 
 Sharing state between components as simple as possible and leverage the good parts of component state and Angular's dependency injection system.
