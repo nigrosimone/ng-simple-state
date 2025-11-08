@@ -49,7 +49,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @returns The current state
      */
     getCurrentState(): Readonly<S> {
-        return this.deepFreeze(this.state$.getValue());
+        return this.devMode ? this.deepFreeze(this.state$.getValue()) : this.state$.getValue();
     }
 
     /**

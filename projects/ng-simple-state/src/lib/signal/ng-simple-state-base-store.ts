@@ -35,7 +35,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * @returns The current state
      */
     getCurrentState(): Readonly<S> {
-        return this.deepFreeze(this.stateSig());
+        return this.devMode ? this.deepFreeze(this.stateSig()) : this.stateSig();
     }
 
     /**
