@@ -8,7 +8,7 @@ import type { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSe
 export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
     protected stackPoint: number = 4;
-    private readonly stateSig: WritableSignal<S> = signal<S>(this.selectFn(this.firstState));
+    private readonly stateSig: WritableSignal<S> = signal<S>(this.firstState);
     private readonly stateSigRo: Signal<S> = this.stateSig.asReadonly();
 
     /**
@@ -26,7 +26,9 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * @returns Signal of the selected state
      */
     selectState<K = Partial<S>>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): Signal<K> {
-        selectFn ??= this.selectFnRef;
+        if (!selectFn) {
+            return this.stateSigRo as unknown as Signal<K>;
+        }
         return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator ?? this.comparator as NgSimpleStateComparator });
     }
 

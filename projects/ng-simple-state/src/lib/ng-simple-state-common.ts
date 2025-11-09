@@ -19,7 +19,6 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected isArray: boolean;
     protected devMode: boolean = isDevMode();
     protected comparator?: NgSimpleStateComparator<S>;
-    protected readonly selectFnRef = this.selectFn.bind(this);
 
     constructor() {
 
@@ -188,12 +187,6 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         this.devTool && this.devToolSend(state, actionName);
         this.storage && this.statePersist(state);
         return state;
-    }
-
-    protected selectFn<K>(tmpState: Readonly<S>) {
-        // Return the state as-is to avoid an extra shallow clone on every select.
-        // Consumers should treat selected value as read-only. In dev mode deepFreeze will help.
-        return tmpState as unknown as K;
     }
 
     /**
