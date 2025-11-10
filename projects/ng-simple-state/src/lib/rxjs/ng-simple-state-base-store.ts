@@ -2,7 +2,7 @@ import { Injectable, OnDestroy, Directive } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
-import type { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState } from '../ng-simple-state-models';
+import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState, StateFnOrReplaceState } from '../ng-simple-state-models';
 
 @Injectable()
 @Directive()
@@ -69,7 +69,30 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      */
     setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
     setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): boolean {
-        const state = this.patchState(stateFnOrNewState, actionName);
+        const state = this._setState(stateFnOrNewState, actionName);
+        if (typeof state !== 'undefined') {
+            this.state$.next(state);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Replace state
+     * @param newState New state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    replaceState(newState: S, actionName?: string): boolean;
+    /**
+     * Replace state
+     * @param selectFn State reducer
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): boolean;
+    replaceState(stateFnOrNewState: StateFnOrReplaceState<S>, actionName?: string): boolean {
+        const state = this._replaceState(stateFnOrNewState, actionName);
         if (typeof state !== 'undefined') {
             this.state$.next(state);
             return true;

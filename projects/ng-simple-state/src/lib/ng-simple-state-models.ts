@@ -1,6 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
 
+export type NgSimpleStateReplaceState<S> = (currentState: Readonly<S>) => S;
 export type NgSimpleStateSetState<S> = (currentState: Readonly<S>) => Partial<S>;
 export type NgSimpleStateSelectState<S, K> = (state: Readonly<S>) => K;
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -52,3 +53,4 @@ export const NG_SIMPLE_STORE_CONFIG = new InjectionToken<NgSimpleStateConfig>(
 );
 
 export type StateFnOrNewState<S> = Partial<S> | NgSimpleStateSetState<S>;
+export type StateFnOrReplaceState<S> = S | NgSimpleStateReplaceState<S>;

@@ -30,7 +30,7 @@ export class CounterStore extends NgSimpleStateBaseRxjsStore<NumbersState> {
     }
 
     del(value: number): boolean {
-        return this.setState(state => state.filter(item => item !== value));
+        return this.replaceState(state => state.filter(item => item !== value));
     }
 }
 

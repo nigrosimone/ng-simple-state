@@ -29,7 +29,7 @@ export class CounterStore extends NgSimpleStateBaseSignalStore<NumbersState> {
     }
 
     del(value: number): boolean {
-        return this.setState(state => state.filter(item => item !== value));
+        return this.replaceState(state => state.filter(item => item !== value));
     }
 }
 

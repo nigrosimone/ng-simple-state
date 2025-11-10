@@ -22,10 +22,10 @@ export class CounterStoreSignal extends NgSimpleStateBaseSignalStore<CounterStat
   }
 
   increment(increment: number = 1): void {
-    this.setState((state) => ({ count: state.count + increment }));
+    this.replaceState((state) => ({ count: state.count + increment }));
   }
 
   decrement(decrement: number = 1): void {
-    this.setState((state) => ({ count: state.count - decrement }));
+    this.replaceState((state) => ({ count: state.count - decrement }));
   }
 }

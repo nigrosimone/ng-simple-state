@@ -1,6 +1,6 @@
 import { Injectable, Directive, Signal, signal, computed, WritableSignal } from '@angular/core';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
-import type { NgSimpleStateComparator, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState } from '../ng-simple-state-models';
+import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState, StateFnOrReplaceState } from '../ng-simple-state-models';
 
 @Injectable()
 @Directive()
@@ -55,7 +55,30 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      */
     setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
     setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): boolean {
-        const state = this.patchState(stateFnOrNewState, actionName);
+        const state = this._setState(stateFnOrNewState, actionName);
+        if (typeof state !== 'undefined') {
+            this.stateSig.set(state);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Replace state
+     * @param newState New state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    replaceState(newState: S, actionName?: string): boolean;
+    /**
+     * Replace state
+     * @param selectFn State reducer
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): boolean;
+    replaceState(stateFnOrReplaceState: StateFnOrReplaceState<S>, actionName?: string): boolean {
+        const state = this._replaceState(stateFnOrReplaceState, actionName);
         if (typeof state !== 'undefined') {
             this.stateSig.set(state);
             return true;

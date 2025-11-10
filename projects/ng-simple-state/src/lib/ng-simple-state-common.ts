@@ -3,7 +3,7 @@ import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
 import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
-import { type NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, type NgSimpleStateSetState, type NgSimpleStateComparator, type NgSimpleStateSelectState, type StateFnOrNewState, NgSimpleStateConfig } from './ng-simple-state-models';
+import { type NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, type NgSimpleStateSetState, type NgSimpleStateComparator, type NgSimpleStateSelectState, type StateFnOrNewState, NgSimpleStateConfig, NgSimpleStateReplaceState, StateFnOrReplaceState } from './ng-simple-state-models';
 
 
 @Injectable()
@@ -106,6 +106,22 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     abstract setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
 
     /**
+     * Replace state
+     * @param newState New state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    abstract replaceState(newState: S, actionName?: string): boolean;
+
+    /**
+     * Replace state
+     * @param selectFn State reducer
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns True if the state is changed
+     */
+    abstract replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): boolean;
+
+    /**
      * Return the current store state (snapshot)
      * @returns The current state
      */
@@ -127,14 +143,14 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      *  - otherwise the initial state provided from `initialState()` method.
      */
     resetState(): boolean {
-        return this.setState(this.firstState, 'resetState');
+        return this.replaceState(this.firstState, 'resetState');
     }
 
     /**
      * Restart the store to initial state provided from `initialState()` method
      */
     restartState(): boolean {
-        return this.setState(this.initState, 'restartState');
+        return this.replaceState(this.initState, 'restartState');
     }
 
     /**
@@ -142,23 +158,26 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param newState New state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
+     * @private
      */
-    protected patchState(newState: Partial<S>, actionName?: string): S | undefined;
+    protected _setState(newState: Partial<S>, actionName?: string): S | undefined;
     /**
      * Set a new state
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
+     * @private
      */
-    protected patchState(stateFn: NgSimpleStateSetState<S>, actionName?: string): S | undefined;
+    protected _setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): S | undefined;
     /**
      * Set a new state
      * @param stateFnOrNewState State reducer or new state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
+     * @private
      */
-    protected patchState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined;
-    protected patchState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined {
+    protected _setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined;
+    protected _setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined {
         const currState = this.getCurrentState();
         let newState: Partial<S>;
         if (typeof stateFnOrNewState === 'function') {
@@ -187,6 +206,51 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         this.devTool && this.devToolSend(state, actionName);
         this.storage && this.statePersist(state);
         return state;
+    }
+
+    /**
+     * Replace state
+     * @param newState state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns state
+     * @private
+     */
+    protected _replaceState(newState: S, actionName?: string): S | undefined;
+    /**
+     * Replace state
+     * @param selectFn State reducer
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns state
+     * @private
+     */
+    protected _replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): S | undefined;
+    /**
+     * Replace state
+     * @param stateFnOrReplaceState State reducer or state
+     * @param actionName The action label into Redux DevTools (default is parent function name)
+     * @returns state
+     * @private
+     */
+    protected _replaceState(stateFnOrReplaceState: StateFnOrReplaceState<S>, actionName?: string): S | undefined;
+    protected _replaceState(stateFnOrReplaceState: StateFnOrReplaceState<S>, actionName?: string): S | undefined {
+        const currState = this.getCurrentState();
+        let newState: S;
+        if (typeof stateFnOrReplaceState === 'function') {
+            newState = stateFnOrReplaceState(currState);
+        } else {
+            newState = stateFnOrReplaceState;
+        }
+        if (currState === newState) {
+            return undefined;
+        }
+        // If comparator is provided, use it to detect equality (avoids further work)
+        if (this.comparator && this.comparator(currState, newState)) {
+            return undefined;
+        }
+        // avoid function call if not necessary
+        this.devTool && this.devToolSend(newState, actionName);
+        this.storage && this.statePersist(newState);
+        return newState;
     }
 
     /**

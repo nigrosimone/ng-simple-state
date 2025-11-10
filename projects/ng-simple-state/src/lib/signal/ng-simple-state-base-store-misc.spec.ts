@@ -36,7 +36,7 @@ export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
     }
 
     decrement(decrement: number = 1): boolean {
-        return this.setState(state => ({ count: state.count - decrement }));
+        return this.replaceState(state => ({ count: state.count - decrement }));
     }
 }
 
