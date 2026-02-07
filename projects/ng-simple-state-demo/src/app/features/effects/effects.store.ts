@@ -42,11 +42,7 @@ export class EffectsStore extends NgSimpleStateBaseSignalStore<EffectsState> {
       state => state.count,
       (count) => {
         console.log('[EffectsStore] Count is now:', count);
-        // Update history when count changes
-        const currentHistory = this.getCurrentState().history;
-        this.setState({
-          history: [...currentHistory, `Count changed to ${count}`]
-        }, 'updateHistory');
+        // Side effect: could save to localStorage, send analytics, etc.
       }
     );
   }
@@ -64,26 +60,29 @@ export class EffectsStore extends NgSimpleStateBaseSignalStore<EffectsState> {
     return this.selectState(state => state.history);
   }
 
-  // Actions
+  // Actions - update history as part of the action, not in effects
   increment(): void {
     this.setState(state => ({
       count: state.count + 1,
-      lastAction: 'increment'
+      lastAction: 'increment',
+      history: [...state.history, `Incremented to ${state.count + 1}`]
     }));
   }
 
   decrement(): void {
     this.setState(state => ({
       count: state.count - 1,
-      lastAction: 'decrement'
+      lastAction: 'decrement',
+      history: [...state.history, `Decremented to ${state.count - 1}`]
     }));
   }
 
   setCount(value: number): void {
-    this.setState({
+    this.setState(state => ({
       count: value,
-      lastAction: `setCount(${value})`
-    });
+      lastAction: `setCount(${value})`,
+      history: [...state.history, `Set count to ${value}`]
+    }));
   }
 
   // Cleanup effects
@@ -98,6 +97,10 @@ export class EffectsStore extends NgSimpleStateBaseSignalStore<EffectsState> {
   }
 
   clearHistory(): void {
-    this.setState({ history: [], lastAction: 'clearHistory' });
+    this.setState(state => ({ 
+      ...state,
+      history: [], 
+      lastAction: 'clearHistory' 
+    }));
   }
 }
