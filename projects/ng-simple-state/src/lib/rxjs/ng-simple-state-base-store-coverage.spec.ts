@@ -43,11 +43,11 @@ export class CounterStoreWithCustomStorage extends NgSimpleStateBaseRxjsStore<Co
     }
 
     increment(increment: number = 1): boolean {
-        return this.setState(state => ({ count: state.count + increment }));
+        return this.setState(state => ({ count: state.count + increment }), 'increment');
     }
 
     decrement(decrement: number = 1): boolean {
-        return this.replaceState(state => ({ count: state.count - decrement }));
+        return this.replaceState(state => ({ count: state.count - decrement }), 'decrement');
     }
 }
 
@@ -410,6 +410,141 @@ describe('provideNgSimpleState without arguments', () => {
     it('should return providers when called with config', () => {
         const result = provideNgSimpleState({ enableDevTool: true });
         expect(result.length).toBe(1);
+    });
+});
+
+
+describe('NgSimpleStateBaseRxjsStore: produce method', () => {
+
+    @Injectable()
+    class ProduceTestStore extends NgSimpleStateBaseRxjsStore<{ items: { id: number; name: string }[] }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'ProduceTestStore' };
+        }
+
+        initialState() {
+            return {
+                items: [
+                    { id: 1, name: 'Item 1' },
+                    { id: 2, name: 'Item 2' }
+                ]
+            };
+        }
+
+        updateItemName(id: number, name: string): boolean {
+            return this.produce(draft => {
+                const item = draft.items.find(i => i.id === id);
+                if (item) {
+                    item.name = name;
+                }
+            });
+        }
+
+        addItem(name: string): boolean {
+            return this.produce(draft => {
+                draft.items.push({ id: Date.now(), name });
+            });
+        }
+    }
+
+    let service: ProduceTestStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [ProduceTestStore]
+        });
+        service = TestBed.inject(ProduceTestStore);
+    });
+
+    it('should update nested item with produce', () => {
+        expect(service.updateItemName(1, 'Updated Item 1')).toBeTrue();
+        
+        const state = service.getCurrentState();
+        expect(state.items[0].name).toBe('Updated Item 1');
+        expect(state.items[1].name).toBe('Item 2');
+    });
+
+    it('should add item with produce', () => {
+        expect(service.addItem('New Item')).toBeTrue();
+        
+        const state = service.getCurrentState();
+        expect(state.items.length).toBe(3);
+        expect(state.items[2].name).toBe('New Item');
+    });
+
+    it('should produce with custom action name', () => {
+        const result = (service as any).produce((draft: any) => {
+            draft.items[0].name = 'Custom Action';
+        }, 'customAction');
+        
+        expect(result).toBeTrue();
+    });
+});
+
+
+describe('NgSimpleStateBaseRxjsStore: effects', () => {
+
+    @Injectable()
+    class EffectsTestStore extends NgSimpleStateBaseRxjsStore<{ count: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'EffectsTestStore' };
+        }
+
+        initialState() {
+            return { count: 0 };
+        }
+    }
+
+    let service: EffectsTestStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [EffectsTestStore]
+        });
+        service = TestBed.inject(EffectsTestStore);
+    });
+
+    it('should create and destroy effect', () => {
+        let callCount = 0;
+        
+        service.createEffect('testEffect', () => {
+            callCount++;
+        });
+        
+        expect(service.getEffectNames()).toContain('testEffect');
+        
+        service.destroyEffect('testEffect');
+        
+        expect(service.getEffectNames()).not.toContain('testEffect');
+    });
+
+    it('should create selector effect', () => {
+        let lastValue: number | null = null;
+        
+        service.createSelectorEffect('selectorEffect', state => state.count, (count) => {
+            lastValue = count;
+        });
+        
+        expect(service.getEffectNames()).toContain('selectorEffect');
+        
+        service.destroyEffect('selectorEffect');
+    });
+
+    it('should destroy all effects', () => {
+        service.createEffect('effect1', () => {});
+        service.createEffect('effect2', () => {});
+        
+        service.destroyAllEffects();
+        
+        expect(service.getEffectNames()).toEqual([]);
+    });
+
+    it('should destroy all effects on ngOnDestroy', () => {
+        service.createEffect('effect1', () => {});
+        service.ngOnDestroy();
+        expect(service.getEffectNames()).toEqual([]);
     });
 });
 

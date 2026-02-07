@@ -42,11 +42,11 @@ export class CounterStoreWithCustomStorage extends NgSimpleStateBaseSignalStore<
     }
 
     increment(increment: number = 1): boolean {
-        return this.setState(state => ({ count: state.count + increment }));
+        return this.setState(state => ({ count: state.count + increment }), 'increment');
     }
 
     decrement(decrement: number = 1): boolean {
-        return this.replaceState(state => ({ count: state.count - decrement }));
+        return this.replaceState(state => ({ count: state.count - decrement }), 'decrement');
     }
 }
 
@@ -402,6 +402,169 @@ describe('provideNgSimpleState without arguments (Signal)', () => {
     it('should return empty array when called without config', () => {
         const result = provideNgSimpleState();
         expect(result).toEqual([]);
+    });
+});
+
+
+describe('NgSimpleStateBaseSignalStore: produce method', () => {
+
+    @Injectable()
+    class ProduceTestStore extends NgSimpleStateBaseSignalStore<{ items: { id: number; name: string }[] }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'ProduceTestStore' };
+        }
+
+        initialState() {
+            return {
+                items: [
+                    { id: 1, name: 'Item 1' },
+                    { id: 2, name: 'Item 2' }
+                ]
+            };
+        }
+
+        updateItemName(id: number, name: string): boolean {
+            return this.produce(draft => {
+                const item = draft.items.find(i => i.id === id);
+                if (item) {
+                    item.name = name;
+                }
+            });
+        }
+
+        addItem(name: string): boolean {
+            return this.produce(draft => {
+                draft.items.push({ id: Date.now(), name });
+            });
+        }
+    }
+
+    let service: ProduceTestStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [ProduceTestStore]
+        });
+        service = TestBed.inject(ProduceTestStore);
+    });
+
+    it('should update nested item with produce', () => {
+        expect(service.updateItemName(1, 'Updated Item 1')).toBeTrue();
+        
+        const state = service.getCurrentState();
+        expect(state.items[0].name).toBe('Updated Item 1');
+        expect(state.items[1].name).toBe('Item 2');
+    });
+
+    it('should add item with produce', () => {
+        expect(service.addItem('New Item')).toBeTrue();
+        
+        const state = service.getCurrentState();
+        expect(state.items.length).toBe(3);
+        expect(state.items[2].name).toBe('New Item');
+    });
+
+    it('should produce with custom action name', () => {
+        const result = (service as any).produce((draft: any) => {
+            draft.items[0].name = 'Custom Action';
+        }, 'customAction');
+        
+        expect(result).toBeTrue();
+    });
+});
+
+
+describe('NgSimpleStateBaseSignalStore: linkedState method', () => {
+
+    @Injectable()
+    class LinkedStateTestStore extends NgSimpleStateBaseSignalStore<{ count: number; multiplier: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'LinkedStateTestStore' };
+        }
+
+        initialState() {
+            return { count: 5, multiplier: 2 };
+        }
+
+        setCount(count: number): void {
+            this.setState({ count });
+        }
+
+        getDoubledCount() {
+            return this.linkedState({
+                source: state => state.count,
+                computation: (count) => count * 2
+            });
+        }
+
+        getCountWithMultiplier() {
+            return this.linkedState({
+                source: state => state.count * state.multiplier
+            });
+        }
+    }
+
+    let service: LinkedStateTestStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [LinkedStateTestStore]
+        });
+        service = TestBed.inject(LinkedStateTestStore);
+    });
+
+    it('should create linked signal with computation', () => {
+        const doubled = service.getDoubledCount();
+        expect(doubled()).toBe(10);
+    });
+
+    it('should create linked signal without computation', () => {
+        const result = service.getCountWithMultiplier();
+        expect(result()).toBe(10);
+    });
+
+    it('should update linked signal when source changes', () => {
+        const doubled = service.getDoubledCount();
+        expect(doubled()).toBe(10);
+        
+        service.setCount(10);
+        expect(doubled()).toBe(20);
+    });
+});
+
+
+describe('NgSimpleStateBaseSignalStore: effects cleanup', () => {
+
+    @Injectable()
+    class EffectsCleanupStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'EffectsCleanupStore' };
+        }
+
+        initialState() {
+            return { count: 0 };
+        }
+    }
+
+    let service: EffectsCleanupStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [EffectsCleanupStore]
+        });
+        service = TestBed.inject(EffectsCleanupStore);
+    });
+
+    it('should get effect names', () => {
+        expect(service.getEffectNames()).toEqual([]);
+    });
+
+    it('should destroy all effects on ngOnDestroy', () => {
+        service.ngOnDestroy();
+        expect(service.getEffectNames()).toEqual([]);
     });
 });
 

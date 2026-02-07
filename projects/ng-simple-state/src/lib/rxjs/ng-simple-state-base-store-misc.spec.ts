@@ -34,11 +34,11 @@ export class CounterStore extends NgSimpleStateBaseRxjsStore<CounterState> {
     }
 
     increment(increment: number = 1): boolean {
-        return this.setState(state => ({ count: state.count + increment }));
+        return this.setState(state => ({ count: state.count + increment }), 'increment');
     }
 
     decrement(decrement: number = 1): boolean {
-        return this.replaceState(state => ({ count: state.count - decrement }));
+        return this.replaceState(state => ({ count: state.count - decrement }), 'decrement');
     }
 }
 
