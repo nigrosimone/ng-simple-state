@@ -548,3 +548,187 @@ describe('NgSimpleStateBaseRxjsStore: effects', () => {
     });
 });
 
+
+describe('NgSimpleStateBaseRxjsStore: plugin blocking', () => {
+
+    @Injectable()
+    class PluginBlockTestRxjsStore extends NgSimpleStateBaseRxjsStore<{ count: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { 
+                storeName: 'PluginBlockTestRxjsStore',
+                plugins: [{
+                    name: 'blocker',
+                    onBeforeStateChange: (context) => {
+                        // Block any change where count > 5
+                        return (context.nextState as any).count <= 5;
+                    }
+                }]
+            };
+        }
+
+        initialState() {
+            return { count: 0 };
+        }
+
+        setCount(count: number): boolean {
+            return this.setState({ count });
+        }
+    }
+
+    let service: PluginBlockTestRxjsStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [PluginBlockTestRxjsStore]
+        });
+        service = TestBed.inject(PluginBlockTestRxjsStore);
+    });
+
+    it('should allow state change when plugin returns true', () => {
+        expect(service.setCount(3)).toBeTrue();
+        expect(service.getCurrentState().count).toBe(3);
+    });
+
+    it('should block state change when plugin returns false', () => {
+        expect(service.setCount(10)).toBeFalse();
+        expect(service.getCurrentState().count).toBe(0);
+    });
+
+    it('should allow edge case (count = 5)', () => {
+        expect(service.setCount(5)).toBeTrue();
+        expect(service.getCurrentState().count).toBe(5);
+    });
+});
+
+
+describe('NgSimpleStateBaseRxjsStore: Immer with custom produce', () => {
+
+    @Injectable()
+    class ImmerProduceRxjsStore extends NgSimpleStateBaseRxjsStore<{ items: number[] }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { 
+                storeName: 'ImmerProduceRxjsStore',
+                immerProduce: <T>(state: T, producer: (draft: T) => void): T => {
+                    // Mock Immer produce - just clone and apply
+                    const draft = structuredClone(state);
+                    producer(draft);
+                    return draft;
+                }
+            };
+        }
+
+        initialState() {
+            return { items: [1, 2, 3] };
+        }
+
+        addItem(item: number): boolean {
+            return this.produce(draft => {
+                draft.items.push(item);
+            });
+        }
+    }
+
+    let service: ImmerProduceRxjsStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [ImmerProduceRxjsStore]
+        });
+        service = TestBed.inject(ImmerProduceRxjsStore);
+    });
+
+    it('should use custom immerProduce function', () => {
+        expect(service.addItem(4)).toBeTrue();
+        expect(service.getCurrentState().items).toEqual([1, 2, 3, 4]);
+    });
+});
+
+
+describe('NgSimpleStateBaseRxjsStore: replaceState', () => {
+
+    @Injectable()
+    class ReplaceStateRxjsStore extends NgSimpleStateBaseRxjsStore<{ count: number; name: string }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'ReplaceStateRxjsStore' };
+        }
+
+        initialState() {
+            return { count: 0, name: 'initial' };
+        }
+
+        replaceWithNew(): boolean {
+            return this.replaceState({ count: 100, name: 'replaced' });
+        }
+
+        replaceWithFn(): boolean {
+            return this.replaceState((state: { count: number; name: string }) => ({ count: state.count * 2, name: 'doubled' }));
+        }
+    }
+
+    let service: ReplaceStateRxjsStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [ReplaceStateRxjsStore]
+        });
+        service = TestBed.inject(ReplaceStateRxjsStore);
+    });
+
+    it('should replace state with object', () => {
+        expect(service.replaceWithNew()).toBeTrue();
+        expect(service.getCurrentState()).toEqual({ count: 100, name: 'replaced' });
+    });
+
+    it('should replace state with function', () => {
+        service.replaceWithNew();
+        expect(service.replaceWithFn()).toBeTrue();
+        expect(service.getCurrentState()).toEqual({ count: 200, name: 'doubled' });
+    });
+});
+
+
+describe('NgSimpleStateBaseRxjsStore: comparator', () => {
+
+    @Injectable()
+    class ComparatorRxjsStore extends NgSimpleStateBaseRxjsStore<{ count: number; timestamp: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { 
+                storeName: 'ComparatorRxjsStore',
+                comparator: (prev, curr) => prev.count === curr.count
+            };
+        }
+
+        initialState() {
+            return { count: 0, timestamp: Date.now() };
+        }
+
+        setCount(count: number): boolean {
+            return this.setState({ count, timestamp: Date.now() });
+        }
+    }
+
+    let service: ComparatorRxjsStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [ComparatorRxjsStore]
+        });
+        service = TestBed.inject(ComparatorRxjsStore);
+    });
+
+    it('should detect change when count changes', () => {
+        expect(service.setCount(5)).toBeTrue();
+        expect(service.getCurrentState().count).toBe(5);
+    });
+
+    it('should detect no change when count stays same', () => {
+        service.setCount(5);
+        // Setting same count should return false due to comparator
+        expect(service.setCount(5)).toBeFalse();
+    });
+});
+

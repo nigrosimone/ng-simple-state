@@ -246,3 +246,149 @@ describe('NgSimpleStateDevTool History', () => {
         expect(service.isPaused()).toBe(false);
     });
 });
+
+
+describe('NgSimpleStateDevTool Time-travel', () => {
+
+    beforeEach(() => {
+        (window as any)['devToolsExtension'] = new DevToolsExtension();
+        TestBed.configureTestingModule({
+            providers: [provideNgSimpleState({ enableDevTool: true })]
+        });
+        const ngZone = TestBed.inject(NgZone);
+        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+    });
+
+    afterEach(() => {
+        (window as any)['devToolsExtension'] = null;
+    });
+
+    it('should set jump callback', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let jumpedStore = '';
+        let jumpedState: any = null;
+        
+        service.setJumpCallback((storeName, state) => {
+            jumpedStore = storeName;
+            jumpedState = state;
+        });
+        
+        service.send('testStore', 'action1', { count: 1 });
+        const history = service.getHistory();
+        
+        service.jumpToAction(history[0].id);
+        
+        expect(jumpedStore).toBe('testStore');
+        expect(jumpedState).toEqual({ count: 1 });
+    });
+
+    it('should not jump without callback', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        service.send('testStore', 'action1', { count: 1 });
+        const history = service.getHistory();
+        
+        // Should not throw when no callback set
+        expect(() => service.jumpToAction(history[0].id)).not.toThrow();
+    });
+
+    it('should not jump to non-existent action', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let jumpCalled = false;
+        service.setJumpCallback(() => { jumpCalled = true; });
+        
+        service.jumpToAction(999);
+        
+        expect(jumpCalled).toBe(false);
+    });
+
+    it('should not send when paused', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        // Access internal isPausedSig to set it true
+        (service as any).isPausedSig.set(true);
+        
+        const result = service.send('testStore', 'action1', { count: 1 });
+        
+        expect(result).toBe(false);
+        
+        // Reset
+        (service as any).isPausedSig.set(false);
+    });
+
+    it('should trim history when exceeding max size', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        // Send more entries than maxHistorySize (default 100)
+        for (let i = 0; i < 105; i++) {
+            service.send('testStore', `action${i}`, { count: i });
+        }
+        
+        const history = service.getHistory();
+        expect(history.length).toBeLessThanOrEqual(100);
+    });
+
+    it('should update currentPosition on send', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        service.send('testStore', 'action1', { count: 1 });
+        const pos1 = service.currentPosition();
+        
+        service.send('testStore', 'action2', { count: 2 });
+        const pos2 = service.currentPosition();
+        
+        expect(pos2).toBeGreaterThan(pos1);
+    });
+});
+
+
+describe('NgSimpleStateDevTool computeDiff edge cases', () => {
+
+    it('should handle undefined values', () => {
+        const diffs = (NgSimpleStateDevTool as any).computeDiff(undefined, { count: 1 });
+        expect(diffs.length).toBe(1);
+        expect(diffs[0].type).toBe('added');
+    });
+
+    it('should handle nested objects', () => {
+        const diffs = (NgSimpleStateDevTool as any).computeDiff(
+            { user: { name: 'old', age: 25 } },
+            { user: { name: 'new', age: 25 } }
+        );
+        
+        expect(diffs.length).toBe(1);
+        expect(diffs[0].path).toBe('user.name');
+    });
+
+    it('should handle array changes', () => {
+        const diffs = (NgSimpleStateDevTool as any).computeDiff(
+            { items: [1, 2, 3] },
+            { items: [1, 2, 4] }
+        );
+        
+        expect(diffs.length).toBe(1);
+        expect(diffs[0].path).toBe('items.2');
+    });
+
+    it('should handle both undefined', () => {
+        const diffs = (NgSimpleStateDevTool as any).computeDiff(undefined, undefined);
+        expect(diffs.length).toBe(0);
+    });
+
+    it('should handle empty objects', () => {
+        const diffs = (NgSimpleStateDevTool as any).computeDiff({}, {});
+        expect(diffs.length).toBe(0);
+    });
+
+    it('should detect type changes', () => {
+        const diffs = (NgSimpleStateDevTool as any).computeDiff(
+            { value: 'string' },
+            { value: 123 }
+        );
+        
+        expect(diffs.length).toBe(1);
+        expect(diffs[0].type).toBe('changed');
+    });
+});

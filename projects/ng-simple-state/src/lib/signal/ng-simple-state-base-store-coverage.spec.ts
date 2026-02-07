@@ -568,3 +568,187 @@ describe('NgSimpleStateBaseSignalStore: effects cleanup', () => {
     });
 });
 
+
+describe('NgSimpleStateBaseSignalStore: plugin blocking', () => {
+
+    @Injectable()
+    class PluginBlockTestStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { 
+                storeName: 'PluginBlockTestStore',
+                plugins: [{
+                    name: 'blocker',
+                    onBeforeStateChange: (context) => {
+                        // Block any change where count > 5
+                        return (context.nextState as any).count <= 5;
+                    }
+                }]
+            };
+        }
+
+        initialState() {
+            return { count: 0 };
+        }
+
+        setCount(count: number): boolean {
+            return this.setState({ count });
+        }
+    }
+
+    let service: PluginBlockTestStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [PluginBlockTestStore]
+        });
+        service = TestBed.inject(PluginBlockTestStore);
+    });
+
+    it('should allow state change when plugin returns true', () => {
+        expect(service.setCount(3)).toBeTrue();
+        expect(service.getCurrentState().count).toBe(3);
+    });
+
+    it('should block state change when plugin returns false', () => {
+        expect(service.setCount(10)).toBeFalse();
+        expect(service.getCurrentState().count).toBe(0);
+    });
+
+    it('should allow edge case (count = 5)', () => {
+        expect(service.setCount(5)).toBeTrue();
+        expect(service.getCurrentState().count).toBe(5);
+    });
+});
+
+
+describe('NgSimpleStateBaseSignalStore: Immer with custom produce', () => {
+
+    @Injectable()
+    class ImmerProduceStore extends NgSimpleStateBaseSignalStore<{ items: number[] }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { 
+                storeName: 'ImmerProduceStore',
+                immerProduce: <T>(state: T, producer: (draft: T) => void): T => {
+                    // Mock Immer produce - just clone and apply
+                    const draft = structuredClone(state);
+                    producer(draft);
+                    return draft;
+                }
+            };
+        }
+
+        initialState() {
+            return { items: [1, 2, 3] };
+        }
+
+        addItem(item: number): boolean {
+            return this.produce(draft => {
+                draft.items.push(item);
+            });
+        }
+    }
+
+    let service: ImmerProduceStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [ImmerProduceStore]
+        });
+        service = TestBed.inject(ImmerProduceStore);
+    });
+
+    it('should use custom immerProduce function', () => {
+        expect(service.addItem(4)).toBeTrue();
+        expect(service.getCurrentState().items).toEqual([1, 2, 3, 4]);
+    });
+});
+
+
+describe('NgSimpleStateBaseSignalStore: replaceState', () => {
+
+    @Injectable()
+    class ReplaceStateStore extends NgSimpleStateBaseSignalStore<{ count: number; name: string }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'ReplaceStateStore' };
+        }
+
+        initialState() {
+            return { count: 0, name: 'initial' };
+        }
+
+        replaceWithNew(): boolean {
+            return this.replaceState({ count: 100, name: 'replaced' });
+        }
+
+        replaceWithFn(): boolean {
+            return this.replaceState(state => ({ count: state.count * 2, name: 'doubled' }));
+        }
+    }
+
+    let service: ReplaceStateStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [ReplaceStateStore]
+        });
+        service = TestBed.inject(ReplaceStateStore);
+    });
+
+    it('should replace state with object', () => {
+        expect(service.replaceWithNew()).toBeTrue();
+        expect(service.getCurrentState()).toEqual({ count: 100, name: 'replaced' });
+    });
+
+    it('should replace state with function', () => {
+        service.replaceWithNew();
+        expect(service.replaceWithFn()).toBeTrue();
+        expect(service.getCurrentState()).toEqual({ count: 200, name: 'doubled' });
+    });
+});
+
+
+describe('NgSimpleStateBaseSignalStore: comparator', () => {
+
+    @Injectable()
+    class ComparatorStore extends NgSimpleStateBaseSignalStore<{ count: number; timestamp: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { 
+                storeName: 'ComparatorStore',
+                comparator: (prev, curr) => prev.count === curr.count
+            };
+        }
+
+        initialState() {
+            return { count: 0, timestamp: Date.now() };
+        }
+
+        setCount(count: number): boolean {
+            return this.setState({ count, timestamp: Date.now() });
+        }
+    }
+
+    let service: ComparatorStore;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [ComparatorStore]
+        });
+        service = TestBed.inject(ComparatorStore);
+    });
+
+    it('should detect change when count changes', () => {
+        expect(service.setCount(5)).toBeTrue();
+        expect(service.getCurrentState().count).toBe(5);
+    });
+
+    it('should detect no change when count stays same', () => {
+        service.setCount(5);
+        // Setting same count should return false due to comparator
+        expect(service.setCount(5)).toBeFalse();
+    });
+});
+

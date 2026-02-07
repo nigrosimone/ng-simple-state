@@ -276,3 +276,81 @@ describe('NgSimpleStatePlugin: Custom Plugin', () => {
         expect(result).toBeFalse();
     });
 });
+
+
+describe('persistPlugin', () => {
+    
+    it('should call save on state change', () => {
+        const savedStates: { storeName: string; state: any }[] = [];
+        
+        const plugin = persistPlugin<{ count: number }>({
+            save: (storeName, state) => {
+                savedStates.push({ storeName, state });
+            },
+            load: () => null
+        });
+        
+        plugin.onAfterStateChange!({
+            storeName: 'TestStore',
+            actionName: 'test',
+            prevState: { count: 0 },
+            nextState: { count: 1 },
+            timestamp: Date.now()
+        });
+        
+        expect(savedStates.length).toBe(1);
+        expect(savedStates[0].storeName).toBe('TestStore');
+        expect(savedStates[0].state).toEqual({ count: 1 });
+    });
+    
+    it('should respect filter function', () => {
+        const savedStates: string[] = [];
+        
+        const plugin = persistPlugin<{ count: number }>({
+            save: (storeName) => savedStates.push(storeName),
+            load: () => null,
+            filter: (storeName) => storeName.startsWith('Persist')
+        });
+        
+        plugin.onAfterStateChange!({
+            storeName: 'TestStore',
+            actionName: 'test',
+            prevState: { count: 0 },
+            nextState: { count: 1 },
+            timestamp: Date.now()
+        });
+        
+        plugin.onAfterStateChange!({
+            storeName: 'PersistStore',
+            actionName: 'test',
+            prevState: { count: 0 },
+            nextState: { count: 1 },
+            timestamp: Date.now()
+        });
+        
+        expect(savedStates).toEqual(['PersistStore']);
+    });
+});
+
+
+describe('undoRedoPlugin edge cases', () => {
+    
+    it('should use default maxHistory when not specified', () => {
+        const plugin = undoRedoPlugin();
+        expect(plugin.name).toBe('undoRedo');
+    });
+    
+    it('should handle undo on empty store', () => {
+        const plugin = undoRedoPlugin();
+        
+        expect(plugin.canUndo('EmptyStore')).toBeFalse();
+        expect(plugin.undo('EmptyStore')).toBeNull();
+    });
+    
+    it('should handle redo on empty store', () => {
+        const plugin = undoRedoPlugin();
+        
+        expect(plugin.canRedo('EmptyStore')).toBeFalse();
+        expect(plugin.redo('EmptyStore')).toBeNull();
+    });
+});
