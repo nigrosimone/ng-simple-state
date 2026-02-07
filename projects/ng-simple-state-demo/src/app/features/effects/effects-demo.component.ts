@@ -25,8 +25,18 @@ import { EffectsStore } from './effects.store';
     <div class="demo-section">
       <h4>Effect Controls</h4>
       <p>Effects can be registered and unregistered dynamically.</p>
-      <button (click)="store.unregisterLoggerEffect()">Unregister Logger Effect</button>
-      <button (click)="store.unregisterCountWatcherEffect()">Unregister CountWatcher Effect</button>
+      <div class="effect-buttons">
+        <div>
+          <strong>Logger Effect:</strong>
+          <button (click)="store.registerLoggerEffect()">Register</button>
+          <button (click)="store.unregisterLoggerEffect()">Unregister</button>
+        </div>
+        <div>
+          <strong>CountWatcher Effect:</strong>
+          <button (click)="store.registerCountWatcherEffect()">Register</button>
+          <button (click)="store.unregisterCountWatcherEffect()">Unregister</button>
+        </div>
+      </div>
       <p><em>Open browser console to see effect logs</em></p>
     </div>
 
@@ -72,6 +82,17 @@ store.destroyEffect('logger');</code></pre>
       gap: 10px;
       align-items: center;
       margin-top: 10px;
+    }
+    .effect-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .effect-buttons div {
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
     button {
       padding: 8px 16px;
