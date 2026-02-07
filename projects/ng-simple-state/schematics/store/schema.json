@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "NgSimpleStateStore",
+  "title": "NgSimpleState Store Options Schema",
+  "type": "object",
+  "description": "Creates a new NgSimpleState store",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the store",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use for the store?"
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "The path at which to create the store file, relative to the current workspace.",
+      "visible": false
+    },
+    "project": {
+      "type": "string",
+      "description": "The name of the project.",
+      "$default": {
+        "$source": "projectName"
+      }
+    },
+    "type": {
+      "type": "string",
+      "description": "The type of store to create",
+      "enum": ["signal", "rxjs"],
+      "default": "signal",
+      "x-prompt": {
+        "message": "Which type of store would you like to create?",
+        "type": "list",
+        "items": [
+          { "value": "signal", "label": "Signal Store (recommended for Angular 21+)" },
+          { "value": "rxjs", "label": "RxJS Store (Observable-based)" }
+        ]
+      }
+    },
+    "flat": {
+      "type": "boolean",
+      "description": "When true, creates files at the top level of the folder.",
+      "default": false
+    },
+    "skipTests": {
+      "type": "boolean",
+      "description": "When true, does not create \"spec.ts\" test files.",
+      "default": false
+    },
+    "prefix": {
+      "type": "string",
+      "description": "The prefix to apply to the store class name.",
+      "default": ""
+    },
+    "persistentStorage": {
+      "type": "string",
+      "description": "Enable persistent storage",
+      "enum": ["none", "local", "session"],
+      "default": "none"
+    },
+    "enableDevTool": {
+      "type": "boolean",
+      "description": "Enable Redux DevTools integration",
+      "default": true
+    }
+  },
+  "required": ["name"]
+}

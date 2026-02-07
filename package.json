@@ -22,10 +22,11 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:lib": "ng build ng-simple-state",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "start-proxy": "ng serve"
+    "docs": "typedoc --out docs projects/ng-simple-state/src/public-api.ts --readme README.md",
+    "docs:watch": "typedoc --watch --out docs projects/ng-simple-state/src/public-api.ts"
   },
   "dependencies": {
     "@angular/animations": "^21.0.0",
@@ -42,7 +43,7 @@
     "zone.js": "^0.16.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-ng-packagr": "^0.1002.0",
+    "@angular-devkit/schematics": "^21.0.0",
     "@angular-eslint/builder": "^21.0.0",
     "@angular-eslint/eslint-plugin": "^21.0.0",
     "@angular-eslint/eslint-plugin-template": "^21.0.0",
@@ -51,13 +52,12 @@
     "@angular/build": "^21.0.0",
     "@angular/cli": "^21.0.0",
     "@angular/compiler-cli": "^21.0.0",
+    "@schematics/angular": "^21.0.0",
     "@types/jasmine": "^5.1.13",
-    "@types/jasminewd2": "^2.0.13",
     "@types/lodash.isequal": "^4.5.8",
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
-    "codelyzer": "^6.0.2",
     "coveralls": "^3.1.1",
     "eslint": "^9.39.1",
     "jasmine-core": "^5.12.1",
@@ -68,12 +68,12 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
     "ng-packagr": "^21.0.0",
-    "protractor": "~7.0.0",
     "ts-node": "^10.9.2",
-    "tslint": "~6.1.0",
+    "typedoc": "^0.27.0",
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=12.13.0"
+    "node": ">=18.0.0"
   }
 }
+

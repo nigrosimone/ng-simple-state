@@ -1,0 +1,25 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["projects/ng-simple-state/src/public-api.ts"],
+  "out": "docs",
+  "name": "ng-simple-state",
+  "readme": "README.md",
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeInternal": true,
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "navigationLinks": {
+    "GitHub": "https://github.com/nigrosimone/ng-simple-state",
+    "npm": "https://www.npmjs.com/package/ng-simple-state"
+  },
+  "plugin": [],
+  "searchInComments": true,
+  "cleanOutputDir": true,
+  "sort": ["source-order"],
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  }
+}

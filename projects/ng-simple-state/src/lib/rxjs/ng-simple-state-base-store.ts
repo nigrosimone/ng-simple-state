@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy, Directive } from '@angular/core';
-import { BehaviorSubject, Observable, asyncScheduler } from 'rxjs';
+import { BehaviorSubject, Observable, asyncScheduler, Subject, takeUntil, Subscription } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
-import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState, StateFnOrReplaceState } from '../ng-simple-state-models';
+import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState, StateFnOrReplaceState, NgSimpleStateProducer } from '../ng-simple-state-models';
 
 @Injectable()
 @Directive()
@@ -12,6 +12,8 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     protected stackPoint: number = 4;
     private readonly state$: BehaviorSubject<S> = new BehaviorSubject<S>(this.firstState);
     private readonly stateObs: Observable<S> = this.state$.asObservable();
+    private readonly destroy$ = new Subject<void>();
+    private readonly registeredEffects: Map<string, Subscription> = new Map();
 
     /**
      * Return the observable of the state
@@ -26,7 +28,10 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      */
     override ngOnDestroy(): void {
         super.ngOnDestroy();
+        this.destroy$.next();
+        this.destroy$.complete();
         this.state$.complete();
+        this.destroyAllEffects();
     }
 
     /**
@@ -44,6 +49,75 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
             distinctUntilChanged(comparator ?? this.comparator as NgSimpleStateComparator),
             observeOn(asyncScheduler)
         );
+    }
+
+    /**
+     * Create an effect that reacts to state changes
+     * @param name Unique effect name
+     * @param effectFn Effect function that receives current state
+     */
+    createEffect(name: string, effectFn: (state: S) => void): void {
+        // Cleanup existing effect with same name
+        this.destroyEffect(name);
+        
+        const subscription = this.state$.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(state => {
+            effectFn(state);
+        });
+        
+        this.registeredEffects.set(name, subscription);
+    }
+
+    /**
+     * Create an effect that reacts to selected state changes
+     * @param name Unique effect name
+     * @param selector State selector
+     * @param effectFn Effect function that receives selected value
+     */
+    createSelectorEffect<K>(
+        name: string, 
+        selector: NgSimpleStateSelectState<S, K>, 
+        effectFn: (selected: K) => void
+    ): void {
+        this.destroyEffect(name);
+        
+        const subscription = this.selectState(selector).pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(value => {
+            effectFn(value);
+        });
+        
+        this.registeredEffects.set(name, subscription);
+    }
+
+    /**
+     * Destroy a specific effect by name
+     * @param name Effect name to destroy
+     */
+    destroyEffect(name: string): void {
+        const subscription = this.registeredEffects.get(name);
+        if (subscription) {
+            subscription.unsubscribe();
+            this.registeredEffects.delete(name);
+        }
+    }
+
+    /**
+     * Destroy all registered effects
+     */
+    destroyAllEffects(): void {
+        this.registeredEffects.forEach((subscription) => {
+            subscription.unsubscribe();
+        });
+        this.registeredEffects.clear();
+    }
+
+    /**
+     * Get all registered effect names
+     */
+    getEffectNames(): string[] {
+        return Array.from(this.registeredEffects.keys());
     }
 
     /**
@@ -75,6 +149,45 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
             return true;
         }
         return false;
+    }
+
+    /**
+     * Set state using Immer-style producer function for immutable updates
+     * Allows writing mutable-looking code that produces immutable updates
+     * @param producer Producer function that receives draft state
+     * @param actionName The action label into Redux DevTools
+     * @returns True if the state is changed
+     * 
+     * @example
+     * ```ts
+     * // Instead of:
+     * this.setState(state => ({ 
+     *   ...state, 
+     *   users: state.users.map(u => u.id === id ? { ...u, name } : u) 
+     * }));
+     * 
+     * // You can write:
+     * this.produce(draft => {
+     *   const user = draft.users.find(u => u.id === id);
+     *   if (user) user.name = name;
+     * });
+     * ```
+     */
+    produce(producer: NgSimpleStateProducer<S>, actionName?: string): boolean {
+        const currentState = this.getCurrentState();
+        
+        // If Immer is configured, use it
+        if (this.immerProduce) {
+            const nextState = this.immerProduce(currentState as S, producer);
+            return this.replaceState(nextState, actionName ?? 'produce');
+        }
+        
+        // Fallback: use structuredClone for a deep copy
+        const draft = structuredClone(currentState) as S;
+        const result = producer(draft);
+        const nextState = result !== undefined ? result : draft;
+        
+        return this.replaceState(nextState, actionName ?? 'produce');
     }
 
     /**

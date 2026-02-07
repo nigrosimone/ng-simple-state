@@ -1,0 +1,104 @@
+import { Injectable } from '@angular/core';
+<% if (isSignal) { %>import { Signal } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+<% } else { %>import { Observable } from 'rxjs';
+import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+<% } %>
+
+/**
+ * State interface for <%= classify(name) %>Store
+ */
+export interface <%= classify(name) %>State {
+  // TODO: Define your state properties here
+  loading: boolean;
+  error: string | null;
+}
+
+/**
+ * <%= classify(name) %> Store
+ * 
+ * @description
+ * A store for managing <%= name %> state.
+<% if (isSignal) { %> * Uses Angular Signals for reactive state management.
+<% } else { %> * Uses RxJS for reactive state management.
+<% } %> */
+@Injectable()
+<% if (isSignal) { %>export class <%= classify(name) %>Store extends NgSimpleStateBaseSignalStore<<%= classify(name) %>State> {
+<% } else { %>export class <%= classify(name) %>Store extends NgSimpleStateBaseRxjsStore<<%= classify(name) %>State> {
+<% } %>
+  /**
+   * Store configuration
+   */
+  protected storeConfig(): NgSimpleStateStoreConfig<<%= classify(name) %>State> {
+    return {
+      storeName: '<%= classify(name) %>Store',<% if (enableDevTool) { %>
+      enableDevTool: true,<% } %><% if (hasPersistentStorage) { %>
+      persistentStorage: '<%= persistentStorageValue %>',<% } %>
+    };
+  }
+
+  /**
+   * Initial state
+   */
+  protected initialState(): <%= classify(name) %>State {
+    return {
+      loading: false,
+      error: null,
+    };
+  }
+
+  // ============ Selectors ============
+
+<% if (isSignal) { %>
+  /**
+   * Select loading state
+   */
+  selectLoading(): Signal<boolean> {
+    return this.selectState(state => state.loading);
+  }
+
+  /**
+   * Select error state
+   */
+  selectError(): Signal<string | null> {
+    return this.selectState(state => state.error);
+  }
+<% } else { %>
+  /**
+   * Select loading state
+   */
+  selectLoading(): Observable<boolean> {
+    return this.selectState(state => state.loading);
+  }
+
+  /**
+   * Select error state
+   */
+  selectError(): Observable<string | null> {
+    return this.selectState(state => state.error);
+  }
+<% } %>
+
+  // ============ Actions ============
+
+  /**
+   * Set loading state
+   */
+  setLoading(loading: boolean): void {
+    this.setState({ loading });
+  }
+
+  /**
+   * Set error state
+   */
+  setError(error: string | null): void {
+    this.setState({ error, loading: false });
+  }
+
+  /**
+   * Clear error
+   */
+  clearError(): void {
+    this.setState({ error: null });
+  }
+}

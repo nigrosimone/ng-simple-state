@@ -1,11 +1,29 @@
 import { InjectionToken } from '@angular/core';
 import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
+import type { NgSimpleStatePlugin } from './plugin/ng-simple-state-plugin';
 
 export type NgSimpleStateReplaceState<S> = (currentState: Readonly<S>) => S;
 export type NgSimpleStateSetState<S> = (currentState: Readonly<S>) => Partial<S>;
 export type NgSimpleStateSelectState<S, K> = (state: Readonly<S>) => K;
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export type NgSimpleStateComparator<K = any> = (previous: K, current: K) => boolean;
+
+/**
+ * Immer-style producer function for immutable updates
+ */
+export type NgSimpleStateProducer<S> = (draft: S) => void | S;
+
+/**
+ * LinkedSignal options for derived state
+ */
+export interface NgSimpleStateLinkedOptions<S, K> {
+    /** Selector function to derive state */
+    source: (state: S) => K;
+    /** Computation function for derived value */
+    computation?: (source: K, previous?: K) => K;
+    /** Equality function */
+    equal?: (a: K, b: K) => boolean;
+}
 
 /**
  * NgSimpleState config option
@@ -32,6 +50,20 @@ export interface NgSimpleStateConfig<K = any> {
      * A function used to deserialize the state from a string. 
      */
     deserializeState?: (state: string) => K;
+    /**
+     * Enable Immer-style immutable updates
+     * When true, you can use `produce()` method for immutable updates
+     */
+    enableImmer?: boolean;
+    /**
+     * Immer produce function (optional, for custom Immer integration)
+     * Import from 'immer' and provide here
+     */
+    immerProduce?: <S>(state: S, producer: (draft: S) => void) => S;
+    /**
+     * Plugins for extending store functionality
+     */
+    plugins?: NgSimpleStatePlugin[];
 }
 
 /**

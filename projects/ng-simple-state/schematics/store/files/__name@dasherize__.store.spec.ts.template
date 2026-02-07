@@ -1,0 +1,101 @@
+import { TestBed } from '@angular/core/testing';
+import { <%= classify(name) %>Store, <%= classify(name) %>State } from './<%= dasherize(name) %>.store';
+import { provideNgSimpleState } from 'ng-simple-state';
+
+describe('<%= classify(name) %>Store', () => {
+  let store: <%= classify(name) %>Store;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        ...provideNgSimpleState(),
+        <%= classify(name) %>Store
+      ]
+    });
+    store = TestBed.inject(<%= classify(name) %>Store);
+  });
+
+  it('should be created', () => {
+    expect(store).toBeTruthy();
+  });
+
+  it('should have initial state', () => {
+    const state = store.getCurrentState();
+    expect(state.loading).toBe(false);
+    expect(state.error).toBeNull();
+  });
+
+  describe('setLoading', () => {
+    it('should set loading to true', () => {
+      store.setLoading(true);
+      expect(store.getCurrentState().loading).toBe(true);
+    });
+
+    it('should set loading to false', () => {
+      store.setLoading(true);
+      store.setLoading(false);
+      expect(store.getCurrentState().loading).toBe(false);
+    });
+  });
+
+  describe('setError', () => {
+    it('should set error and stop loading', () => {
+      store.setLoading(true);
+      store.setError('An error occurred');
+      
+      const state = store.getCurrentState();
+      expect(state.error).toBe('An error occurred');
+      expect(state.loading).toBe(false);
+    });
+  });
+
+  describe('clearError', () => {
+    it('should clear the error', () => {
+      store.setError('An error');
+      store.clearError();
+      expect(store.getCurrentState().error).toBeNull();
+    });
+  });
+
+  describe('resetState', () => {
+    it('should reset to initial state', () => {
+      store.setLoading(true);
+      store.setError('An error');
+      store.resetState();
+      
+      const state = store.getCurrentState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBeNull();
+    });
+  });
+<% if (isSignal) { %>
+  describe('selectors (Signal)', () => {
+    it('should select loading state', () => {
+      store.setLoading(true);
+      expect(store.selectLoading()()).toBe(true);
+    });
+
+    it('should select error state', () => {
+      store.setError('Test error');
+      expect(store.selectError()()).toBe('Test error');
+    });
+  });
+<% } else { %>
+  describe('selectors (RxJS)', () => {
+    it('should select loading state', (done) => {
+      store.selectLoading().subscribe(loading => {
+        expect(loading).toBe(false);
+        done();
+      });
+    });
+
+    it('should select error state', (done) => {
+      store.setError('Test error');
+      store.selectError().subscribe(error => {
+        expect(error).toBe('Test error');
+        done();
+      });
+    });
+  });
+<% } %>
+});

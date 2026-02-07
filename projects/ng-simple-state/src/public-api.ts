@@ -10,3 +10,5 @@ export * from './lib/storage/ng-simple-state-session-storage';
 export * from './lib/ng-simple-state-models';
 export * from './lib/ng-simple-state-common';
 export * from './lib/ng-simple-state-provider';
+export * from './lib/plugin/ng-simple-state-plugin';
+export * from './lib/batch/ng-simple-state-batch';

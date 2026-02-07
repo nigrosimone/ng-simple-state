@@ -1,6 +1,6 @@
 {
   "name": "ng-simple-state",
-  "version": "21.0.1",
+  "version": "21.1.0",
   "description": "Simple state management in Angular with only Services and RxJS or Signal.",
   "repository": {
     "type": "git",
@@ -10,7 +10,10 @@
     "angular",
     "state",
     "rxjs",
-    "state-management"
+    "signal",
+    "state-management",
+    "store",
+    "redux"
   ],
   "author": "Simone Nigro <nigro.simone@gmail.com>",
   "license": "MIT",
@@ -18,6 +21,10 @@
     "url": "https://github.com/nigrosimone/ng-simple-state/issues"
   },
   "homepage": "https://github.com/nigrosimone/ng-simple-state",
+  "schematics": "./schematics/collection.json",
+  "ng-add": {
+    "save": "dependencies"
+  },
   "peerDependencies": {
     "@angular/common": ">15.0.0",
     "@angular/core": ">15.0.0"

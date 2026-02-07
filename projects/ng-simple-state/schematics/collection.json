@@ -1,0 +1,15 @@
+{
+  "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "store": {
+      "description": "Generate a new NgSimpleState store",
+      "factory": "./store/index#store",
+      "schema": "./store/schema.json",
+      "aliases": ["s"]
+    },
+    "ng-add": {
+      "description": "Add NgSimpleState to your application",
+      "factory": "./ng-add/index#ngAdd"
+    }
+  }
+}

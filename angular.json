@@ -27,6 +27,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "polyfills": ["zone.js", "zone.js/testing"],
             "main": "projects/ng-simple-state/src/test.ts",
             "tsConfig": "projects/ng-simple-state/tsconfig.spec.json",
             "karmaConfig": "projects/ng-simple-state/karma.conf.js"
