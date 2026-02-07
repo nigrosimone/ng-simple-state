@@ -1,4 +1,4 @@
-import { Injectable, Directive, Signal, signal, computed, WritableSignal, effect, EffectRef, linkedSignal } from '@angular/core';
+import { Injectable, Directive, Signal, signal, computed, WritableSignal, effect, EffectRef, linkedSignal, inject, Injector, runInInjectionContext } from '@angular/core';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
 import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState, StateFnOrReplaceState, NgSimpleStateLinkedOptions, NgSimpleStateProducer } from '../ng-simple-state-models';
 
@@ -11,6 +11,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     private readonly stateSig: WritableSignal<S> = signal<S>(this.firstState);
     private readonly stateSigRo: Signal<S> = this.stateSig.asReadonly();
     private readonly registeredEffects: Map<string, EffectRef> = new Map();
+    private readonly injector = inject(Injector);
 
     /**
      * Return the Signal of the state
@@ -73,7 +74,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         
         let cleanup: (() => void) | void;
         
-        const effectRef = effect(() => {
+        const effectRef = runInInjectionContext(this.injector, () => effect(() => {
             const state = this.stateSig();
             
             // Run previous cleanup
@@ -82,7 +83,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
             }
             
             cleanup = effectFn(state);
-        });
+        }));
         
         this.registeredEffects.set(name, effectRef);
         return effectRef;
@@ -105,7 +106,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         const selectedSignal = computed(() => selector(this.stateSig()));
         let cleanup: (() => void) | void;
         
-        const effectRef = effect(() => {
+        const effectRef = runInInjectionContext(this.injector, () => effect(() => {
             const value = selectedSignal();
             
             if (cleanup) {
@@ -113,7 +114,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
             }
             
             cleanup = effectFn(value);
-        });
+        }));
         
         this.registeredEffects.set(name, effectRef);
         return effectRef;
