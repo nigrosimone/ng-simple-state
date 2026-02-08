@@ -112,6 +112,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         if (!this.plugins.length) {
             return true;
         }
+        
         const context: NgSimpleStatePluginContext<S> = {
             storeName: this.storeName,
             actionName,
