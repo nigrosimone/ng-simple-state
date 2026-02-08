@@ -112,7 +112,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         if (!this.plugins.length) {
             return true;
         }
-        
+
         const context: NgSimpleStatePluginContext<S> = {
             storeName: this.storeName,
             actionName,
@@ -136,6 +136,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Notify plugins after state change
      */
     protected notifyPluginsAfterChange(prevState: S, nextState: S, actionName: string): void {
+        if (!this.plugins.length) {
+            return;
+        }
+
         const context: NgSimpleStatePluginContext<S> = {
             storeName: this.storeName,
             actionName,
@@ -327,6 +331,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Get action name from stack trace
      */
     protected getActionName(): string {
+        if (!this.devMode && !this.plugins.length) {
+            return 'no-action-needed';
+        }
         try {
             return new Error().stack
                 ?.split('\n')[this.stackPoint]
