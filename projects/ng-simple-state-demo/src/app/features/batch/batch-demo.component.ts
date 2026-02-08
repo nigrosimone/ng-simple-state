@@ -182,15 +182,13 @@ export class BatchDemoComponent {
   }
 
   debouncedIncrement(): void {
-    const { update, flush } = createDebouncedUpdater<BatchState>(
+    const { update } = createDebouncedUpdater<BatchState>(
       (state) => this.store.setState(state),
       300
     );
     for (let i = 1; i < 5; i++) {
-      const { b } = this.store.getCurrentState();
-      update({ b: b + i });
+      update({ b: i });
     }
-    flush();
   }
 
   throttledIncrement(): void {
@@ -199,8 +197,7 @@ export class BatchDemoComponent {
       100
     );
     for (let i = 1; i < 5; i++) {
-      const { b } = this.store.getCurrentState();
-      update({ b: b + i });
+      update({ b: i });
     }
   }
 }
