@@ -44,7 +44,7 @@ import { EffectsStore } from './effects.store';
       <h4>History (from countWatcher effect)</h4>
       <button (click)="store.clearHistory()">Clear History</button>
       <ul>
-        @for (entry of history(); track entry) {
+        @for (entry of history(); track $index) {
           <li>{{ entry }}</li>
         } @empty {
           <li><em>No history yet - change the count to see entries</em></li>
