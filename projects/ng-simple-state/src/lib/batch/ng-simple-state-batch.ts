@@ -53,6 +53,8 @@ export class StateTransaction<S> {
  * 
  * @example
  * ```ts
+ * import { withTransaction } from 'ng-simple-state';
+ * 
  * await withTransaction(store, async (tx) => {
  *   store.setState({ step: 1 });
  *   await apiCall(); // If this fails, state rolls back
@@ -87,6 +89,27 @@ export async function withTransaction<S, R>(
 /**
  * Debounce state updates
  * Only the last update within the time window is applied
+ * 
+ * @example
+ * ```ts
+ * import { createDebouncedUpdater } from 'ng-simple-state';
+ *
+ * // Create a debounced updater with 300ms delay
+ * const { update, flush, cancel } = createDebouncedUpdater<MyState>(
+ *   (state) => store.setState(state),
+ *   300
+ * );
+ *
+ * // Rapid calls - only the last one is applied after 300ms
+ * update({ searchQuery: 'a' });
+ * update({ searchQuery: 'ab' });
+ * update({ searchQuery: 'abc' }); // Only this is applied after 300ms
+ *
+ * // Force immediate update
+ * flush();
+ *
+ * // Cancel any pending update
+ * cancel();
  */
 export function createDebouncedUpdater<S>(
     updateFn: (state: Partial<S>) => void,
@@ -134,6 +157,27 @@ export function createDebouncedUpdater<S>(
 /**
  * Throttle state updates
  * At most one update per time window
+ * 
+ * @example
+ * ```ts
+ * import { createThrottledUpdater } from 'ng-simple-state';
+ * 
+ * // Create a throttled updater with 100ms delay
+ * const { update, cancel } = createThrottledUpdater<MyState>(
+ *   (state) => store.setState(state),
+ *   100
+ * );
+ *
+ * // First call executes immediately, subsequent calls are throttled
+ * update({ scrollPosition: 100 }); // Executes immediately
+ * update({ scrollPosition: 150 }); // Queued
+ * update({ scrollPosition: 200 }); // Replaces queued update
+ *
+ * // After 100ms, { scrollPosition: 200 } is applied
+ *
+ * // Cancel pending throttled update
+ * cancel();
+```
  */
 export function createThrottledUpdater<S>(
     updateFn: (state: Partial<S>) => void,
