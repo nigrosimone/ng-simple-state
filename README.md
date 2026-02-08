@@ -1018,6 +1018,14 @@ ng generate ng-simple-state:store my-feature --persistentStorage=local
 
 Effects are side-effect functions that react to state changes. They are useful for logging, analytics, syncing with external services, or triggering additional actions.
 
+Each effect has a **name** (any unique string you choose) that serves as an identifier — you can use it later to destroy the effect with `destroyEffect(name)`. If you create a new effect with the same name, the previous one is automatically cleaned up.
+
+| Method | Description |
+| --- | --- |
+| `createEffect(name, effectFn)` | Runs `effectFn(state)` on every state change |
+| `createSelectorEffect(name, selector, effectFn)` | Runs `effectFn(selected)` only when the selected slice changes |
+| `destroyEffect(name)` | Destroys a specific effect by its name |
+
 #### Complete Store Example with Effects
 
 ```ts
@@ -1041,23 +1049,22 @@ export class UserStore extends NgSimpleStateBaseSignalStore<UserState> {
     return { user: null, isLoading: false, lastActivity: '' };
   }
 
-  // Register effects in constructor or in a setup method
   constructor() {
     super();
 
-    // Effect 1: Log all state changes
+    // 'logger' is an arbitrary name — used only to identify this effect for destroyEffect()
     this.createEffect('logger', (state) => {
       console.log('[UserStore] State updated:', state);
     });
 
-    // Effect 2: React only when user changes (using selector)
+    // 'userChanged' is an arbitrary name — used only to identify this effect for destroyEffect()
+    //  effect runs only when state.user changes
     this.createSelectorEffect(
       'userChanged',
-      state => state.user,  // Selector - effect runs only when this value changes
+      state => state.user,
       (user) => {
         if (user) {
           console.log('User logged in:', user.name);
-          // Could trigger analytics, notifications, etc.
         } else {
           console.log('User logged out');
         }
@@ -1079,7 +1086,7 @@ export class UserStore extends NgSimpleStateBaseSignalStore<UserState> {
     this.setState({ user: null, lastActivity: 'logout' });
   }
 
-  // Cleanup specific effect when needed
+  // Cleanup a specific effect by name
   disableLogging(): void {
     this.destroyEffect('logger');
   }
