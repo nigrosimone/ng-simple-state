@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "commonjs",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "outDir": "./out",
+    "declaration": false,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "sourceMap": true,
+    "types": ["jasmine", "node"]
+  },
+  "include": [
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "./**/files/**",
+    "./out/**"
+  ]
+}
