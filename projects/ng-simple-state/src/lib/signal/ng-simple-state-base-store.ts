@@ -14,6 +14,14 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     private readonly injector = inject(Injector);
 
     /**
+     * Apply state directly from DevTools time-travel.
+     * Sets the signal without triggering devtool send or plugins.
+     */
+    protected applyDevToolState(state: S): void {
+        this.stateSig.set(state);
+    }
+
+    /**
      * Return the Signal of the state
      * @returns Signal of the state
      */

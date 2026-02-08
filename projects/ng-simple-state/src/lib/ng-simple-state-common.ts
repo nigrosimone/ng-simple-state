@@ -23,6 +23,12 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected plugins: NgSimpleStatePlugin<S>[] = [];
     protected immerProduce?: <T>(state: T, producer: (draft: T) => void) => T;
 
+    /**
+     * Apply state directly from DevTools time-travel (bypasses devtool send and plugins).
+     * Must be implemented by concrete store classes.
+     */
+    protected abstract applyDevToolState(state: S): void;
+
     constructor() {
 
         const globalConfig: NgSimpleStateConfig<S> | null = inject(NG_SIMPLE_STORE_CONFIG, { optional: true })
@@ -69,6 +75,14 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         this.initState = this.initialState();
         if (!this.firstState) {
             this.firstState = this.initState;
+        }
+
+        // Register with DevTool for time-travel support
+        if (this.devTool) {
+            this.devTool.registerStore(this.storeName, {
+                applyState: (state: unknown) => this.applyDevToolState(state as S),
+                getInitialState: () => this.initState
+            });
         }
 
         this.devToolSend(this.firstState, 'initialState');
@@ -138,6 +152,11 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     ngOnDestroy(): void {
         this.devToolSend(undefined, 'ngOnDestroy');
+        
+        // Unregister from DevTool
+        if (this.devTool) {
+            this.devTool.unregisterStore(this.storeName);
+        }
         
         // Notify plugins of store destroy
         for (const plugin of this.plugins) {
@@ -306,7 +325,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected getActionName(): string {
         try {
             return new Error().stack
-                ?.split('\n')[this.stackPoint + 1]
+                ?.split('\n')[this.stackPoint]
                 ?.trim()
                 ?.split(' ')[1]
                 ?.split('.')[1] || 'unknown';

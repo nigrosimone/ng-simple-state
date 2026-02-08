@@ -16,6 +16,14 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     private readonly registeredEffects: Map<string, Subscription> = new Map();
 
     /**
+     * Apply state directly from DevTools time-travel.
+     * Sets the BehaviorSubject without triggering devtool send or plugins.
+     */
+    protected applyDevToolState(state: S): void {
+        this.state$.next(state);
+    }
+
+    /**
      * Return the observable of the state
      * @returns Observable of the state
      */

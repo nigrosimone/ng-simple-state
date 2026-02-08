@@ -263,7 +263,7 @@ describe('NgSimpleStateDevTool Time-travel', () => {
         (window as any)['devToolsExtension'] = null;
     });
 
-    it('should set jump callback', () => {
+    it('should set jump callback (legacy)', () => {
         const service = TestBed.inject(NgSimpleStateDevTool);
         
         let jumpedStore = '';
@@ -283,7 +283,26 @@ describe('NgSimpleStateDevTool Time-travel', () => {
         expect(jumpedState).toEqual({ count: 1 });
     });
 
-    it('should not jump without callback', () => {
+    it('should jump via store registry', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let appliedState: any = null;
+        service.registerStore('testStore', {
+            applyState: (state: unknown) => { appliedState = state; },
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        service.send('testStore', 'action1', { count: 1 });
+        const history = service.getHistory();
+        
+        service.jumpToAction(history[0].id);
+        
+        expect(appliedState).toEqual({ count: 1 });
+        
+        service.unregisterStore('testStore');
+    });
+
+    it('should not jump without callback or store', () => {
         const service = TestBed.inject(NgSimpleStateDevTool);
         
         service.send('testStore', 'action1', { count: 1 });
@@ -340,6 +359,275 @@ describe('NgSimpleStateDevTool Time-travel', () => {
         const pos2 = service.currentPosition();
         
         expect(pos2).toBeGreaterThan(pos1);
+    });
+
+    it('should not send when time-traveling', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        (service as any).isTimeTraveling = true;
+        
+        const result = service.send('testStore', 'action1', { count: 1 });
+        expect(result).toBe(false);
+        
+        (service as any).isTimeTraveling = false;
+    });
+
+    it('should expose timeTraveling getter', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        expect(service.timeTraveling).toBe(false);
+    });
+});
+
+
+describe('NgSimpleStateDevTool Redux DevTools dispatch handlers', () => {
+
+    let devToolsExt: DevToolsExtension;
+    let subscribers: ((msg: any) => void)[];
+    let initCalledWith: any;
+
+    beforeEach(() => {
+        subscribers = [];
+        initCalledWith = undefined;
+        
+        (window as any)['devToolsExtension'] = {
+            connect(): any {
+                return {
+                    send: (name: string, state: any) => {
+                        devToolsExt = { name, state } as any;
+                    },
+                    init: (state: any) => {
+                        initCalledWith = structuredClone(state);
+                    },
+                    subscribe: (fn: (msg: any) => void) => {
+                        subscribers.push(fn);
+                        return () => {};
+                    }
+                };
+            }
+        };
+
+        TestBed.configureTestingModule({
+            providers: [provideNgSimpleState({ enableDevTool: true })]
+        });
+        const ngZone = TestBed.inject(NgZone);
+        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+    });
+
+    afterEach(() => {
+        (window as any)['devToolsExtension'] = null;
+    });
+
+    function dispatch(payload: any, state?: string) {
+        for (const sub of subscribers) {
+            sub({ type: 'DISPATCH', payload, state });
+        }
+    }
+
+    it('should handle JUMP_TO_STATE with store registry', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let appliedState: any = null;
+        service.registerStore('counter', {
+            applyState: (state: unknown) => { appliedState = state; },
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        service.send('counter', 'increment', { count: 5 });
+        
+        dispatch(
+            { type: 'JUMP_TO_STATE', index: 0 },
+            JSON.stringify({ counter: { count: 3 } })
+        );
+        
+        expect(appliedState).toEqual({ count: 3 });
+        service.unregisterStore('counter');
+    });
+
+    it('should handle JUMP_TO_ACTION', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let appliedState: any = null;
+        service.registerStore('counter', {
+            applyState: (state: unknown) => { appliedState = state; },
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        dispatch(
+            { type: 'JUMP_TO_ACTION', actionId: 1 },
+            JSON.stringify({ counter: { count: 7 } })
+        );
+        
+        expect(appliedState).toEqual({ count: 7 });
+        service.unregisterStore('counter');
+    });
+
+    it('should handle TOGGLE_ACTION (skip)', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let appliedState: any = null;
+        service.registerStore('counter', {
+            applyState: (state: unknown) => { appliedState = state; },
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        dispatch(
+            { type: 'TOGGLE_ACTION', id: 1 },
+            JSON.stringify({ counter: { count: 10 } })
+        );
+        
+        expect(appliedState).toEqual({ count: 10 });
+        service.unregisterStore('counter');
+    });
+
+    it('should handle RESET', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let appliedState: any = null;
+        service.registerStore('counter', {
+            applyState: (state: unknown) => { appliedState = state; },
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        service.send('counter', 'increment', { count: 5 });
+        expect(service.getHistory().length).toBe(1);
+        
+        dispatch({ type: 'RESET' });
+        
+        expect(appliedState).toEqual({ count: 0 });
+        expect(service.getHistory().length).toBe(0);
+        expect(initCalledWith).toEqual({ counter: { count: 0 } });
+        
+        service.unregisterStore('counter');
+    });
+
+    it('should handle ROLLBACK', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let appliedState: any = null;
+        service.registerStore('counter', {
+            applyState: (state: unknown) => { appliedState = state; },
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        service.send('counter', 'increment', { count: 5 });
+        
+        dispatch(
+            { type: 'ROLLBACK' },
+            JSON.stringify({ counter: { count: 2 } })
+        );
+        
+        expect(appliedState).toEqual({ count: 2 });
+        expect(service.getHistory().length).toBe(0);
+        
+        service.unregisterStore('counter');
+    });
+
+    it('should handle COMMIT', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        service.registerStore('counter', {
+            applyState: () => {},
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        service.send('counter', 'increment', { count: 5 });
+        expect(service.getHistory().length).toBe(1);
+        
+        dispatch({ type: 'COMMIT' });
+        
+        expect(service.getHistory().length).toBe(0);
+        expect(initCalledWith).toEqual({ counter: { count: 5 } });
+        
+        service.unregisterStore('counter');
+    });
+
+    it('should suppress send during time-travel', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let sendCount = 0;
+        const originalSend = service.send.bind(service);
+        
+        service.registerStore('counter', {
+            applyState: () => {
+                // Try to send during time-travel — should be suppressed
+                const result = service.send('counter', 'sideEffect', { count: 99 });
+                if (result) { sendCount++; }
+            },
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        dispatch(
+            { type: 'JUMP_TO_STATE', index: 0 },
+            JSON.stringify({ counter: { count: 3 } })
+        );
+        
+        expect(sendCount).toBe(0);
+        service.unregisterStore('counter');
+    });
+
+    it('should handle RESET with multiple stores', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        const appliedStates: Record<string, any> = {};
+        
+        service.registerStore('store1', {
+            applyState: (state: unknown) => { appliedStates['store1'] = state; },
+            getInitialState: () => ({ val: 'a' })
+        });
+        service.registerStore('store2', {
+            applyState: (state: unknown) => { appliedStates['store2'] = state; },
+            getInitialState: () => ({ val: 'b' })
+        });
+        
+        service.send('store1', 'update', { val: 'x' });
+        service.send('store2', 'update', { val: 'y' });
+        
+        dispatch({ type: 'RESET' });
+        
+        expect(appliedStates['store1']).toEqual({ val: 'a' });
+        expect(appliedStates['store2']).toEqual({ val: 'b' });
+        
+        service.unregisterStore('store1');
+        service.unregisterStore('store2');
+    });
+
+    it('should handle PAUSE_RECORDING', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        expect(service.isPaused()).toBe(false);
+        
+        dispatch({ type: 'PAUSE_RECORDING' });
+        
+        expect(service.isPaused()).toBe(true);
+        
+        dispatch({ type: 'PAUSE_RECORDING' });
+        
+        expect(service.isPaused()).toBe(false);
+    });
+
+    it('should handle JUMP_TO_STATE without state gracefully', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        let applyCount = 0;
+        service.registerStore('counter', {
+            applyState: () => { applyCount++; },
+            getInitialState: () => ({ count: 0 })
+        });
+        
+        dispatch({ type: 'JUMP_TO_STATE', index: 0 });
+        
+        expect(applyCount).toBe(0);
+        service.unregisterStore('counter');
+    });
+
+    it('should handle ROLLBACK without state gracefully', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        
+        dispatch({ type: 'ROLLBACK' });
+        
+        // Should not throw
+        expect(service.getHistory().length).toBe(0);
     });
 });
 
