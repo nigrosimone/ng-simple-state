@@ -322,11 +322,10 @@ describe('Batch Operations Integration Tests', () => {
     describe('StateTransaction Class', () => {
 
         it('should create transaction with snapshot', () => {
-            let capturedState: OrderState | null = null;
             
             const tx = new StateTransaction<OrderState>(
                 () => orderStore.getCurrentState(),
-                (state) => { capturedState = state; orderStore.replaceState(state); }
+                (state) => { orderStore.replaceState(state); }
             );
 
             expect(tx.isActive).toBeTrue();

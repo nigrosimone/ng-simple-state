@@ -273,7 +273,7 @@ class DeepComparisonStore extends NgSimpleStateBaseSignalStore<DeepState> {
     }
 
     setNestedValue(value: number): boolean {
-        return this.setState(state => ({
+        return this.setState(() => ({
             data: {
                 nested: { value }
             }
@@ -295,7 +295,7 @@ class DeepComparisonStore extends NgSimpleStateBaseSignalStore<DeepState> {
 
 // --- Array State Tests ---
 
-interface ArrayState extends Array<{ id: number; name: string }> {}
+type ArrayState = Array<{ id: number; name: string }>;
 
 @Injectable()
 class ArrayStore extends NgSimpleStateBaseSignalStore<ArrayState> {

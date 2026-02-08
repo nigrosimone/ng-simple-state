@@ -507,10 +507,9 @@ describe('NgSimpleStateBaseRxjsStore: effects', () => {
     });
 
     it('should create and destroy effect', () => {
-        let callCount = 0;
         
         service.createEffect('testEffect', () => {
-            callCount++;
+            // Effect logic (can be empty for this test)
         });
         
         expect(service.getEffectNames()).toContain('testEffect');
@@ -521,10 +520,9 @@ describe('NgSimpleStateBaseRxjsStore: effects', () => {
     });
 
     it('should create selector effect', () => {
-        let lastValue: number | null = null;
         
-        service.createSelectorEffect('selectorEffect', state => state.count, (count) => {
-            lastValue = count;
+        service.createSelectorEffect('selectorEffect', state => state.count, () => {
+            // Effect logic using selected count (can be empty for this test)
         });
         
         expect(service.getEffectNames()).toContain('selectorEffect');

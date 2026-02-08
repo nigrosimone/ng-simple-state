@@ -811,7 +811,7 @@ describe('NgSimpleStateBaseSignalStore: Plugin lifecycle hooks', () => {
     });
 
     it('should call onStoreInit when store is created', () => {
-        const service = TestBed.inject(LifecyclePluginStore);
+        TestBed.inject(LifecyclePluginStore);
         expect(onStoreInitSpy).toHaveBeenCalledWith('LifecyclePluginStore', { value: 0 });
     });
 
@@ -884,7 +884,7 @@ describe('NgSimpleStateBaseSignalStore: DevTool time-travel', () => {
     });
 
     it('should register getInitialState callback with DevTool', () => {
-        const service = TestBed.inject(TimeTravelStore);
+        TestBed.inject(TimeTravelStore);
         expect(mockDevTool.registerStore).toHaveBeenCalled();
         
         const initialState = getInitialStateSpy();

@@ -400,7 +400,6 @@ describe('NgSimpleStateDevTool Time-travel', () => {
 
 describe('NgSimpleStateDevTool Redux DevTools dispatch handlers', () => {
 
-    let devToolsExt: DevToolsExtension;
     let subscribers: ((msg: any) => void)[];
     let initCalledWith: any;
 
@@ -411,8 +410,8 @@ describe('NgSimpleStateDevTool Redux DevTools dispatch handlers', () => {
         (window as any)['devToolsExtension'] = {
             connect(): any {
                 return {
-                    send: (name: string, state: any) => {
-                        devToolsExt = { name, state } as any;
+                    send: () => {
+                        
                     },
                     init: (state: any) => {
                         initCalledWith = structuredClone(state);
@@ -564,7 +563,6 @@ describe('NgSimpleStateDevTool Redux DevTools dispatch handlers', () => {
         const service = TestBed.inject(NgSimpleStateDevTool);
 
         let sendCount = 0;
-        const originalSend = service.send.bind(service);
 
         service.registerStore('counter', {
             applyState: () => {

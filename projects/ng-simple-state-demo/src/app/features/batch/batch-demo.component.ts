@@ -177,6 +177,7 @@ export class BatchDemoComponent {
         throw new Error('Simulated failure!');
         // tx.commit(); - never reached
       });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {
       this.transactionStatus.set(`Transaction rolled back! State restored to: A=${beforeState.a}, B=${beforeState.b}`);
     }

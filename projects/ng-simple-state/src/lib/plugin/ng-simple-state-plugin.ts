@@ -62,7 +62,7 @@ export const NG_SIMPLE_STATE_PLUGINS = new InjectionToken<NgSimpleStatePlugin[]>
 /**
  * Store-bound undo/redo helper — no store name needed
  */
-export interface NgSimpleStateUndoRedoForStore<S> {
+export interface NgSimpleStateUndoRedoForStore {
     /** Undo: restores the previous state on the store. Returns true if successful. */
     undo(): boolean;
     /** Redo: restores the next state on the store. Returns true if successful. */
@@ -99,7 +99,7 @@ export type NgSimpleStateUndoRedoPlugin<S = unknown> = NgSimpleStatePlugin<S> & 
     selectCanRedo: (storeName: string) => Signal<boolean>;
     clearHistory: (storeName: string) => void;
     /** Returns a store-bound helper that eliminates storeName strings */
-    forStore: (store: NgSimpleStateStoreRef<S>) => NgSimpleStateUndoRedoForStore<S>;
+    forStore: (store: NgSimpleStateStoreRef<S>) => NgSimpleStateUndoRedoForStore;
 };
 
 /**
@@ -240,7 +240,7 @@ export function undoRedoPlugin<S>(options?: {
             }
         },
         
-        forStore(store: NgSimpleStateStoreRef<S>): NgSimpleStateUndoRedoForStore<S> {
+        forStore(store: NgSimpleStateStoreRef<S>): NgSimpleStateUndoRedoForStore {
             const name = store.storeName;
             return {
                 undo(): boolean {

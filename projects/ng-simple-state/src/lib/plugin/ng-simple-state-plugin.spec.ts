@@ -218,16 +218,16 @@ describe('NgSimpleStatePlugin: Custom Plugin', () => {
         
         const customPlugin: NgSimpleStatePlugin = {
             name: 'custom',
-            onBeforeStateChange(context) {
+            onBeforeStateChange() {
                 beforeCount++;
             },
-            onAfterStateChange(context) {
+            onAfterStateChange() {
                 afterCount++;
             },
-            onStoreInit(storeName, initialState) {
+            onStoreInit() {
                 initCount++;
             },
-            onStoreDestroy(storeName) {
+            onStoreDestroy() {
                 destroyCount++;
             }
         };
@@ -260,7 +260,7 @@ describe('NgSimpleStatePlugin: Custom Plugin', () => {
     it('should allow onBeforeStateChange to prevent state change', () => {
         const blockingPlugin: NgSimpleStatePlugin = {
             name: 'blocking',
-            onBeforeStateChange(context) {
+            onBeforeStateChange() {
                 return false; // Block all changes
             }
         };

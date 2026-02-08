@@ -318,7 +318,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         // avoid function call if not necessary
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         this.devTool && this.devToolSend(state, resolvedActionName);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         this.storage && this.statePersist(state);
 
         // Notify plugins after change
@@ -394,7 +396,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         // avoid function call if not necessary
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         this.devTool && this.devToolSend(newState, resolvedActionName);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         this.storage && this.statePersist(newState);
 
         // Notify plugins after change

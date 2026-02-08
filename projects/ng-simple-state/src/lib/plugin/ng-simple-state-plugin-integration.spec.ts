@@ -397,7 +397,7 @@ describe('undoRedoPlugin.forStore() Integration', () => {
 
     let store: ItemsStore;
     let plugin: NgSimpleStateUndoRedoPlugin<ItemsState>;
-    let history: NgSimpleStateUndoRedoForStore<ItemsState>;
+    let history: NgSimpleStateUndoRedoForStore;
 
     beforeEach(() => {
         plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });

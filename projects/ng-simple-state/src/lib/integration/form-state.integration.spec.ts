@@ -338,7 +338,7 @@ class CounterWithHistoryStore extends NgSimpleStateBaseSignalStore<CounterWithHi
     linkedCounter(): WritableSignal<number> {
         return this.linkedState({
             source: state => state.current,
-            computation: (value, previous) => {
+            computation: (value) => {
                 return value;
             }
         });
