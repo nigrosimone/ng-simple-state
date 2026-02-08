@@ -11,8 +11,6 @@ import {
   strings,
   noop
 } from '@angular-devkit/schematics';
-import { normalize, Path } from '@angular-devkit/core';
-
 export interface StoreOptions {
   name: string;
   path?: string;
@@ -30,7 +28,7 @@ function buildPath(options: StoreOptions): string {
   if (!options.flat) {
     path = `${path}/${strings.dasherize(options.name)}`;
   }
-  return normalize(path as Path);
+  return path.replace(/\\/g, '/');
 }
 
 export function store(options: StoreOptions): Rule {
