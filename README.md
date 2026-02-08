@@ -1153,7 +1153,6 @@ Usage in component:
   selector: 'app-profile',
   template: `
     <p>Full Name: {{ store.fullName() }}</p>
-    <p>Is Adult: {{ store.isAdult() ? 'Yes' : 'No' }}</p>
     <input [value]="firstName()" (input)="updateFirstName($event)" placeholder="First name" />
     <input [value]="lastName()" (input)="updateLastName($event)" placeholder="Last name" />
   `
