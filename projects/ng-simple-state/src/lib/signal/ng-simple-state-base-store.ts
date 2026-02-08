@@ -58,7 +58,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      */
     linkedState<K>(options: NgSimpleStateLinkedOptions<S, K>): WritableSignal<K> {
         const sourceSignal = computed(() => options.source(this.stateSig()));
-        
+
         return linkedSignal({
             source: sourceSignal,
             computation: (source, previous) => {
@@ -71,30 +71,47 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     }
 
     /**
+     * Create an effect from a signal
+     * @param name Unique effect name
+     * @param sourceSignal Signal source
+     * @param effectFn Effect function that receives the signal value
+     * @returns EffectRef for cleanup
+     */
+    private createEffectFromSignal<T>(
+        name: string,
+        sourceSignal: () => T,
+        effectFn: (value: T) => void | (() => void)
+    ): EffectRef {
+        // Cleanup existing effect with same name
+        this.destroyEffect(name);
+
+        let cleanup: (() => void) | void;
+
+        const effectRef = runInInjectionContext(this.injector, () =>
+            effect(() => {
+                const value = sourceSignal();
+
+                // Run previous cleanup
+                if (cleanup) {
+                    cleanup();
+                }
+
+                cleanup = effectFn(value);
+            })
+        );
+
+        this.registeredEffects.set(name, effectRef);
+        return effectRef;
+    }
+
+    /**
      * Create an effect that reacts to state changes
      * @param name Unique effect name
      * @param effectFn Effect function that receives current state
      * @returns EffectRef for cleanup
      */
     createEffect(name: string, effectFn: (state: S) => void | (() => void)): EffectRef {
-        // Cleanup existing effect with same name
-        this.destroyEffect(name);
-        
-        let cleanup: (() => void) | void;
-        
-        const effectRef = runInInjectionContext(this.injector, () => effect(() => {
-            const state = this.stateSig();
-            
-            // Run previous cleanup
-            if (cleanup) {
-                cleanup();
-            }
-            
-            cleanup = effectFn(state);
-        }));
-        
-        this.registeredEffects.set(name, effectRef);
-        return effectRef;
+        return this.createEffectFromSignal(name, this.stateSig, effectFn);
     }
 
     /**
@@ -105,27 +122,12 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * @returns EffectRef for cleanup
      */
     createSelectorEffect<K>(
-        name: string, 
-        selector: NgSimpleStateSelectState<S, K>, 
+        name: string,
+        selector: NgSimpleStateSelectState<S, K>,
         effectFn: (selected: K) => void | (() => void)
     ): EffectRef {
-        this.destroyEffect(name);
-        
         const selectedSignal = computed(() => selector(this.stateSig()));
-        let cleanup: (() => void) | void;
-        
-        const effectRef = runInInjectionContext(this.injector, () => effect(() => {
-            const value = selectedSignal();
-            
-            if (cleanup) {
-                cleanup();
-            }
-            
-            cleanup = effectFn(value);
-        }));
-        
-        this.registeredEffects.set(name, effectRef);
-        return effectRef;
+        return this.createEffectFromSignal(name, selectedSignal, effectFn);
     }
 
     /**
@@ -212,18 +214,18 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      */
     produce(producer: NgSimpleStateProducer<S>, actionName?: string): boolean {
         const currentState = this.getCurrentState();
-        
+
         // If Immer is configured, use it
         if (this.immerProduce) {
             const nextState = this.immerProduce(currentState as S, producer);
             return this.replaceState(nextState, actionName ?? 'produce');
         }
-        
+
         // Fallback: use structuredClone for a deep copy
         const draft = structuredClone(currentState) as S;
         const result = producer(draft);
         const nextState = result !== undefined ? result : draft;
-        
+
         return this.replaceState(nextState, actionName ?? 'produce');
     }
 

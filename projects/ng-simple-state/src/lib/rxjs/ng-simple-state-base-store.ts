@@ -60,21 +60,35 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     }
 
     /**
+     * Create an effect from an observable
+     * @param name Unique effect name
+     * @param source$ Observable source
+     * @param effectFn Effect function that receives the observable value
+     */
+    private createEffectFromObservable<T>(
+        name: string,
+        source$: Observable<T>,
+        effectFn: (value: T) => void
+    ): void {
+        // Cleanup existing effect with same name
+        this.destroyEffect(name);
+
+        const subscription = source$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(value => {
+                effectFn(value);
+            });
+
+        this.registeredEffects.set(name, subscription);
+    }
+
+    /**
      * Create an effect that reacts to state changes
      * @param name Unique effect name
      * @param effectFn Effect function that receives current state
      */
     createEffect(name: string, effectFn: (state: S) => void): void {
-        // Cleanup existing effect with same name
-        this.destroyEffect(name);
-        
-        const subscription = this.state$.pipe(
-            takeUntil(this.destroy$)
-        ).subscribe(state => {
-            effectFn(state);
-        });
-        
-        this.registeredEffects.set(name, subscription);
+        this.createEffectFromObservable(name, this.state$, effectFn);
     }
 
     /**
@@ -84,19 +98,15 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @param effectFn Effect function that receives selected value
      */
     createSelectorEffect<K>(
-        name: string, 
-        selector: NgSimpleStateSelectState<S, K>, 
+        name: string,
+        selector: NgSimpleStateSelectState<S, K>,
         effectFn: (selected: K) => void
     ): void {
-        this.destroyEffect(name);
-        
-        const subscription = this.selectState(selector).pipe(
-            takeUntil(this.destroy$)
-        ).subscribe(value => {
-            effectFn(value);
-        });
-        
-        this.registeredEffects.set(name, subscription);
+        this.createEffectFromObservable(
+            name,
+            this.selectState(selector),
+            effectFn
+        );
     }
 
     /**
@@ -183,18 +193,18 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      */
     produce(producer: NgSimpleStateProducer<S>, actionName?: string): boolean {
         const currentState = this.getCurrentState();
-        
+
         // If Immer is configured, use it
         if (this.immerProduce) {
             const nextState = this.immerProduce(currentState as S, producer);
             return this.replaceState(nextState, actionName ?? 'produce');
         }
-        
+
         // Fallback: use structuredClone for a deep copy
         const draft = structuredClone(currentState) as S;
         const result = producer(draft);
         const nextState = result !== undefined ? result : draft;
-        
+
         return this.replaceState(nextState, actionName ?? 'produce');
     }
 
