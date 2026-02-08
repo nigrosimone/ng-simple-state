@@ -14,7 +14,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected abstract stackPoint: number;
     protected devTool?: NgSimpleStateDevTool;
     protected storage?: NgSimpleStateStorage<S>;
-    protected storeName: string;
+    readonly storeName: string;
     protected firstState!: S;
     protected initState!: S;
     protected isArray: boolean;

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PluginsState, PluginsStore } from './plugins.store';
-import { NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin } from 'projects/ng-simple-state/src/public-api';
+import { NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin, NgSimpleStateUndoRedoForStore } from 'projects/ng-simple-state/src/public-api';
 
 @Component({
   selector: 'app-plugins-demo',
@@ -58,23 +58,20 @@ bootstrapApplication(AppComponent, &#123;
 
     <div class="code-section">
       <h4>Usage in Component</h4>
-      <pre><code>// Check availability
-undoRedo.canUndo('MyStore')  // boolean
-undoRedo.canRedo('MyStore')  // boolean
+      <pre><code>// Inject the plugin and bind to a store
+const undoRedo = inject(NG_SIMPLE_STATE_UNDO_REDO);
+const history = undoRedo.forStore(this.store);
 
-// Get previous/next state
-const prevState = undoRedo.undo('MyStore');
-if (prevState) &#123;
-  store.replaceState(prevState);
-&#125;
+// Reactive signals
+canUndo = history.selectCanUndo();
+canRedo = history.selectCanRedo();
 
-const nextState = undoRedo.redo('MyStore');
-if (nextState) &#123;
-  store.replaceState(nextState);
-&#125;
+// Undo / Redo (calls replaceState automatically)
+history.undo();
+history.redo();
 
 // Clear history
-undoRedo.clearHistory('MyStore');</code></pre>
+history.clearHistory();</code></pre>
     </div>
 
     <div class="code-section">
@@ -178,27 +175,20 @@ const myPlugin: NgSimpleStatePlugin = &#123;
 export class PluginsDemoComponent {
   store = inject(PluginsStore);
   private readonly undoRedo = inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<PluginsState>;
+  private readonly history: NgSimpleStateUndoRedoForStore<PluginsState> = this.undoRedo.forStore(this.store);
   
   items: Signal<string[]> = this.store.selectItems();
   lastAction: Signal<string> = this.store.selectLastAction();
   itemCount: Signal<number> = this.store.selectItemCount();
   
-  private readonly storeName = 'PluginsStore';
-  
-  canUndo: Signal<boolean> = this.undoRedo.selectCanUndo(this.storeName);
-  canRedo: Signal<boolean> = this.undoRedo.selectCanRedo(this.storeName);
+  canUndo: Signal<boolean> = this.history.selectCanUndo();
+  canRedo: Signal<boolean> = this.history.selectCanRedo();
   
   undo(): void {
-    const prevState = this.undoRedo.undo(this.storeName);
-    if (prevState) {
-      this.store.replaceState(prevState);
-    }
+    this.history.undo();
   }
   
   redo(): void {
-    const nextState = this.undoRedo.redo(this.storeName);
-    if (nextState) {
-      this.store.replaceState(nextState);
-    }
+    this.history.redo();
   }
 }

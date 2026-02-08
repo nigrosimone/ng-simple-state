@@ -60,6 +60,34 @@ export const NG_SIMPLE_STATE_PLUGINS = new InjectionToken<NgSimpleStatePlugin[]>
 );
 
 /**
+ * Store-bound undo/redo helper — no store name needed
+ */
+export interface NgSimpleStateUndoRedoForStore<S> {
+    /** Undo: restores the previous state on the store. Returns true if successful. */
+    undo(): boolean;
+    /** Redo: restores the next state on the store. Returns true if successful. */
+    redo(): boolean;
+    /** Whether undo is available (plain check) */
+    canUndo(): boolean;
+    /** Whether redo is available (plain check) */
+    canRedo(): boolean;
+    /** Reactive signal for canUndo */
+    selectCanUndo(): Signal<boolean>;
+    /** Reactive signal for canRedo */
+    selectCanRedo(): Signal<boolean>;
+    /** Clear undo/redo history */
+    clearHistory(): void;
+}
+
+/**
+ * Minimal store shape accepted by forStore (avoids circular import)
+ */
+export interface NgSimpleStateStoreRef<S> {
+    readonly storeName: string;
+    replaceState(newState: S): boolean;
+}
+
+/**
  * Type for the undoRedoPlugin instance
  */
 export type NgSimpleStateUndoRedoPlugin<S = unknown> = NgSimpleStatePlugin<S> & {
@@ -70,6 +98,8 @@ export type NgSimpleStateUndoRedoPlugin<S = unknown> = NgSimpleStatePlugin<S> & 
     selectCanUndo: (storeName: string) => Signal<boolean>;
     selectCanRedo: (storeName: string) => Signal<boolean>;
     clearHistory: (storeName: string) => void;
+    /** Returns a store-bound helper that eliminates storeName strings */
+    forStore: (store: NgSimpleStateStoreRef<S>) => NgSimpleStateUndoRedoForStore<S>;
 };
 
 /**
@@ -208,6 +238,52 @@ export function undoRedoPlugin<S>(options?: {
                 s.canUndo.set(false);
                 s.canRedo.set(false);
             }
+        },
+        
+        forStore(store: NgSimpleStateStoreRef<S>): NgSimpleStateUndoRedoForStore<S> {
+            const name = store.storeName;
+            return {
+                undo(): boolean {
+                    const h = getOrCreate(name);
+                    if (h.past.length === 0) {
+                        return false;
+                    }
+                    h.undoRedoMode = 'undo';
+                    const prevState = h.past.pop()!;
+                    store.replaceState(prevState);
+                    return true;
+                },
+                redo(): boolean {
+                    const h = getOrCreate(name);
+                    if (h.future.length === 0) {
+                        return false;
+                    }
+                    h.undoRedoMode = 'redo';
+                    const nextState = h.future.pop()!;
+                    store.replaceState(nextState);
+                    return true;
+                },
+                canUndo(): boolean {
+                    return getOrCreate(name).past.length > 0;
+                },
+                canRedo(): boolean {
+                    return getOrCreate(name).future.length > 0;
+                },
+                selectCanUndo(): Signal<boolean> {
+                    return getOrCreateSignals(name).canUndo.asReadonly();
+                },
+                selectCanRedo(): Signal<boolean> {
+                    return getOrCreateSignals(name).canRedo.asReadonly();
+                },
+                clearHistory(): void {
+                    history.delete(name);
+                    const s = signals.get(name);
+                    if (s) {
+                        s.canUndo.set(false);
+                        s.canRedo.set(false);
+                    }
+                }
+            };
         }
     };
 }

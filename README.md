@@ -1185,6 +1185,7 @@ Extend store functionality with plugins. Plugins can intercept state changes, pe
 Enable state history with undo/redo functionality:
 
 ```ts
+import { isDevMode } from '@angular/core';
 import { provideNgSimpleState, undoRedoPlugin } from 'ng-simple-state';
 
 bootstrapApplication(AppComponent, {
@@ -1197,11 +1198,13 @@ bootstrapApplication(AppComponent, {
 });
 ```
 
-Usage in component:
+The `undoRedoPlugin` is automatically registered as an injectable token (`NG_SIMPLE_STATE_UNDO_REDO`).  
+Use `inject()` and `forStore()`:
 
 ```ts
-import { Component, inject } from '@angular/core';
-import { CounterStore } from './counter-store';
+import { Component, inject, Signal } from '@angular/core';
+import { NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin } from 'ng-simple-state';
+import { CounterState, CounterStore } from './counter-store';
 
 @Component({
   selector: 'app-counter',
@@ -1210,54 +1213,47 @@ import { CounterStore } from './counter-store';
     <button (click)="store.increment()">+</button>
     <button (click)="store.decrement()">-</button>
     <hr>
-    <button [disabled]="!canUndo()" (click)="undo()">Undo</button>
-    <button [disabled]="!canRedo()" (click)="redo()">Redo</button>
-  `
+    <button [disabled]="!canUndo()" (click)="history.undo()">Undo</button>
+    <button [disabled]="!canRedo()" (click)="history.redo()">Redo</button>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CounterComponent {
   store = inject(CounterStore);
   counter = this.store.selectCount();
-  
-  // Inject the undoRedo plugin instance (exported from your providers file)
-  private undoRedo = inject(UNDO_REDO_PLUGIN);
-  
-  canUndo(): boolean {
-    return this.undoRedo.canUndo('CounterStore');
-  }
-  
-  canRedo(): boolean {
-    return this.undoRedo.canRedo('CounterStore');
-  }
-  
-  undo(): void {
-    const prevState = this.undoRedo.undo('CounterStore');
-    if (prevState) {
-      this.store.replaceState(prevState);
-    }
-  }
-  
-  redo(): void {
-    const nextState = this.undoRedo.redo('CounterStore');
-    if (nextState) {
-      this.store.replaceState(nextState);
-    }
-  }
+
+  // Inject via token and bind to the store — no store name strings needed
+  private readonly undoRedo = inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<CounterState>;
+  private readonly history = this.undoRedo.forStore(this.store);
+
+  // Reactive signals (work with OnPush / zoneless)
+  canUndo: Signal<boolean> = this.history.selectCanUndo();
+  canRedo: Signal<boolean> = this.history.selectCanRedo();
 }
 ```
+
+`forStore(store)` returns a `NgSimpleStateUndoRedoForStore<S>` helper bound to the store.  
+`undo()` and `redo()` call `replaceState` automatically — no manual wiring needed.
 
 #### undoRedoPlugin API
 
 ```ts
-// Check if undo/redo is available
-undoRedo.canUndo(storeName: string): boolean;
-undoRedo.canRedo(storeName: string): boolean;
+const history = undoRedo.forStore(store);
 
-// Get previous/next state (does not apply it automatically)
-undoRedo.undo(storeName: string): S | null;
-undoRedo.redo(storeName: string): S | null;
+// Reactive signals (Signal<boolean>)
+history.selectCanUndo();
+history.selectCanRedo();
 
-// Clear history for a store
-undoRedo.clearHistory(storeName: string): void;
+// Undo/Redo — applies state automatically, returns true if successful
+history.undo();
+history.redo();
+
+// Plain boolean checks
+history.canUndo();
+history.canRedo();
+
+// Clear history
+history.clearHistory();
 ```
 
 #### Create Custom Plugin
