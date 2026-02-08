@@ -997,8 +997,6 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
 }
 ```
 
-## New Features (v21.1.0+)
-
 ### Schematics CLI
 
 Generate stores quickly using Angular CLI:
@@ -1018,7 +1016,7 @@ ng generate ng-simple-state:store my-feature --persistentStorage=local
 
 Effects are side-effect functions that react to state changes. They are useful for logging, analytics, syncing with external services, or triggering additional actions.
 
-Each effect has a **name** (any unique string you choose) that serves as an identifier — you can use it later to destroy the effect with `destroyEffect(name)`. If you create a new effect with the same name, the previous one is automatically cleaned up.
+Each effect has a **name** (any unique string you choose) that serves as an identifier, you can use it later to destroy the effect with `destroyEffect(name)`. If you create a new effect with the same name, the previous one is automatically cleaned up.
 
 | Method | Description |
 | --- | --- |
@@ -1052,12 +1050,10 @@ export class UserStore extends NgSimpleStateBaseSignalStore<UserState> {
   constructor() {
     super();
 
-    // 'logger' is an arbitrary name — used only to identify this effect for destroyEffect()
     this.createEffect('logger', (state) => {
       console.log('[UserStore] State updated:', state);
     });
 
-    // 'userChanged' is an arbitrary name — used only to identify this effect for destroyEffect()
     //  effect runs only when state.user changes
     this.createSelectorEffect(
       'userChanged',
@@ -1072,12 +1068,10 @@ export class UserStore extends NgSimpleStateBaseSignalStore<UserState> {
     );
   }
 
-  // Selectors
   selectUser(): Signal<{ id: number; name: string } | null> {
     return this.selectState(state => state.user);
   }
 
-  // Actions
   login(user: { id: number; name: string }): void {
     this.setState({ user, isLoading: false, lastActivity: 'login' });
   }
@@ -1086,7 +1080,6 @@ export class UserStore extends NgSimpleStateBaseSignalStore<UserState> {
     this.setState({ user: null, lastActivity: 'logout' });
   }
 
-  // Cleanup a specific effect by name
   disableLogging(): void {
     this.destroyEffect('logger');
   }
@@ -1144,12 +1137,10 @@ export class ProfileStore extends NgSimpleStateBaseSignalStore<ProfileState> {
     computation: (name) => `${name.first} ${name.last}`.trim()
   });
 
-  // Selectors
   selectFirstName(): Signal<string> {
     return this.selectState(state => state.firstName);
   }
 
-  // Actions
   setName(firstName: string, lastName: string): void {
     this.setState({ firstName, lastName });
   }
@@ -1229,7 +1220,7 @@ export class CounterComponent {
   store = inject(CounterStore);
   counter = this.store.selectCount();
 
-  // Inject via token and bind to the store — no store name strings needed
+  // Inject via token and bind to the store, no store name strings needed
   private readonly undoRedo = inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<CounterState>;
   private readonly history = this.undoRedo.forStore(this.store);
 
@@ -1240,7 +1231,7 @@ export class CounterComponent {
 ```
 
 `forStore(store)` returns a `NgSimpleStateUndoRedoForStore<S>` helper bound to the store.  
-`undo()` and `redo()` call `replaceState` automatically — no manual wiring needed.
+`undo()` and `redo()` call `replaceState` automatically, no manual wiring needed.
 
 #### undoRedoPlugin API
 
@@ -1251,7 +1242,7 @@ const history = undoRedo.forStore(store);
 history.selectCanUndo();
 history.selectCanRedo();
 
-// Undo/Redo — applies state automatically, returns true if successful
+// Undo/Redo, applies state automatically, returns true if successful
 history.undo();
 history.redo();
 
@@ -1318,7 +1309,6 @@ export class FormStore extends NgSimpleStateBaseSignalStore<FormState> {
     return { name: '', email: '', phone: '', isValid: false };
   }
 
-  // Selectors
   selectForm(): Signal<FormState> {
     return this.selectState();
   }
