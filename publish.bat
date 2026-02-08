@@ -1,4 +1,5 @@
 @echo off
+npm login && ^
 npm version patch && ^
 cd "%cd%\projects\ng-simple-state" && ^
 npm version patch && ^
