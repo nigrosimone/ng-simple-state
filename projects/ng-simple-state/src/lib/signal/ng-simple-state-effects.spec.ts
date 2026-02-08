@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Injector, Signal, runInInjectionContext } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, flush, TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 
@@ -11,7 +11,7 @@ export interface EffectsTestState {
 
 @Injectable()
 export class EffectsTestStore extends NgSimpleStateBaseSignalStore<EffectsTestState> {
-    
+
     public effectCallCount = 0;
     public lastEffectState: EffectsTestState | null = null;
     public selectorEffectCallCount = 0;
@@ -117,9 +117,35 @@ describe('NgSimpleStateBaseSignalStore: Effects', () => {
 
     it('should replace effect with same name without error', () => {
         runInInjectionContext(injector, () => {
-            store.createEffect('sameNameEffect', () => {});
-            expect(() => store.createEffect('sameNameEffect', () => {})).not.toThrow();
+            store.createEffect('sameNameEffect', () => { });
+            expect(() => store.createEffect('sameNameEffect', () => { })).not.toThrow();
             store.destroyEffect('sameNameEffect');
         });
     });
+
+    it('should call previous cleanup before running effect again', fakeAsync(() => {
+        const cleanup1 = jasmine.createSpy('cleanup1');
+        const cleanup2 = jasmine.createSpy('cleanup2');
+
+        const effectFn = jasmine
+            .createSpy('effectFn')
+            .and.returnValues(cleanup1, cleanup2);
+
+        TestBed.runInInjectionContext(() => {
+            store.createEffect('test', effectFn);
+        });
+
+        flush();
+
+        expect(effectFn).toHaveBeenCalledTimes(1);
+        expect(cleanup1).not.toHaveBeenCalled();
+
+        store.setState({ count: 1 });
+
+        flush();
+
+        expect(effectFn).toHaveBeenCalledTimes(2);
+        expect(cleanup1).toHaveBeenCalledTimes(1);
+        expect(cleanup2).not.toHaveBeenCalled();
+    }));
 });
