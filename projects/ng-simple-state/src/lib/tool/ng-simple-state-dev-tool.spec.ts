@@ -497,6 +497,24 @@ describe('NgSimpleStateDevTool Redux DevTools dispatch handlers', () => {
         service.unregisterStore('counter');
     });
 
+    it('should handle IMPORT_STATE (skip)', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+
+        let appliedState: any = null;
+        service.registerStore('counter', {
+            applyState: (state: unknown) => { appliedState = state; },
+            getInitialState: () => ({ count: 0 })
+        });
+
+        dispatch(
+            { type: 'IMPORT_STATE' },
+            JSON.stringify({ computedStates: [{ state: { counter: { count: 2 } } }] })
+        );
+
+        expect(appliedState).toEqual({ count: 2 });
+        service.unregisterStore('counter');
+    });
+
     it('should handle RESET', () => {
         const service = TestBed.inject(NgSimpleStateDevTool);
 
