@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PluginsState, PluginsStore } from './plugins.store';
-import { undoRedo } from '../../../main';
+import { NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin } from 'projects/ng-simple-state/src/public-api';
 
 @Component({
   selector: 'app-plugins-demo',
@@ -177,6 +177,7 @@ const myPlugin: NgSimpleStatePlugin = &#123;
 })
 export class PluginsDemoComponent {
   store = inject(PluginsStore);
+  private readonly undoRedo = inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<PluginsState>;
   
   items: Signal<string[]> = this.store.selectItems();
   lastAction: Signal<string> = this.store.selectLastAction();
@@ -184,28 +185,18 @@ export class PluginsDemoComponent {
   
   private readonly storeName = 'PluginsStore';
   
-  // Use computed signals that depend on store state to trigger reactivity
-  canUndo: Signal<boolean> = computed(() => {
-    // Access state to create dependency - when state changes, this recomputes
-    this.store.state();
-    return undoRedo.canUndo(this.storeName);
-  });
-  
-  canRedo: Signal<boolean> = computed(() => {
-    // Access state to create dependency - when state changes, this recomputes
-    this.store.state();
-    return undoRedo.canRedo(this.storeName);
-  });
+  canUndo: Signal<boolean> = this.undoRedo.selectCanUndo(this.storeName);
+  canRedo: Signal<boolean> = this.undoRedo.selectCanRedo(this.storeName);
   
   undo(): void {
-    const prevState = undoRedo.undo(this.storeName) as PluginsState | null;
+    const prevState = this.undoRedo.undo(this.storeName);
     if (prevState) {
       this.store.replaceState(prevState);
     }
   }
   
   redo(): void {
-    const nextState = undoRedo.redo(this.storeName) as PluginsState | null;
+    const nextState = this.undoRedo.redo(this.storeName);
     if (nextState) {
       this.store.replaceState(nextState);
     }

@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken, signal, Signal, WritableSignal } from '@angular/core';
 
 /**
  * Plugin hook context containing store information
@@ -60,6 +60,26 @@ export const NG_SIMPLE_STATE_PLUGINS = new InjectionToken<NgSimpleStatePlugin[]>
 );
 
 /**
+ * Type for the undoRedoPlugin instance
+ */
+export type NgSimpleStateUndoRedoPlugin<S = unknown> = NgSimpleStatePlugin<S> & {
+    undo: (storeName: string) => S | null;
+    redo: (storeName: string) => S | null;
+    canUndo: (storeName: string) => boolean;
+    canRedo: (storeName: string) => boolean;
+    selectCanUndo: (storeName: string) => Signal<boolean>;
+    selectCanRedo: (storeName: string) => Signal<boolean>;
+    clearHistory: (storeName: string) => void;
+};
+
+/**
+ * InjectionToken for the undoRedoPlugin instance
+ */
+export const NG_SIMPLE_STATE_UNDO_REDO = new InjectionToken<NgSimpleStateUndoRedoPlugin>(
+    'ng-simple-state.undoRedo'
+);
+
+/**
  * Persist plugin - custom persistence logic
  */
 export function persistPlugin<S>(options: {
@@ -83,21 +103,30 @@ export function persistPlugin<S>(options: {
  */
 export function undoRedoPlugin<S>(options?: {
     maxHistory?: number;
-}): NgSimpleStatePlugin<S> & {
-    undo: (storeName: string) => S | null;
-    redo: (storeName: string) => S | null;
-    canUndo: (storeName: string) => boolean;
-    canRedo: (storeName: string) => boolean;
-    clearHistory: (storeName: string) => void;
-} {
+}): NgSimpleStateUndoRedoPlugin<S> {
     const maxHistory = options?.maxHistory ?? 50;
     const history: Map<string, { past: S[]; future: S[]; undoRedoMode: 'none' | 'undo' | 'redo' }> = new Map();
+    const signals: Map<string, { canUndo: WritableSignal<boolean>; canRedo: WritableSignal<boolean> }> = new Map();
     
     const getOrCreate = (storeName: string) => {
         if (!history.has(storeName)) {
             history.set(storeName, { past: [], future: [], undoRedoMode: 'none' });
         }
         return history.get(storeName)!;
+    };
+    
+    const getOrCreateSignals = (storeName: string) => {
+        if (!signals.has(storeName)) {
+            signals.set(storeName, { canUndo: signal(false), canRedo: signal(false) });
+        }
+        return signals.get(storeName)!;
+    };
+    
+    const updateSignals = (storeName: string) => {
+        const h = getOrCreate(storeName);
+        const s = getOrCreateSignals(storeName);
+        s.canUndo.set(h.past.length > 0);
+        s.canRedo.set(h.future.length > 0);
     };
     
     return {
@@ -110,6 +139,7 @@ export function undoRedoPlugin<S>(options?: {
                 // Push current state to future for redo
                 h.future.push(context.prevState);
                 h.undoRedoMode = 'none';
+                updateSignals(context.storeName);
                 return;
             }
             
@@ -117,6 +147,7 @@ export function undoRedoPlugin<S>(options?: {
                 // Push current state to past for undo
                 h.past.push(context.prevState);
                 h.undoRedoMode = 'none';
+                updateSignals(context.storeName);
                 return;
             }
             
@@ -126,10 +157,12 @@ export function undoRedoPlugin<S>(options?: {
                 h.past.shift();
             }
             h.future = []; // Clear redo stack on new action
+            updateSignals(context.storeName);
         },
         
         onStoreDestroy(storeName) {
             history.delete(storeName);
+            signals.delete(storeName);
         },
         
         undo(storeName: string): S | null {
@@ -160,8 +193,21 @@ export function undoRedoPlugin<S>(options?: {
             return getOrCreate(storeName).future.length > 0;
         },
         
+        selectCanUndo(storeName: string): Signal<boolean> {
+            return getOrCreateSignals(storeName).canUndo.asReadonly();
+        },
+        
+        selectCanRedo(storeName: string): Signal<boolean> {
+            return getOrCreateSignals(storeName).canRedo.asReadonly();
+        },
+        
         clearHistory(storeName: string): void {
             history.delete(storeName);
+            const s = signals.get(storeName);
+            if (s) {
+                s.canUndo.set(false);
+                s.canRedo.set(false);
+            }
         }
     };
 }

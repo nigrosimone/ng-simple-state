@@ -5,8 +5,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
 import isEqual from 'lodash.isequal';
 
-// Export undoRedo instance for use in components
-export const undoRedo = undoRedoPlugin({ maxHistory: 50 });
+const undoRedo = undoRedoPlugin({ maxHistory: 50 });
 
 const routes: Routes = [
   { path: 'todo', loadComponent: () => import('./app/todo/todo.component').then(m => m.TodoComponent) },

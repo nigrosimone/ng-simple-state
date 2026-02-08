@@ -1,6 +1,6 @@
 import { EnvironmentProviders, makeEnvironmentProviders } from "@angular/core";
 import { NG_SIMPLE_STORE_CONFIG, NgSimpleStateConfig } from "./ng-simple-state-models";
-import { NgSimpleStatePlugin, NG_SIMPLE_STATE_PLUGINS } from "./plugin/ng-simple-state-plugin";
+import { NgSimpleStatePlugin, NG_SIMPLE_STATE_PLUGINS, NG_SIMPLE_STATE_UNDO_REDO } from "./plugin/ng-simple-state-plugin";
 
 /**
  * Provide NgSimpleState with optional global configuration
@@ -26,6 +26,17 @@ export function provideNgSimpleState(ngSimpleStateConfig?: NgSimpleStateConfig):
                     useValue: ngSimpleStateConfig.plugins,
                 }])
             );
+            
+            // Auto-register undoRedoPlugin if present
+            const undoRedoInstance = ngSimpleStateConfig.plugins.find(p => p.name === 'undoRedo');
+            if (undoRedoInstance) {
+                providers.push(
+                    makeEnvironmentProviders([{
+                        provide: NG_SIMPLE_STATE_UNDO_REDO,
+                        useValue: undoRedoInstance,
+                    }])
+                );
+            }
         }
     }
     

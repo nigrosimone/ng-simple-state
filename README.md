@@ -23,13 +23,16 @@ npm i ng-simple-state
 
 `provideNgSimpleState` has some global optional config defined by `NgSimpleStateConfig` interface:
 
-| Option               | Description                                                                                     | Default          |
-| -------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
-| *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`          |
-| *persistentStorage*  | Set the persistent storage `local` or `session`.                                                | undefined        |
-| *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`        |
-| *serializeState*     | A function used to serialize the state to a string.                                             | `JSON.stringify` |
-| *deserializeState*   | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
+| Option                 | Description                                                                                     | Default          |
+| ---------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
+| *enableDevTool*        | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`          |
+| *persistentStorage*    | Set the persistent storage `local` or `session`.                                                | undefined        |
+| *comparator*           | A function used to compare the previous and current state for equality.                         | `a === b`        |
+| *serializeState*       | A function used to serialize the state to a string.                                             | `JSON.stringify` |
+| *deserializeState*     | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
+| *plugins*              | Array of plugins to extend store functionality.                                                 | `[]`             |
+| *enableImmer*          | Enable Immer-style immutable updates.                                                           | `false`          |
+| *immerProduce*         | Custom Immer produce function for immutable updates.                                            | undefined        |
 
 _Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
 
@@ -993,6 +996,524 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): boolean;
 }
 ```
+
+## New Features (v21.1.0+)
+
+### Schematics CLI
+
+Generate stores quickly using Angular CLI:
+
+```bash
+# Generate a Signal store (recommended)
+ng generate ng-simple-state:store my-feature
+
+# Generate an RxJS store
+ng generate ng-simple-state:store my-feature --type=rxjs
+
+# With persistent storage
+ng generate ng-simple-state:store my-feature --persistentStorage=local
+```
+
+### Effect Management
+
+Effects are side-effect functions that react to state changes. They are useful for logging, analytics, syncing with external services, or triggering additional actions.
+
+#### Complete Store Example with Effects
+
+```ts
+import { Injectable, Signal } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+export interface UserState {
+  user: { id: number; name: string } | null;
+  isLoading: boolean;
+  lastActivity: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class UserStore extends NgSimpleStateBaseSignalStore<UserState> {
+
+  storeConfig(): NgSimpleStateStoreConfig<UserState> {
+    return { storeName: 'UserStore' };
+  }
+
+  initialState(): UserState {
+    return { user: null, isLoading: false, lastActivity: '' };
+  }
+
+  // Register effects in constructor or in a setup method
+  constructor() {
+    super();
+
+    // Effect 1: Log all state changes
+    this.createEffect('logger', (state) => {
+      console.log('[UserStore] State updated:', state);
+    });
+
+    // Effect 2: React only when user changes (using selector)
+    this.createSelectorEffect(
+      'userChanged',
+      state => state.user,  // Selector - effect runs only when this value changes
+      (user) => {
+        if (user) {
+          console.log('User logged in:', user.name);
+          // Could trigger analytics, notifications, etc.
+        } else {
+          console.log('User logged out');
+        }
+      }
+    );
+  }
+
+  // Selectors
+  selectUser(): Signal<{ id: number; name: string } | null> {
+    return this.selectState(state => state.user);
+  }
+
+  // Actions
+  login(user: { id: number; name: string }): void {
+    this.setState({ user, isLoading: false, lastActivity: 'login' });
+  }
+
+  logout(): void {
+    this.setState({ user: null, lastActivity: 'logout' });
+  }
+
+  // Cleanup specific effect when needed
+  disableLogging(): void {
+    this.destroyEffect('logger');
+  }
+}
+```
+
+#### Usage in Component
+
+```ts
+@Component({
+  selector: 'app-user',
+  template: `
+    @if (user()) {
+      <p>Welcome, {{ user()?.name }}!</p>
+      <button (click)="store.logout()">Logout</button>
+    } @else {
+      <button (click)="store.login({ id: 1, name: 'John' })">Login</button>
+    }
+  `
+})
+export class UserComponent {
+  store = inject(UserStore);
+  user = this.store.selectUser();
+}
+```
+
+### Linked Signals
+
+Create reactive linked signals that derive from store state with custom computation:
+
+```ts
+import { Injectable, Signal, computed } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+export interface ProfileState {
+  firstName: string;
+  lastName: string;
+  age: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class ProfileStore extends NgSimpleStateBaseSignalStore<ProfileState> {
+
+  storeConfig(): NgSimpleStateStoreConfig<ProfileState> {
+    return { storeName: 'ProfileStore' };
+  }
+
+  initialState(): ProfileState {
+    return { firstName: '', lastName: '', age: 0 };
+  }
+
+  // Linked signal with custom computation
+  fullName = this.linkedState({
+    source: state => ({ first: state.firstName, last: state.lastName }),
+    computation: (name) => `${name.first} ${name.last}`.trim()
+  });
+
+  // Selectors
+  selectFirstName(): Signal<string> {
+    return this.selectState(state => state.firstName);
+  }
+
+  // Actions
+  setName(firstName: string, lastName: string): void {
+    this.setState({ firstName, lastName });
+  }
+}
+```
+
+Usage in component:
+
+```ts
+@Component({
+  selector: 'app-profile',
+  template: `
+    <p>Full Name: {{ store.fullName() }}</p>
+    <p>Is Adult: {{ store.isAdult() ? 'Yes' : 'No' }}</p>
+    <input [value]="firstName()" (input)="updateFirstName($event)" placeholder="First name" />
+    <input [value]="lastName()" (input)="updateLastName($event)" placeholder="Last name" />
+  `
+})
+export class ProfileComponent {
+  store = inject(ProfileStore);
+  firstName = this.store.selectFirstName();
+  lastName = this.store.selectState(s => s.lastName);
+
+  updateFirstName(event: Event): void {
+    this.store.setName((event.target as HTMLInputElement).value, this.lastName());
+  }
+
+  updateLastName(event: Event): void {
+    this.store.setName(this.firstName(), (event.target as HTMLInputElement).value);
+  }
+}
+```
+
+### Plugin System
+
+Extend store functionality with plugins. Plugins can intercept state changes, perform side effects, and add features like undo/redo.
+
+#### undoRedoPlugin
+
+Enable state history with undo/redo functionality:
+
+```ts
+import { provideNgSimpleState, undoRedoPlugin } from 'ng-simple-state';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideNgSimpleState({
+      enableDevTool: isDevMode(),
+      plugins: [undoRedoPlugin({ maxHistory: 50 })]
+    })
+  ]
+});
+```
+
+Usage in component:
+
+```ts
+import { Component, inject } from '@angular/core';
+import { CounterStore } from './counter-store';
+
+@Component({
+  selector: 'app-counter',
+  template: `
+    <h1>Counter: {{ counter() }}</h1>
+    <button (click)="store.increment()">+</button>
+    <button (click)="store.decrement()">-</button>
+    <hr>
+    <button [disabled]="!canUndo()" (click)="undo()">Undo</button>
+    <button [disabled]="!canRedo()" (click)="redo()">Redo</button>
+  `
+})
+export class CounterComponent {
+  store = inject(CounterStore);
+  counter = this.store.selectCount();
+  
+  // Inject the undoRedo plugin instance (exported from your providers file)
+  private undoRedo = inject(UNDO_REDO_PLUGIN);
+  
+  canUndo(): boolean {
+    return this.undoRedo.canUndo('CounterStore');
+  }
+  
+  canRedo(): boolean {
+    return this.undoRedo.canRedo('CounterStore');
+  }
+  
+  undo(): void {
+    const prevState = this.undoRedo.undo('CounterStore');
+    if (prevState) {
+      this.store.replaceState(prevState);
+    }
+  }
+  
+  redo(): void {
+    const nextState = this.undoRedo.redo('CounterStore');
+    if (nextState) {
+      this.store.replaceState(nextState);
+    }
+  }
+}
+```
+
+#### undoRedoPlugin API
+
+```ts
+// Check if undo/redo is available
+undoRedo.canUndo(storeName: string): boolean;
+undoRedo.canRedo(storeName: string): boolean;
+
+// Get previous/next state (does not apply it automatically)
+undoRedo.undo(storeName: string): S | null;
+undoRedo.redo(storeName: string): S | null;
+
+// Clear history for a store
+undoRedo.clearHistory(storeName: string): void;
+```
+
+#### Create Custom Plugin
+
+You can create your own plugins implementing the `NgSimpleStatePlugin` interface:
+
+```ts
+import { NgSimpleStatePlugin, NgSimpleStatePluginContext } from 'ng-simple-state';
+
+const myCustomPlugin: NgSimpleStatePlugin = {
+  name: 'myPlugin',
+  
+  onBeforeStateChange(context: NgSimpleStatePluginContext): boolean | void {
+    // Return false to prevent state change
+    console.log(`Before: ${context.actionName}`);
+  },
+  
+  onAfterStateChange(context: NgSimpleStatePluginContext): void {
+    console.log(`After: ${context.actionName}`, context.nextState);
+  },
+  
+  onStoreInit(storeName: string, initialState: unknown): void {
+    console.log(`Store ${storeName} initialized`);
+  },
+  
+  onStoreDestroy(storeName: string): void {
+    console.log(`Store ${storeName} destroyed`);
+  }
+};
+```
+
+### Batch Updates
+
+Group multiple state updates into a single emission to improve performance:
+
+```ts
+import { Injectable, Signal } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig, batchState } from 'ng-simple-state';
+
+export interface FormState {
+  name: string;
+  email: string;
+  phone: string;
+  isValid: boolean;
+}
+
+@Injectable({ providedIn: 'root' })
+export class FormStore extends NgSimpleStateBaseSignalStore<FormState> {
+
+  storeConfig(): NgSimpleStateStoreConfig<FormState> {
+    return { storeName: 'FormStore' };
+  }
+
+  initialState(): FormState {
+    return { name: '', email: '', phone: '', isValid: false };
+  }
+
+  // Selectors
+  selectForm(): Signal<FormState> {
+    return this.selectState();
+  }
+
+  // Batch multiple updates - only one emission at the end
+  updateAllFields(name: string, email: string, phone: string): void {
+    batchState(() => {
+      this.setState({ name });
+      this.setState({ email });
+      this.setState({ phone });
+      this.setState({ isValid: this.validateForm(name, email, phone) });
+    }); // Single emission with all changes
+  }
+
+  // Regular updates (each triggers an emission)
+  setName(name: string): void {
+    this.setState({ name });
+  }
+
+  setEmail(email: string): void {
+    this.setState({ email });
+  }
+
+  private validateForm(name: string, email: string, phone: string): boolean {
+    return name.length > 0 && email.includes('@') && phone.length >= 10;
+  }
+}
+```
+
+Usage in component:
+
+```ts
+@Component({
+  selector: 'app-form',
+  template: `
+    <form (ngSubmit)="submitForm()">
+      <input [(ngModel)]="name" name="name" placeholder="Name" />
+      <input [(ngModel)]="email" name="email" placeholder="Email" />
+      <input [(ngModel)]="phone" name="phone" placeholder="Phone" />
+      <button type="submit">Save All (Batched)</button>
+    </form>
+    <p>Form Valid: {{ form().isValid ? 'Yes' : 'No' }}</p>
+  `
+})
+export class FormComponent {
+  store = inject(FormStore);
+  form = this.store.selectForm();
+  
+  name = '';
+  email = '';
+  phone = '';
+
+  submitForm(): void {
+    // All updates batched into single emission
+    this.store.updateAllFields(this.name, this.email, this.phone);
+  }
+}
+```
+
+### Immer-style Updates
+
+Write mutable-looking code that produces immutable updates. First, install Immer and configure it:
+
+```bash
+npm install immer
+```
+
+```ts
+// In your app bootstrap
+import { produce } from 'immer';
+
+provideNgSimpleState({
+  immerProduce: produce
+});
+```
+
+Store example with Immer:
+
+```ts
+import { Injectable, Signal } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface UsersState {
+  users: User[];
+  selectedId: number | null;
+}
+
+@Injectable({ providedIn: 'root' })
+export class UsersStore extends NgSimpleStateBaseSignalStore<UsersState> {
+
+  storeConfig(): NgSimpleStateStoreConfig<UsersState> {
+    return { storeName: 'UsersStore' };
+  }
+
+  initialState(): UsersState {
+    return { users: [], selectedId: null };
+  }
+
+  // Selectors
+  selectUsers(): Signal<User[]> {
+    return this.selectState(state => state.users);
+  }
+
+  selectSelectedUser(): Signal<User | undefined> {
+    return this.selectState(state => 
+      state.users.find(u => u.id === state.selectedId)
+    );
+  }
+
+  // Actions using Immer produce - looks mutable but is immutable!
+  addUser(user: User): void {
+    this.produce(draft => {
+      draft.users.push(user); // Looks mutable, but creates immutable update
+    });
+  }
+
+  updateUserName(id: number, newName: string): void {
+    this.produce(draft => {
+      const user = draft.users.find(u => u.id === id);
+      if (user) {
+        user.name = newName; // Direct mutation syntax, but immutable result
+      }
+    });
+  }
+
+  removeUser(id: number): void {
+    this.produce(draft => {
+      const index = draft.users.findIndex(u => u.id === id);
+      if (index !== -1) {
+        draft.users.splice(index, 1); // Array mutation syntax
+      }
+    });
+  }
+
+  selectUser(id: number): void {
+    this.setState({ selectedId: id });
+  }
+}
+```
+
+Usage in component:
+
+```ts
+@Component({
+  selector: 'app-users',
+  template: `
+    <ul>
+      @for (user of users(); track user.id) {
+        <li [class.selected]="user.id === selectedUser()?.id">
+          {{ user.name }} ({{ user.email }})
+          <button (click)="store.selectUser(user.id)">Select</button>
+          <button (click)="store.removeUser(user.id)">Remove</button>
+        </li>
+      }
+    </ul>
+    <button (click)="addNewUser()">Add User</button>
+  `
+})
+export class UsersComponent {
+  store = inject(UsersStore);
+  users = this.store.selectUsers();
+  selectedUser = this.store.selectSelectedUser();
+
+  addNewUser(): void {
+    this.store.addUser({
+      id: Date.now(),
+      name: 'New User',
+      email: 'new@example.com'
+    });
+  }
+}
+```
+
+### Redux DevTools Integration
+
+Full integration with Redux DevTools browser extension for time-travel debugging:
+
+```ts
+// Enable DevTools in your app configuration
+provideNgSimpleState({
+  enableDevTool: isDevMode()
+});
+```
+
+Features available in Redux DevTools:
+- **Time-travel debugging** - Jump to any previous state
+- **Action history** - See all dispatched actions with timestamps
+- **State inspection** - Explore state tree at any point
+- **Diff visualization** - See what changed between states
+- **Export/Import** - Save and restore state
+
+![Redux DevTools](https://github.com/nigrosimone/ng-simple-state/blob/main/projects/ng-simple-state-demo/src/assets/dev-tool.gif?raw=true)
 
 ## Alternatives
 

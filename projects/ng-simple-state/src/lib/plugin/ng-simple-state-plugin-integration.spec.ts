@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
 import { provideNgSimpleState } from '../ng-simple-state-provider';
-import { undoRedoPlugin } from './ng-simple-state-plugin';
+import { undoRedoPlugin, NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin } from './ng-simple-state-plugin';
 
 // --- Test Store ---
 
@@ -201,5 +201,192 @@ describe('undoRedoPlugin Integration (with real store + DI)', () => {
 
         expect(plugin.canUndo(storeName)).toBeFalse();
         expect(plugin.canRedo(storeName)).toBeFalse();
+    });
+
+    // --- Reactive Signal Tests ---
+
+    it('selectCanUndo should be a reactive signal that updates on state changes', () => {
+        const canUndo = plugin.selectCanUndo(storeName);
+
+        expect(canUndo()).toBeFalse();
+
+        store.addItem('Item 2');
+
+        expect(canUndo()).toBeTrue();
+    });
+
+    it('selectCanRedo should be a reactive signal that updates after undo', () => {
+        const canRedo = plugin.selectCanRedo(storeName);
+
+        expect(canRedo()).toBeFalse();
+
+        store.addItem('Item 2');
+        expect(canRedo()).toBeFalse();
+
+        // Undo
+        const prevState = plugin.undo(storeName);
+        store.replaceState(prevState!);
+
+        expect(canRedo()).toBeTrue();
+
+        // Redo
+        const nextState = plugin.redo(storeName);
+        store.replaceState(nextState!);
+
+        expect(canRedo()).toBeFalse();
+    });
+
+    it('selectCanUndo/selectCanRedo should update correctly through full undo/redo cycle', () => {
+        const canUndo = plugin.selectCanUndo(storeName);
+        const canRedo = plugin.selectCanRedo(storeName);
+
+        expect(canUndo()).toBeFalse();
+        expect(canRedo()).toBeFalse();
+
+        // Add items
+        store.addItem('Item 2');
+        store.addItem('Item 3');
+
+        expect(canUndo()).toBeTrue();
+        expect(canRedo()).toBeFalse();
+
+        // Undo
+        const state1 = plugin.undo(storeName);
+        store.replaceState(state1!);
+
+        expect(canUndo()).toBeTrue();
+        expect(canRedo()).toBeTrue();
+
+        // Undo again
+        const state2 = plugin.undo(storeName);
+        store.replaceState(state2!);
+
+        expect(canUndo()).toBeFalse();
+        expect(canRedo()).toBeTrue();
+
+        // New action clears redo
+        store.addItem('Item 4');
+
+        expect(canUndo()).toBeTrue();
+        expect(canRedo()).toBeFalse();
+    });
+
+    it('clearHistory should reset selectCanUndo/selectCanRedo signals', () => {
+        const canUndo = plugin.selectCanUndo(storeName);
+        const canRedo = plugin.selectCanRedo(storeName);
+
+        store.addItem('Item 2');
+        expect(canUndo()).toBeTrue();
+
+        plugin.clearHistory(storeName);
+
+        expect(canUndo()).toBeFalse();
+        expect(canRedo()).toBeFalse();
+    });
+});
+
+// --- DI Token Injection Tests ---
+
+describe('NG_SIMPLE_STATE_UNDO_REDO Token Injection', () => {
+
+    it('should provide undoRedo plugin via NG_SIMPLE_STATE_UNDO_REDO token', () => {
+        const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
+
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({ plugins: [plugin] }),
+                ItemsStore
+            ]
+        });
+
+        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO);
+        expect(injected).toBeTruthy();
+        expect(injected).toBe(plugin);
+    });
+
+    it('should return the same instance from token and from the store plugins', () => {
+        const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
+
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({ plugins: [plugin] }),
+                ItemsStore
+            ]
+        });
+
+        const store = TestBed.inject(ItemsStore);
+        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO);
+
+        // The injected token should be the same reference as what the store uses
+        const storePlugins = (store as any).plugins;
+        const undoRedoInStore = storePlugins.find((p: any) => p.name === 'undoRedo');
+        expect(injected).toBe(undoRedoInStore);
+    });
+
+    it('should allow injected plugin to perform undo/redo on a store', () => {
+        const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
+
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({ plugins: [plugin] }),
+                ItemsStore
+            ]
+        });
+
+        const store = TestBed.inject(ItemsStore);
+        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<ItemsState>;
+        const storeName = 'ItemsStore';
+
+        store.addItem('Item 2');
+        expect(injected.canUndo(storeName)).toBeTrue();
+
+        const prevState = injected.undo(storeName);
+        store.replaceState(prevState!);
+        expect(store.getCurrentState().items).toEqual(['Item 1']);
+        expect(injected.canRedo(storeName)).toBeTrue();
+
+        const nextState = injected.redo(storeName);
+        store.replaceState(nextState!);
+        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    });
+
+    it('should provide reactive signals via the injected token', () => {
+        const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
+
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({ plugins: [plugin] }),
+                ItemsStore
+            ]
+        });
+
+        const store = TestBed.inject(ItemsStore);
+        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<ItemsState>;
+        const storeName = 'ItemsStore';
+
+        const canUndo = injected.selectCanUndo(storeName);
+        const canRedo = injected.selectCanRedo(storeName);
+
+        expect(canUndo()).toBeFalse();
+        expect(canRedo()).toBeFalse();
+
+        store.addItem('Item 2');
+        expect(canUndo()).toBeTrue();
+
+        const prevState = injected.undo(storeName);
+        store.replaceState(prevState!);
+        expect(canRedo()).toBeTrue();
+    });
+
+    it('should not provide NG_SIMPLE_STATE_UNDO_REDO if no undoRedo plugin is configured', () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({}),
+                ItemsStore
+            ]
+        });
+
+        expect(() => TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO))
+            .toThrowError(/No provider/);
     });
 });
