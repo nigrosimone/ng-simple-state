@@ -51,11 +51,6 @@ export interface NgSimpleStateConfig<K = any> {
      */
     deserializeState?: (state: string) => K;
     /**
-     * Enable Immer-style immutable updates
-     * When true, you can use `produce()` method for immutable updates
-     */
-    enableImmer?: boolean;
-    /**
      * Immer produce function (optional, for custom Immer integration)
      * Import from 'immer' and provide here
      */

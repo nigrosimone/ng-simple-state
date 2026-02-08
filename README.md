@@ -31,7 +31,6 @@ npm i ng-simple-state
 | *serializeState*       | A function used to serialize the state to a string.                                             | `JSON.stringify` |
 | *deserializeState*     | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
 | *plugins*              | Array of plugins to extend store functionality.                                                 | `[]`             |
-| *enableImmer*          | Enable Immer-style immutable updates.                                                           | `false`          |
 | *immerProduce*         | Custom Immer produce function for immutable updates.                                            | undefined        |
 
 _Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
