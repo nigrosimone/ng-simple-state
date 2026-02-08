@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { CounterState } from './state-model';
-import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 
 @Injectable()

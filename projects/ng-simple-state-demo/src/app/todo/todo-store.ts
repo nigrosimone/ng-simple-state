@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   NgSimpleStateBaseRxjsStore,
   NgSimpleStateStoreConfig
-} from 'projects/ng-simple-state/src/public-api';
+} from 'ng-simple-state';
 
 export interface Todo {
   id: number;

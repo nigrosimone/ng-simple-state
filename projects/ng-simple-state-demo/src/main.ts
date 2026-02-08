@@ -1,6 +1,6 @@
 import { isDevMode, provideZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app/app.component';
-import { NgSimpleStateLocalStorage, provideNgSimpleState, undoRedoPlugin } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateLocalStorage, provideNgSimpleState, undoRedoPlugin } from 'ng-simple-state';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
 import isEqual from 'lodash.isequal';

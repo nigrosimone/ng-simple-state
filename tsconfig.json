@@ -14,8 +14,7 @@
     "sourceMap": true,
     "paths": {
       "ng-simple-state": [
-        "dist/ng-simple-state/ng-simple-state",
-        "dist/ng-simple-state"
+        "projects/ng-simple-state/src/public-api.ts"
       ]
     },
     "declaration": false,
