@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Observable, firstValueFrom, take } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { NgSimpleStateBaseRxjsStore } from '../rxjs/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
 import { provideNgSimpleState } from '../ng-simple-state-provider';

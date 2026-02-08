@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
 import { provideNgSimpleState } from '../ng-simple-state-provider';
-import { undoRedoPlugin, NgSimpleStateUndoRedoPlugin, persistPlugin } from '../plugin/ng-simple-state-plugin';
+import { undoRedoPlugin, NgSimpleStateUndoRedoPlugin } from '../plugin/ng-simple-state-plugin';
 import { withTransaction } from '../batch/ng-simple-state-batch';
 
 // --- Shopping Cart State Models ---

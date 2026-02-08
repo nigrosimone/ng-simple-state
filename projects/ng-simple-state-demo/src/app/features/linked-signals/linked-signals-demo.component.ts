@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LinkedSignalsStore } from './linked-signals.store';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-linked-signals-demo',
   template: `
     <h3>Linked Signals Demo (Angular 21+)</h3>

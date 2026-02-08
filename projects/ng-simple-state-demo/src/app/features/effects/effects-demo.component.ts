@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { EffectsStore } from './effects.store';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-effects-demo',
   template: `
     <h3>Effects Demo</h3>

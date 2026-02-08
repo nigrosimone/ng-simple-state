@@ -5,6 +5,7 @@ import { PluginsState, PluginsStore } from './plugins.store';
 import { NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin, NgSimpleStateUndoRedoForStore } from 'projects/ng-simple-state/src/public-api';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-plugins-demo',
   template: `
     <h3>Undo/Redo Plugin Demo</h3>
