@@ -47,3 +47,4 @@ testem.log
 Thumbs.db
 /projects/ng-simple-state/coverage
 /projects/ng-simple-state/schematics/out
+/docs
