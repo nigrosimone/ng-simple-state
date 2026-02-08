@@ -52,10 +52,12 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.immerProduce = config.immerProduce;
         }
 
-        // Setup plugins
+        // Setup plugins - deduplicate by reference to avoid double-registration
         const globalPlugins = inject(NG_SIMPLE_STATE_PLUGINS, { optional: true }) ?? [];
-        const storePlugins = config.plugins ?? [];
-        this.plugins = [...globalPlugins, ...storePlugins] as NgSimpleStatePlugin<S>[];
+        const storePlugins = storeConfig.plugins ?? [];
+        const allPlugins = [...globalPlugins, ...storePlugins];
+        // Deduplicate: same plugin instance should only be registered once
+        this.plugins = allPlugins.filter((plugin, index) => allPlugins.indexOf(plugin) === index) as NgSimpleStatePlugin<S>[];
 
         if (this.storage) {
             const firstState = this.storage.getItem(this.storeName);

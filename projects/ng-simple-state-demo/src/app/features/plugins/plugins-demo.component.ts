@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PluginsState, PluginsStore } from './plugins.store';
@@ -36,6 +36,7 @@ import { undoRedo } from '../../../main';
         <button [disabled]="!canUndo()" (click)="undo()">⬅ Undo</button>
         <button [disabled]="!canRedo()" (click)="redo()">Redo ➡</button>
       </div>
+      
     </div>
 
     <div class="code-section">
@@ -183,13 +184,18 @@ export class PluginsDemoComponent {
   
   private readonly storeName = 'PluginsStore';
   
-  canUndo(): boolean {
+  // Use computed signals that depend on store state to trigger reactivity
+  canUndo: Signal<boolean> = computed(() => {
+    // Access state to create dependency - when state changes, this recomputes
+    this.store.state();
     return undoRedo.canUndo(this.storeName);
-  }
+  });
   
-  canRedo(): boolean {
+  canRedo: Signal<boolean> = computed(() => {
+    // Access state to create dependency - when state changes, this recomputes
+    this.store.state();
     return undoRedo.canRedo(this.storeName);
-  }
+  });
   
   undo(): void {
     const prevState = undoRedo.undo(this.storeName) as PluginsState | null;

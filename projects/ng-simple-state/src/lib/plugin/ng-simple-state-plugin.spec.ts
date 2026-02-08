@@ -353,4 +353,93 @@ describe('undoRedoPlugin edge cases', () => {
         expect(plugin.canRedo('EmptyStore')).toBeFalse();
         expect(plugin.redo('EmptyStore')).toBeNull();
     });
+    
+    it('should enable redo after undo workflow', () => {
+        const plugin = undoRedoPlugin<{ count: number }>();
+        
+        // Initial action: count 0 -> 1
+        plugin.onAfterStateChange!({
+            storeName: 'TestStore',
+            actionName: 'increment',
+            prevState: { count: 0 },
+            nextState: { count: 1 },
+            timestamp: Date.now()
+        });
+        
+        expect(plugin.canUndo('TestStore')).toBeTrue();
+        expect(plugin.canRedo('TestStore')).toBeFalse();
+        
+        // Call undo to get previous state
+        const prevState = plugin.undo('TestStore');
+        expect(prevState).toEqual({ count: 0 });
+        
+        // Simulate store applying the undo via replaceState
+        // This triggers onAfterStateChange with prevState = current, nextState = undone state
+        plugin.onAfterStateChange!({
+            storeName: 'TestStore',
+            actionName: 'undo',
+            prevState: { count: 1 },  // state before undo
+            nextState: { count: 0 },  // state after undo
+            timestamp: Date.now()
+        });
+        
+        // Now redo should be available
+        expect(plugin.canRedo('TestStore')).toBeTrue();
+        expect(plugin.canUndo('TestStore')).toBeFalse();
+        
+        // Call redo to get next state
+        const nextState = plugin.redo('TestStore');
+        expect(nextState).toEqual({ count: 1 });
+        
+        // Simulate store applying the redo via replaceState
+        plugin.onAfterStateChange!({
+            storeName: 'TestStore',
+            actionName: 'redo',
+            prevState: { count: 0 },  // state before redo
+            nextState: { count: 1 },  // state after redo
+            timestamp: Date.now()
+        });
+        
+        // Now undo should be available again
+        expect(plugin.canUndo('TestStore')).toBeTrue();
+        expect(plugin.canRedo('TestStore')).toBeFalse();
+    });
+    
+    it('should clear redo stack on new action after undo', () => {
+        const plugin = undoRedoPlugin<{ count: number }>();
+        
+        // Action: 0 -> 1
+        plugin.onAfterStateChange!({
+            storeName: 'TestStore',
+            actionName: 'increment',
+            prevState: { count: 0 },
+            nextState: { count: 1 },
+            timestamp: Date.now()
+        });
+        
+        // Undo: get state 0
+        plugin.undo('TestStore');
+        
+        // Simulate store applying undo
+        plugin.onAfterStateChange!({
+            storeName: 'TestStore',
+            actionName: 'undo',
+            prevState: { count: 1 },
+            nextState: { count: 0 },
+            timestamp: Date.now()
+        });
+        
+        expect(plugin.canRedo('TestStore')).toBeTrue();
+        
+        // New action (not undo/redo) should clear redo stack
+        plugin.onAfterStateChange!({
+            storeName: 'TestStore',
+            actionName: 'newAction',
+            prevState: { count: 0 },
+            nextState: { count: 5 },
+            timestamp: Date.now()
+        });
+        
+        expect(plugin.canRedo('TestStore')).toBeFalse();
+    });
 });

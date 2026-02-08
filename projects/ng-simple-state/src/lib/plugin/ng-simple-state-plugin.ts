@@ -91,11 +91,11 @@ export function undoRedoPlugin<S>(options?: {
     clearHistory: (storeName: string) => void;
 } {
     const maxHistory = options?.maxHistory ?? 50;
-    const history: Map<string, { past: S[]; future: S[] }> = new Map();
+    const history: Map<string, { past: S[]; future: S[]; undoRedoMode: 'none' | 'undo' | 'redo' }> = new Map();
     
     const getOrCreate = (storeName: string) => {
         if (!history.has(storeName)) {
-            history.set(storeName, { past: [], future: [] });
+            history.set(storeName, { past: [], future: [], undoRedoMode: 'none' });
         }
         return history.get(storeName)!;
     };
@@ -105,6 +105,22 @@ export function undoRedoPlugin<S>(options?: {
         
         onAfterStateChange(context) {
             const h = getOrCreate(context.storeName);
+            
+            if (h.undoRedoMode === 'undo') {
+                // Push current state to future for redo
+                h.future.push(context.prevState);
+                h.undoRedoMode = 'none';
+                return;
+            }
+            
+            if (h.undoRedoMode === 'redo') {
+                // Push current state to past for undo
+                h.past.push(context.prevState);
+                h.undoRedoMode = 'none';
+                return;
+            }
+            
+            // Normal action - record to history
             h.past.push(context.prevState);
             if (h.past.length > maxHistory) {
                 h.past.shift();
@@ -121,7 +137,9 @@ export function undoRedoPlugin<S>(options?: {
             if (h.past.length === 0) {
                 return null;
             }
-            return h.past[h.past.length - 1];
+            // Mark as undo operation
+            h.undoRedoMode = 'undo';
+            return h.past.pop()!;
         },
         
         redo(storeName: string): S | null {
@@ -129,7 +147,9 @@ export function undoRedoPlugin<S>(options?: {
             if (h.future.length === 0) {
                 return null;
             }
-            return h.future[h.future.length - 1];
+            // Mark as redo operation
+            h.undoRedoMode = 'redo';
+            return h.future.pop()!;
         },
         
         canUndo(storeName: string): boolean {
