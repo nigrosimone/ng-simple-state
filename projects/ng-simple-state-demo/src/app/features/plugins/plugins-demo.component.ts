@@ -174,7 +174,7 @@ const myPlugin: NgSimpleStatePlugin = &#123;
 })
 export class PluginsDemoComponent {
   store = inject(PluginsStore);
-  private readonly undoRedo = inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<PluginsState>;
+  private readonly undoRedo = inject<NgSimpleStateUndoRedoPlugin<PluginsState>>(NG_SIMPLE_STATE_UNDO_REDO);
   private readonly history: NgSimpleStateUndoRedoForStore<PluginsState> = this.undoRedo.forStore(this.store);
   
   items: Signal<string[]> = this.store.selectItems();
