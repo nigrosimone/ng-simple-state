@@ -409,23 +409,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param actionName The action name
      * @returns True if dev tools are enabled
      */
-    protected devToolSend(newState: S | undefined, actionName?: string): boolean {
+    protected devToolSend(newState: S | undefined, actionName: string): boolean {
         if (!this.devTool) {
             return false;
-        }
-        if (!actionName) {
-            // retrieve the parent (of parent) method into the stack trace
-            try {
-                actionName = new Error().stack
-                    ?.split('\n')[this.stackPoint]
-                    ?.trim()
-                    ?.split(' ')[1]
-                    ?.split('.')[1] || 'unknown';
-                /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-            } catch (_) {
-                /* istanbul ignore next */
-                actionName = 'unknown';
-            }
         }
         if (!this.devTool.send(this.storeName, actionName, newState)) {
             /* istanbul ignore next */
