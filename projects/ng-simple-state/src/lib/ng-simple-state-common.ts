@@ -86,7 +86,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         this.devToolSend(this.firstState, 'initialState');
-        
+
         // Notify plugins of store init
         this.notifyPluginsInit();
 
@@ -109,6 +109,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @returns false if any plugin prevents the change
      */
     protected notifyPluginsBeforeChange(prevState: S, nextState: S, actionName: string): boolean {
+        if (!this.plugins.length) {
+            return true;
+        }
         const context: NgSimpleStatePluginContext<S> = {
             storeName: this.storeName,
             actionName,
@@ -116,7 +119,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             nextState,
             timestamp: Date.now()
         };
-        
+
         for (const plugin of this.plugins) {
             if (plugin.onBeforeStateChange) {
                 const result = plugin.onBeforeStateChange(context);
@@ -139,7 +142,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             nextState,
             timestamp: Date.now()
         };
-        
+
         for (const plugin of this.plugins) {
             if (plugin.onAfterStateChange) {
                 plugin.onAfterStateChange(context);
@@ -152,12 +155,12 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     ngOnDestroy(): void {
         this.devToolSend(undefined, 'ngOnDestroy');
-        
+
         // Unregister from DevTool
         if (this.devTool) {
             this.devTool.unregisterStore(this.storeName);
         }
-        
+
         // Notify plugins of store destroy
         for (const plugin of this.plugins) {
             if (plugin.onStoreDestroy) {
@@ -300,25 +303,25 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         if (this.comparator && this.comparator(currState, state)) {
             return undefined;
         }
-        
+
         // Get action name before plugin notification
         const resolvedActionName = actionName ?? this.getActionName();
-        
+
         // Notify plugins before change - they can prevent the change
         if (!this.notifyPluginsBeforeChange(currState as S, state, resolvedActionName)) {
             return undefined;
         }
-        
+
         // avoid function call if not necessary
         this.devTool && this.devToolSend(state, resolvedActionName);
         this.storage && this.statePersist(state);
-        
+
         // Notify plugins after change
         this.notifyPluginsAfterChange(currState as S, state, resolvedActionName);
-        
+
         return state;
     }
-    
+
     /**
      * Get action name from stack trace
      */
@@ -373,22 +376,22 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         if (this.comparator && this.comparator(currState, newState)) {
             return undefined;
         }
-        
+
         // Get action name before plugin notification
         const resolvedActionName = actionName ?? this.getActionName();
-        
+
         // Notify plugins before change - they can prevent the change
         if (!this.notifyPluginsBeforeChange(currState as S, newState, resolvedActionName)) {
             return undefined;
         }
-        
+
         // avoid function call if not necessary
         this.devTool && this.devToolSend(newState, resolvedActionName);
         this.storage && this.statePersist(newState);
-        
+
         // Notify plugins after change
         this.notifyPluginsAfterChange(currState as S, newState, resolvedActionName);
-        
+
         return newState;
     }
 
