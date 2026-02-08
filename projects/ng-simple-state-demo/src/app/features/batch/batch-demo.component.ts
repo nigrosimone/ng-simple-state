@@ -195,14 +195,14 @@ export class BatchDemoComponent {
     this.transactionStatus = 'Running failing transaction...';
     const beforeState = this.store.getCurrentState();
     try {
-      await withTransaction(this.store, async (tx) => {
+      await withTransaction(this.store, async () => {
         this.store.incrementA();
         this.store.incrementB();
         // Simulate error
         throw new Error('Simulated failure!');
         // tx.commit(); - never reached
       });
-    } catch (e) {
+    } catch (_) {
       this.transactionStatus = `Transaction rolled back! State restored to: A=${beforeState.a}, B=${beforeState.b}`;
     }
   }
