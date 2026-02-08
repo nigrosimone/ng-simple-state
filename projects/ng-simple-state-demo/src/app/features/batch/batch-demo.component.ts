@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BatchStore } from './batch.store';
-import { withTransaction } from 'projects/ng-simple-state/src/public-api';
+import { BatchState, BatchStore } from './batch.store';
+import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 'projects/ng-simple-state/src/public-api';
 
 @Component({
   selector: 'app-batch-demo',
@@ -139,19 +139,15 @@ const throttledUpdate = createThrottledUpdater(500);</code></pre>
 })
 export class BatchDemoComponent {
   store = inject(BatchStore);
-  
+
   a: Signal<number> = this.store.selectA();
   b: Signal<number> = this.store.selectB();
   c: Signal<number> = this.store.selectC();
   sum: Signal<number> = this.store.selectSum();
   updateCount: Signal<number> = this.store.selectUpdateCount();
   lastUpdate: Signal<string> = this.store.selectLastUpdate();
-  
+
   transactionStatus = '';
-  
-  // Simple debounce/throttle state
-  private debounceTimeout: ReturnType<typeof setTimeout> | null = null;
-  private lastThrottle = 0;
 
   async runTransaction(): Promise<void> {
     this.transactionStatus = 'Running transaction...';
@@ -186,22 +182,25 @@ export class BatchDemoComponent {
   }
 
   debouncedIncrement(): void {
-    // Simple debounce implementation for demo
-    if (this.debounceTimeout) {
-      clearTimeout(this.debounceTimeout);
+    const { update, flush } = createDebouncedUpdater<BatchState>(
+      (state) => this.store.setState(state),
+      300
+    );
+    for (let i = 1; i < 5; i++) {
+      const { b } = this.store.getCurrentState();
+      update({ b: b + i });
     }
-    this.debounceTimeout = setTimeout(() => {
-      this.store.incrementA();
-      this.debounceTimeout = null;
-    }, 300);
+    flush();
   }
 
   throttledIncrement(): void {
-    // Simple throttle implementation for demo
-    const now = Date.now();
-    if (now - this.lastThrottle >= 500) {
-      this.lastThrottle = now;
-      this.store.incrementB();
+    const { update } = createThrottledUpdater<BatchState>(
+      (state) => this.store.setState(state),
+      100
+    );
+    for (let i = 1; i < 5; i++) {
+      const { b } = this.store.getCurrentState();
+      update({ b: b + i });
     }
   }
 }
