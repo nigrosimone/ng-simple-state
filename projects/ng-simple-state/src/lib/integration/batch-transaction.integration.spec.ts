@@ -5,11 +5,8 @@ import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-sto
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
 import { provideNgSimpleState } from '../ng-simple-state-provider';
 import { 
-    batchState, 
-    batchStateAsync, 
     StateTransaction, 
     withTransaction,
-    NgSimpleStateBatchManager,
     createDebouncedUpdater,
     createThrottledUpdater
 } from '../batch/ng-simple-state-batch';
@@ -262,119 +259,6 @@ describe('Batch Operations Integration Tests', () => {
         });
     });
 
-    describe('Batch State Updates', () => {
-
-        it('should batch multiple item additions', () => {
-            const items: OrderItem[] = [
-                { productId: 'prod1', name: 'Item 1', quantity: 1, unitPrice: 10 },
-                { productId: 'prod2', name: 'Item 2', quantity: 2, unitPrice: 20 },
-                { productId: 'prod3', name: 'Item 3', quantity: 3, unitPrice: 30 }
-            ];
-
-            batchState(() => {
-                items.forEach(item => orderStore.addItem(item));
-            });
-
-            expect(orderStore.selectItems()().length).toBe(3);
-        });
-
-        it('should batch complete order setup', () => {
-            batchState(() => {
-                orderStore.addItem({ productId: 'p1', name: 'Product', quantity: 1, unitPrice: 100 });
-                orderStore.setCustomer({
-                    id: 'c1',
-                    name: 'John Doe',
-                    email: 'john@example.com',
-                    phone: '555-1234'
-                });
-                orderStore.setShippingAddress({
-                    street: '123 Main St',
-                    city: 'Anytown',
-                    state: 'CA',
-                    zip: '12345',
-                    country: 'USA'
-                });
-                orderStore.setPaymentMethod('card');
-                orderStore.applyDiscount(10);
-                orderStore.setShippingCost(5);
-            });
-
-            expect(orderStore.selectIsReadyToSubmit()()).toBeTrue();
-            expect(orderStore.getCurrentState().discount).toBe(10);
-        });
-
-        it('should handle nested batch calls', () => {
-            batchState(() => {
-                orderStore.addItem({ productId: 'p1', name: 'Item 1', quantity: 1, unitPrice: 50 });
-                
-                batchState(() => {
-                    orderStore.addItem({ productId: 'p2', name: 'Item 2', quantity: 2, unitPrice: 25 });
-                    orderStore.setNotes('Nested batch');
-                });
-                
-                orderStore.addItem({ productId: 'p3', name: 'Item 3', quantity: 1, unitPrice: 75 });
-            });
-
-            expect(orderStore.selectItems()().length).toBe(3);
-            expect(orderStore.getCurrentState().notes).toBe('Nested batch');
-        });
-
-        it('should handle batch with error gracefully', () => {
-            const manager = NgSimpleStateBatchManager.getInstance();
-            
-            try {
-                batchState(() => {
-                    orderStore.addItem({ productId: 'p1', name: 'Item', quantity: 1, unitPrice: 100 });
-                    throw new Error('Simulated error');
-                });
-            } catch {
-                // Expected
-            }
-
-            // Batch should be properly ended
-            expect(manager.isInBatch()).toBeFalse();
-            // Item was added before error
-            expect(orderStore.selectItems()().length).toBe(1);
-        });
-    });
-
-    describe('Async Batch Operations', () => {
-
-        it('should batch async operations', async () => {
-            await batchStateAsync(async () => {
-                orderStore.addItem({ productId: 'p1', name: 'Async Item', quantity: 1, unitPrice: 100 });
-                
-                // Simulate async operation
-                await Promise.resolve();
-                
-                orderStore.setCustomer({
-                    id: 'c1',
-                    name: 'Async Customer',
-                    email: 'async@example.com',
-                    phone: '555-0000'
-                });
-            });
-
-            expect(orderStore.selectItems()().length).toBe(1);
-            expect(orderStore.getCurrentState().customer?.name).toBe('Async Customer');
-        });
-
-        it('should handle async batch errors', async () => {
-            const manager = NgSimpleStateBatchManager.getInstance();
-            
-            try {
-                await batchStateAsync(async () => {
-                    orderStore.addItem({ productId: 'p1', name: 'Item', quantity: 1, unitPrice: 50 });
-                    await Promise.reject(new Error('Async error'));
-                });
-            } catch {
-                // Expected
-            }
-
-            expect(manager.isInBatch()).toBeFalse();
-        });
-    });
-
     describe('Transaction Operations', () => {
 
         it('should commit successful transaction', async () => {
@@ -624,25 +508,23 @@ describe('Batch Operations Integration Tests', () => {
 
         it('should handle complete checkout process', async () => {
             // Step 1: Add items
-            batchState(() => {
-                orderStore.addItem({
-                    productId: 'laptop',
-                    name: 'Laptop Pro',
-                    quantity: 1,
-                    unitPrice: 1299.99
-                });
-                orderStore.addItem({
-                    productId: 'mouse',
-                    name: 'Wireless Mouse',
-                    quantity: 2,
-                    unitPrice: 49.99
-                });
-                orderStore.addItem({
-                    productId: 'keyboard',
-                    name: 'Mechanical Keyboard',
-                    quantity: 1,
-                    unitPrice: 149.99
-                });
+            orderStore.addItem({
+                productId: 'laptop',
+                name: 'Laptop Pro',
+                quantity: 1,
+                unitPrice: 1299.99
+            });
+            orderStore.addItem({
+                productId: 'mouse',
+                name: 'Wireless Mouse',
+                quantity: 2,
+                unitPrice: 49.99
+            });
+            orderStore.addItem({
+                productId: 'keyboard',
+                name: 'Mechanical Keyboard',
+                quantity: 1,
+                unitPrice: 149.99
             });
 
             // Step 2: Set customer info
@@ -724,36 +606,7 @@ describe('Batch Operations Integration Tests', () => {
     });
 });
 
-describe('Plugin Integration with Batch/Transaction', () => {
-
-    it('should call plugins for each state change in batch', () => {
-        const changeLog: string[] = [];
-        
-        const loggingPlugin: NgSimpleStatePlugin<OrderState> = {
-            name: 'batchLogger',
-            onAfterStateChange(context) {
-                changeLog.push(context.actionName);
-            }
-        };
-
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ enableDevTool: false, plugins: [loggingPlugin] }),
-                OrderStore
-            ]
-        });
-        
-        const store = TestBed.inject(OrderStore);
-
-        batchState(() => {
-            store.addItem({ productId: 'p1', name: 'Item 1', quantity: 1, unitPrice: 10 });
-            store.addItem({ productId: 'p2', name: 'Item 2', quantity: 1, unitPrice: 20 });
-            store.setNotes('Batch test');
-        });
-
-        // Each state change triggers plugin
-        expect(changeLog.length).toBe(3);
-    });
+describe('Plugin Integration with Transaction', () => {
 
     it('should allow plugin to block during transaction', async () => {
         let blockNext = false;

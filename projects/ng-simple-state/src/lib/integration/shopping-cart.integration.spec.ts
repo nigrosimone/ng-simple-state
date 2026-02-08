@@ -5,7 +5,7 @@ import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-sto
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
 import { provideNgSimpleState } from '../ng-simple-state-provider';
 import { undoRedoPlugin, NgSimpleStateUndoRedoPlugin, persistPlugin } from '../plugin/ng-simple-state-plugin';
-import { batchState, withTransaction } from '../batch/ng-simple-state-batch';
+import { withTransaction } from '../batch/ng-simple-state-batch';
 
 // --- Shopping Cart State Models ---
 
@@ -420,37 +420,6 @@ describe('Shopping Cart Integration Tests', () => {
             cartStore.addItem(products[1], 1);
             
             expect(undoRedoPlugin_.canRedo('ShoppingCart')).toBeFalse();
-        });
-    });
-
-    describe('Batch Operations', () => {
-
-        it('should batch multiple cart updates', () => {
-            const products = catalogStore.selectProducts()();
-            
-            batchState(() => {
-                cartStore.addItem(products[0], 1);
-                cartStore.addItem(products[1], 2);
-                cartStore.addItem(products[2], 3);
-                cartStore.applyCoupon('BATCH10', 10);
-            });
-            
-            expect(cartStore.selectItems()().length).toBe(3);
-            expect(cartStore.getCurrentState().couponCode).toBe('BATCH10');
-        });
-
-        it('should allow efficient bulk updates', () => {
-            const products = catalogStore.selectProducts()();
-            
-            // Add all products in a batch
-            batchState(() => {
-                products.forEach((product, index) => {
-                    cartStore.addItem(product, index + 1);
-                });
-            });
-            
-            expect(cartStore.selectItems()().length).toBe(5);
-            expect(cartStore.selectTotalItems()()).toBe(1 + 2 + 3 + 4 + 5); // 15
         });
     });
 

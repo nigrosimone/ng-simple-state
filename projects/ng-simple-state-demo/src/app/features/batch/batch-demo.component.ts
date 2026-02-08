@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BatchStore } from './batch.store';
-import { batchState, withTransaction } from 'projects/ng-simple-state/src/public-api';
+import { withTransaction } from 'projects/ng-simple-state/src/public-api';
 
 @Component({
   selector: 'app-batch-demo',
@@ -44,13 +44,6 @@ import { batchState, withTransaction } from 'projects/ng-simple-state/src/public
     </div>
 
     <div class="demo-section">
-      <h4>Batched Updates (1 emission)</h4>
-      <p>All updates in a batch are combined into a single emission.</p>
-      <button (click)="batchUpdateAll()">Batch Update All</button>
-      <button (click)="store.updateSingle()">Single Update All</button>
-    </div>
-
-    <div class="demo-section">
       <h4>Transactions</h4>
       <p>Transactions can rollback on error.</p>
       <button (click)="runTransaction()">Run Transaction (success)</button>
@@ -70,14 +63,7 @@ import { batchState, withTransaction } from 'projects/ng-simple-state/src/public
 
     <div class="code-section">
       <h4>Code Examples</h4>
-      <pre><code>import &#123; batchState, withTransaction &#125; from 'ng-simple-state';
-
-// Batch multiple updates - only final state is emitted
-batchState(() => &#123;
-  store.setState(&#123; a: 1 &#125;);
-  store.setState(&#123; b: 2 &#125;);
-  store.setState(&#123; c: 3 &#125;);
-&#125;); // Single emission with &#123; a: 1, b: 2, c: 3 &#125;
+      <pre><code>import &#123; withTransaction &#125; from 'ng-simple-state';
 
 // Transaction with automatic rollback on error
 await withTransaction(store, async (tx) => &#123;
@@ -166,14 +152,6 @@ export class BatchDemoComponent {
   // Simple debounce/throttle state
   private debounceTimeout: ReturnType<typeof setTimeout> | null = null;
   private lastThrottle = 0;
-
-  batchUpdateAll(): void {
-    batchState(() => {
-      this.store.incrementA();
-      this.store.incrementB();
-      this.store.incrementC();
-    });
-  }
 
   async runTransaction(): Promise<void> {
     this.transactionStatus = 'Running transaction...';
