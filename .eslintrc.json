@@ -15,6 +15,7 @@
       ],
       "parserOptions": {
         "project": [
+          "projects/ng-simple-state/schematics/tsconfig.schematics.json",
           "projects/ng-simple-state/tsconfig.lib.json",
           "projects/ng-simple-state/tsconfig.spec.json",
           "projects/ng-simple-state-demo/tsconfig.app.json",
