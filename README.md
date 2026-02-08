@@ -1281,6 +1281,85 @@ const myCustomPlugin: NgSimpleStatePlugin = {
 };
 ```
 
+### Transactions
+
+Execute operations with automatic rollback on error using `withTransaction`:
+
+```ts
+import { withTransaction } from 'ng-simple-state';
+
+// Transaction with automatic rollback on error
+await withTransaction(store, async (tx) => {
+  store.setState({ step: 1 });
+  await apiCall(); // If this fails, state rolls back automatically
+  store.setState({ step: 2 });
+  tx.commit(); // Explicit commit (optional - auto-commits if not called)
+});
+
+// Manual rollback example
+await withTransaction(store, async (tx) => {
+  store.setState({ processing: true });
+  const result = await riskyOperation();
+  
+  if (!result.success) {
+    tx.rollback(); // Manually rollback to initial state
+    return;
+  }
+  
+  store.setState({ data: result.data });
+  tx.commit();
+});
+```
+
+### Debounced Updates
+
+Rate-limit state updates with `createDebouncedUpdater`. Only the last update within the time window is applied:
+
+```ts
+import { createDebouncedUpdater } from 'ng-simple-state';
+
+// Create a debounced updater with 300ms delay
+const { update, flush, cancel } = createDebouncedUpdater<MyState>(
+  (state) => store.setState(state),
+  300
+);
+
+// Rapid calls - only the last one is applied after 300ms
+update({ searchQuery: 'a' });
+update({ searchQuery: 'ab' });
+update({ searchQuery: 'abc' }); // Only this is applied after 300ms
+
+// Force immediate update
+flush();
+
+// Cancel any pending update
+cancel();
+```
+
+### Throttled Updates
+
+Limit update frequency with `createThrottledUpdater`. At most one update per time window:
+
+```ts
+import { createThrottledUpdater } from 'ng-simple-state';
+
+// Create a throttled updater with 100ms delay
+const { update, cancel } = createThrottledUpdater<MyState>(
+  (state) => store.setState(state),
+  100
+);
+
+// First call executes immediately, subsequent calls are throttled
+update({ scrollPosition: 100 }); // Executes immediately
+update({ scrollPosition: 150 }); // Queued
+update({ scrollPosition: 200 }); // Replaces queued update
+
+// After 100ms, { scrollPosition: 200 } is applied
+
+// Cancel pending throttled update
+cancel();
+```
+
 ### Immer-style Updates
 
 Write mutable-looking code that produces immutable updates. First, install Immer and configure it:
