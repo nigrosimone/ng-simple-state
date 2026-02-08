@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BatchState, BatchStore } from './batch.store';
 import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 'projects/ng-simple-state/src/public-api';
@@ -48,7 +48,7 @@ import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 
       <p>Transactions can rollback on error.</p>
       <button (click)="runTransaction()">Run Transaction (success)</button>
       <button (click)="runFailingTransaction()">Run Failing Transaction (rollback)</button>
-      <p class="info">{{ transactionStatus }}</p>
+      <p class="info">{{ transactionStatus() }}</p>
     </div>
 
     <div class="demo-section">
@@ -147,10 +147,10 @@ export class BatchDemoComponent {
   updateCount: Signal<number> = this.store.selectUpdateCount();
   lastUpdate: Signal<string> = this.store.selectLastUpdate();
 
-  transactionStatus = '';
+  transactionStatus = signal<string>('');
 
   async runTransaction(): Promise<void> {
-    this.transactionStatus = 'Running transaction...';
+    this.transactionStatus.set('Running transaction...');
     try {
       await withTransaction(this.store, async (tx) => {
         this.store.incrementA();
@@ -159,14 +159,14 @@ export class BatchDemoComponent {
         this.store.incrementB();
         tx.commit();
       });
-      this.transactionStatus = 'Transaction committed successfully!';
+      this.transactionStatus.set('Transaction committed successfully!');
     } catch (e) {
-      this.transactionStatus = 'Transaction failed: ' + e;
+      this.transactionStatus.set('Transaction failed: ' + e);
     }
   }
 
   async runFailingTransaction(): Promise<void> {
-    this.transactionStatus = 'Running failing transaction...';
+    this.transactionStatus.set('Running failing transaction...');
     const beforeState = this.store.getCurrentState();
     try {
       await withTransaction(this.store, async () => {
@@ -177,7 +177,7 @@ export class BatchDemoComponent {
         // tx.commit(); - never reached
       });
     } catch (_) {
-      this.transactionStatus = `Transaction rolled back! State restored to: A=${beforeState.a}, B=${beforeState.b}`;
+      this.transactionStatus.set(`Transaction rolled back! State restored to: A=${beforeState.a}, B=${beforeState.b}`);
     }
   }
 
