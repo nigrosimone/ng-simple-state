@@ -1,5 +1,5 @@
 import { Injectable, Signal } from '@angular/core';
-import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 export interface EffectsState {
   count: number;

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BatchState, BatchStore } from './batch.store';
-import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 'projects/ng-simple-state/src/public-api';
+import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 'ng-simple-state';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector

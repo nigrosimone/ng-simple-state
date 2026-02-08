@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Hero } from './hero';
-import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'projects/ng-simple-state/src/public-api';
+import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 
 export type HeroState = Array<Hero>;
