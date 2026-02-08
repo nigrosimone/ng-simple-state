@@ -5,7 +5,9 @@ import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { BASE_KEY, NgSimpleStateStorage } from '../storage/ng-simple-state-browser-storage';
 import { DevToolsExtension } from '../tool/ng-simple-state-dev-tool.spec';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
-import { provideNgSimpleState } from '../ng-simple-state-provider';
+import { NgSimpleStatePlugin } from '../plugin/ng-simple-state-plugin';
+import { provideNgSimpleState, provideNgSimpleStatePlugins } from '../ng-simple-state-provider';
+import { NgSimpleStateDevTool } from '../tool/ng-simple-state-dev-tool';
 
 export interface CounterState {
     count: number;
@@ -749,6 +751,150 @@ describe('NgSimpleStateBaseSignalStore: comparator', () => {
         service.setCount(5);
         // Setting same count should return false due to comparator
         expect(service.setCount(5)).toBeFalse();
+    });
+});
+
+describe('provideNgSimpleStatePlugins', () => {
+
+    it('should provide plugins separately', () => {
+        const plugins: NgSimpleStatePlugin[] = [
+            {
+                name: 'testPlugin',
+                onBeforeStateChange: () => true
+            }
+        ];
+        
+        const result = provideNgSimpleStatePlugins(plugins);
+        expect(result).toBeDefined();
+    });
+});
+
+describe('NgSimpleStateBaseSignalStore: Plugin lifecycle hooks', () => {
+
+    let onStoreInitSpy: jasmine.Spy;
+    let onStoreDestroySpy: jasmine.Spy;
+    let lifecyclePlugin: NgSimpleStatePlugin;
+
+    @Injectable()
+    class LifecyclePluginStore extends NgSimpleStateBaseSignalStore<{ value: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'LifecyclePluginStore' };
+        }
+
+        initialState() {
+            return { value: 0 };
+        }
+
+        setValue(value: number): boolean {
+            return this.setState({ value });
+        }
+    }
+
+    beforeEach(() => {
+        onStoreInitSpy = jasmine.createSpy('onStoreInit');
+        onStoreDestroySpy = jasmine.createSpy('onStoreDestroy');
+        
+        lifecyclePlugin = {
+            name: 'lifecyclePlugin',
+            onStoreInit: onStoreInitSpy,
+            onStoreDestroy: onStoreDestroySpy,
+            onBeforeStateChange: () => true
+        };
+
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({ plugins: [lifecyclePlugin] }),
+                LifecyclePluginStore
+            ]
+        });
+    });
+
+    it('should call onStoreInit when store is created', () => {
+        const service = TestBed.inject(LifecyclePluginStore);
+        expect(onStoreInitSpy).toHaveBeenCalledWith('LifecyclePluginStore', { value: 0 });
+    });
+
+    it('should call onStoreDestroy when store is destroyed', () => {
+        const service = TestBed.inject(LifecyclePluginStore);
+        service.ngOnDestroy();
+        expect(onStoreDestroySpy).toHaveBeenCalledWith('LifecyclePluginStore');
+    });
+});
+
+describe('NgSimpleStateBaseSignalStore: DevTool time-travel', () => {
+
+    let mockDevTool: any;
+    let applyStateSpy: jasmine.Spy;
+    let getInitialStateSpy: jasmine.Spy;
+
+    @Injectable()
+    class TimeTravelStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
+
+        storeConfig(): NgSimpleStateStoreConfig {
+            return { storeName: 'TimeTravelStore', enableDevTool: true };
+        }
+
+        initialState() {
+            return { count: 0 };
+        }
+
+        increment(): boolean {
+            return this.setState(s => ({ count: s.count + 1 }));
+        }
+
+        applyTestState(state: { count: number }): void {
+            (this as any).applyDevToolState(state);
+        }
+    }
+
+    beforeEach(() => {
+        applyStateSpy = jasmine.createSpy('applyState');
+        getInitialStateSpy = jasmine.createSpy('getInitialState');
+        
+        mockDevTool = {
+            send: jasmine.createSpy('send').and.returnValue(true),
+            registerStore: jasmine.createSpy('registerStore').and.callFake(
+                (storeName: string, callbacks: { applyState: (s: unknown) => void, getInitialState: () => unknown }) => {
+                    applyStateSpy.and.callFake(callbacks.applyState);
+                    getInitialStateSpy.and.callFake(callbacks.getInitialState);
+                }
+            ),
+            unregisterStore: jasmine.createSpy('unregisterStore')
+        };
+
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: NgSimpleStateDevTool, useValue: mockDevTool },
+                TimeTravelStore
+            ]
+        });
+    });
+
+    it('should register applyState callback with DevTool', () => {
+        const service = TestBed.inject(TimeTravelStore);
+        expect(mockDevTool.registerStore).toHaveBeenCalled();
+        
+        // Simulate DevTool calling applyState (time-travel)
+        service.increment();
+        expect(service.getCurrentState().count).toBe(1);
+        
+        service.applyTestState({ count: 10 });
+        expect(service.getCurrentState().count).toBe(10);
+    });
+
+    it('should register getInitialState callback with DevTool', () => {
+        const service = TestBed.inject(TimeTravelStore);
+        expect(mockDevTool.registerStore).toHaveBeenCalled();
+        
+        const initialState = getInitialStateSpy();
+        expect(initialState).toEqual({ count: 0 });
+    });
+
+    it('should unregister from DevTool on destroy', () => {
+        const service = TestBed.inject(TimeTravelStore);
+        service.ngOnDestroy();
+        expect(mockDevTool.unregisterStore).toHaveBeenCalledWith('TimeTravelStore');
     });
 });
 
