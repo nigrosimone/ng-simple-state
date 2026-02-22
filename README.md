@@ -1500,6 +1500,43 @@ Features available in Redux DevTools:
 
 ![Redux DevTools](https://github.com/nigrosimone/ng-simple-state/blob/main/projects/ng-simple-state-demo/src/assets/dev-tool.gif?raw=true)
 
+### Integration with ng-http-caching
+
+`ng-simple-state` can be used as a reactive storage backend for [ng-http-caching](https://www.npmjs.com/package/ng-http-caching). This integration allows you to manage the HTTP cache through `ng-simple-state` stores, providing full visibility and control over the cache state within your DevTools or application state.
+
+1. Install `ng-http-caching`:
+
+```bash
+npm i ng-http-caching
+```
+
+2. Configure `ng-http-caching` to use the `ng-simple-state` adapter in your `bootstrapApplication`:
+
+```ts
+import { provideNgHttpCaching } from 'ng-http-caching';
+import { withNgHttpCachingNgSimpleState } from 'ng-http-caching/ng-simple-state';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideNgHttpCaching({
+      store: withNgHttpCachingNgSimpleState(),
+    }),
+    // ... other providers
+  ]
+});
+```
+
+You can customize the store configuration (e.g., enable persistence or change the store name) by passing a configuration object to the adapter:
+
+```ts
+provideNgHttpCaching({
+  store: withNgHttpCachingNgSimpleState({
+    storeName: 'MyCacheStore',
+    // ... other NgSimpleStateStoreConfig options
+  }),
+})
+```
+
 ## Alternatives
 
 Aren't you satisfied? there are some valid alternatives:
