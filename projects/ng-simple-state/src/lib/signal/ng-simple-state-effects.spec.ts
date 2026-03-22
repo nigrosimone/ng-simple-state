@@ -1,5 +1,5 @@
 import { Injectable, Injector, Signal, runInInjectionContext } from '@angular/core';
-import { flush, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 
