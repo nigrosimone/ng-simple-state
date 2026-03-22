@@ -1,5 +1,5 @@
 import { Injectable, Injector, Signal, runInInjectionContext } from '@angular/core';
-import { fakeAsync, flush, TestBed } from '@angular/core/testing';
+import { flush, TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 
@@ -122,7 +122,7 @@ describe('NgSimpleStateBaseSignalStore: Effects', () => {
         });
     });
 
-    it('should call previous cleanup before running effect again', fakeAsync(() => {
+    it('should call previous cleanup before running effect again', async () => {
         const cleanup1 = jasmine.createSpy('cleanup1');
         const cleanup2 = jasmine.createSpy('cleanup2');
 
@@ -134,17 +134,17 @@ describe('NgSimpleStateBaseSignalStore: Effects', () => {
             store.createEffect('test', effectFn);
         });
 
-        flush();
+        await new Promise(r => setTimeout(r));
 
         expect(effectFn).toHaveBeenCalledTimes(1);
         expect(cleanup1).not.toHaveBeenCalled();
 
         store.setState({ count: 1 });
 
-        flush();
+         await new Promise(r => setTimeout(r));
 
         expect(effectFn).toHaveBeenCalledTimes(2);
         expect(cleanup1).toHaveBeenCalledTimes(1);
         expect(cleanup2).not.toHaveBeenCalled();
-    }));
+    });
 });

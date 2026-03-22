@@ -129,7 +129,7 @@ describe('NgSimpleStateBaseRxjsStore: Service', () => {
             (state as any).count = 2;
             expect(true).toEqual(false);
         } catch (error: any) {
-            expect(error.message).toEqual('Cannot assign to read only property \'count\' of object \'[object Object]\'');
+            expect(error.message).toEqual("Cannot assign to read only property 'count' of object '#<Object>'");
         } finally {
             service['devMode'] = true;
             expect(service['devMode']).toEqual(true);
