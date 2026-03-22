@@ -1,4 +1,4 @@
-# NgSimpleState [![Build Status](https://app.travis-ci.com/nigrosimone/ng-simple-state.svg?branch=main)](https://app.travis-ci.com/nigrosimone/ng-simple-state) [![Coverage Status](https://coveralls.io/repos/github/nigrosimone/ng-simple-state/badge.svg?branch=main)](https://coveralls.io/github/nigrosimone/ng-simple-state?branch=main) [![NPM version](https://img.shields.io/npm/v/ng-simple-state.svg)](https://www.npmjs.com/package/ng-simple-state) [![Maintainability](https://qlty.sh/gh/nigrosimone/projects/ng-simple-state/maintainability.svg)](https://qlty.sh/gh/nigrosimone/projects/ng-simple-state)
+# NgSimpleState [![NPM version](https://img.shields.io/npm/v/ng-simple-state.svg)](https://www.npmjs.com/package/ng-simple-state) [![Maintainability](https://qlty.sh/gh/nigrosimone/projects/ng-simple-state/maintainability.svg)](https://qlty.sh/gh/nigrosimone/projects/ng-simple-state)
 
 Simple state management in Angular with only Services and RxJS or Signal.
 

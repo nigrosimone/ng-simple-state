@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Injector, Signal, runInInjectionContext } from '@angular/core';
 import { fakeAsync, flush, TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
