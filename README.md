@@ -6,7 +6,7 @@ Simple state management in Angular with only Services and RxJS or Signal.
 
 Sharing state between components as simple as possible and leverage the good parts of component state and Angular's dependency injection system.
 
-See the [demo](https://stackblitz.com/edit/stackblitz-starters-ld9zx4qf?file=src%2Fapp.component.ts)
+See the [demo](https://stackblitz.com/edit/demo-ng-simple-state?file=src%2Fapp.component.ts)
 
 ## Get Started
 
