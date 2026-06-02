@@ -92,13 +92,14 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
         this.isArray = Array.isArray(this.firstState);
 
-        if(config.webMcp) {
+        if (config.webMcp) {
+            const serialize = config.serializeState || JSON.stringify;
             declareExperimentalWebMcpTool({
                 name: `${this.storeName}_getCurrentState`,
                 description: `Reads the current ${this.storeName} store state.`,
                 inputSchema: { type: 'object', properties: {} },
                 execute: () => ({
-                    content: [{ type: 'text', text: JSON.stringify(this.getCurrentState()) }],
+                    content: [{ type: 'text', text: serialize(this.getCurrentState()) }],
                 }),
             });
         }
