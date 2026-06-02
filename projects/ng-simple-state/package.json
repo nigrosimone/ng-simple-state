@@ -1,6 +1,6 @@
 {
   "name": "ng-simple-state",
-  "version": "21.1.5",
+  "version": "22.0.0",
   "description": "Simple state management in Angular with only Services and RxJS or Signal.",
   "repository": {
     "type": "git",
@@ -26,8 +26,8 @@
     "save": "dependencies"
   },
   "peerDependencies": {
-    "@angular/common": ">15.0.0",
-    "@angular/core": ">15.0.0"
+    "@angular/common": ">22.0.0",
+    "@angular/core": ">22.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
