@@ -29,6 +29,7 @@ npm i ng-simple-state
 | *deserializeState*     | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
 | *plugins*              | Array of plugins to extend store functionality.                                                 | `[]`             |
 | *immerProduce*         | Custom Immer produce function for immutable updates.                                            | undefined        |
+| *webMcp*               | Enable experimental WebMCP tool integration.                                                    | `false`          |
 
 _Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
 
