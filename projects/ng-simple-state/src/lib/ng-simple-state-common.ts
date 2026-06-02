@@ -22,6 +22,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected comparator?: NgSimpleStateComparator<S>;
     protected plugins: NgSimpleStatePlugin<S>[] = [];
     protected immerProduce?: <T>(state: T, producer: (draft: T) => void) => T;
+    protected readonly registeredEffects: Map<string, (() => void)> = new Map();
 
     /**
      * Apply state directly from DevTools time-travel (bypasses devtool send and plugins).
@@ -474,6 +475,32 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
     }
 
-    /** @internal */
-    abstract destroyAllEffects(): void;
+    /**
+     * Destroy a specific effect by name
+     * @param name Effect name to destroy
+     */
+    public destroyEffect(name: string): void {
+        const destroyFn = this.registeredEffects.get(name);
+        if (destroyFn) {
+            destroyFn();
+            this.registeredEffects.delete(name);
+        }
+    }
+
+    /**
+     * Destroy all registered effects
+     */
+    public destroyAllEffects(): void {
+        this.registeredEffects.forEach((destroyFn) => {
+            destroyFn();
+        });
+        this.registeredEffects.clear();
+    }
+
+    /**
+     * Get all registered effect names
+     */
+    public getEffectNames(): string[] {
+        return Array.from(this.registeredEffects.keys());
+    }
 }

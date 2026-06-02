@@ -10,7 +10,6 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     protected stackPoint: number = 4;
     private readonly stateSig: WritableSignal<S> = signal<S>(this.firstState);
     private readonly stateSigRo: Signal<S> = this.stateSig.asReadonly();
-    private readonly registeredEffects: Map<string, EffectRef> = new Map();
     private readonly injector = inject(Injector);
 
     /**
@@ -92,7 +91,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
             })
         );
 
-        this.registeredEffects.set(name, effectRef);
+        this.registeredEffects.set(name, effectRef.destroy.bind(effectRef));
         return effectRef;
     }
 
@@ -120,35 +119,6 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     ): EffectRef {
         const selectedSignal = computed(() => selector(this.stateSig()));
         return this.createEffectFromSignal(name, selectedSignal, effectFn);
-    }
-
-    /**
-     * Destroy a specific effect by name
-     * @param name Effect name to destroy
-     */
-    destroyEffect(name: string): void {
-        const effectRef = this.registeredEffects.get(name);
-        if (effectRef) {
-            effectRef.destroy();
-            this.registeredEffects.delete(name);
-        }
-    }
-
-    /**
-     * Destroy all registered effects
-     */
-    destroyAllEffects(): void {
-        this.registeredEffects.forEach((effectRef) => {
-            effectRef.destroy();
-        });
-        this.registeredEffects.clear();
-    }
-
-    /**
-     * Get all registered effect names
-     */
-    getEffectNames(): string[] {
-        return Array.from(this.registeredEffects.keys());
     }
 
     /**

@@ -1,5 +1,5 @@
 import { Injectable, inject, Directive, DestroyRef } from '@angular/core';
-import { BehaviorSubject, Observable, asyncScheduler, Subject, takeUntil, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, asyncScheduler, Subject, takeUntil } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
 import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState, StateFnOrReplaceState, NgSimpleStateProducer } from '../ng-simple-state-models';
@@ -13,7 +13,6 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     private readonly state$: BehaviorSubject<S> = new BehaviorSubject<S>(this.firstState);
     private readonly stateObs: Observable<S> = this.state$.asObservable();
     private readonly destroy$ = new Subject<void>();
-    private readonly registeredEffects: Map<string, Subscription> = new Map();
 
     constructor() {
         super();
@@ -77,7 +76,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
                 effectFn(value);
             });
 
-        this.registeredEffects.set(name, subscription);
+        this.registeredEffects.set(name, subscription.unsubscribe.bind(subscription));
     }
 
     /**
@@ -105,35 +104,6 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
             this.selectState(selector),
             effectFn
         );
-    }
-
-    /**
-     * Destroy a specific effect by name
-     * @param name Effect name to destroy
-     */
-    destroyEffect(name: string): void {
-        const subscription = this.registeredEffects.get(name);
-        if (subscription) {
-            subscription.unsubscribe();
-            this.registeredEffects.delete(name);
-        }
-    }
-
-    /**
-     * Destroy all registered effects
-     */
-    destroyAllEffects(): void {
-        this.registeredEffects.forEach((subscription) => {
-            subscription.unsubscribe();
-        });
-        this.registeredEffects.clear();
-    }
-
-    /**
-     * Get all registered effect names
-     */
-    getEffectNames(): string[] {
-        return Array.from(this.registeredEffects.keys());
     }
 
     /**
