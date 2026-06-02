@@ -23,12 +23,12 @@ npm i ng-simple-state
 | Option                 | Description                                                                                     | Default          |
 | ---------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
 | *enableDevTool*        | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`          |
-| *persistentStorage*    | Set the persistent storage `local` or `session`.                                                | undefined        |
+| *persistentStorage*    | Set the persistent storage `local` or `session`.                                                | `undefined`      |
 | *comparator*           | A function used to compare the previous and current state for equality.                         | `a === b`        |
 | *serializeState*       | A function used to serialize the state to a string.                                             | `JSON.stringify` |
 | *deserializeState*     | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
 | *plugins*              | Array of plugins to extend store functionality.                                                 | `[]`             |
-| *immerProduce*         | Custom Immer produce function for immutable updates.                                            | undefined        |
+| *immerProduce*         | Custom Immer produce function for immutable updates.                                            | `undefined`      |
 | *webMcp*               | Enable experimental WebMCP tool integration.                                                    | `false`          |
 
 _Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
@@ -296,11 +296,12 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | Option               | Description                                                                                     | Default          |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`          |
-| *storeName*          | The store name.                                                                                 | undefined        |
-| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | undefined        |
+| *storeName*          | The store name.                                                                                 | `undefined`      |
+| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `undefined`      |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`        |
 | *serializeState*     | A function used to serialize the state to a string.                                             | `JSON.stringify` |
 | *deserializeState*   | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
+| *webMcp*               | Enable experimental WebMCP tool integration.                                                  | `false`          |
 
 ### Testing
 
@@ -1338,11 +1339,12 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | Option               | Description                                                                                     | Default          |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`          |
-| *storeName*          | The store name.                                                                                 | undefined        |
-| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | undefined        |
+| *storeName*          | The store name.                                                                                 | `undefined`      |
+| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `undefined`      |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`        |
 | *serializeState*     | A function used to serialize the state to a string.                                             | `JSON.stringify` |
 | *deserializeState*   | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
+| *webMcp*               | Enable experimental WebMCP tool integration.                                                  | `false`          |
 
 
 ### Testing
