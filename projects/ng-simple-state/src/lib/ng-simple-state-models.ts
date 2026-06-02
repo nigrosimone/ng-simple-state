@@ -60,7 +60,7 @@ export interface NgSimpleStateConfig<K = any> {
      */
     plugins?: NgSimpleStatePlugin[];
     /**
-     * Enable experimental WebMCP tool integration
+     * Enable experimental WebMCP tool integration (only read current state)
      */
     webMcp?: boolean;
 }
