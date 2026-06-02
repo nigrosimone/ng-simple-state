@@ -1534,6 +1534,38 @@ provideNgHttpCaching({
 })
 ```
 
+### WebMCP
+
+Enable experimental WebMCP (only read current state)
+
+```ts
+import { Service, signal, inject, Signal } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface UsersState {
+  users: User[];
+  selectedId: number | null;
+}
+
+@Service()
+export class UsersStore extends NgSimpleStateBaseSignalStore<UsersState> {
+
+  storeConfig(): NgSimpleStateStoreConfig<UsersState> {
+    return { storeName: 'UsersStore', webMcp: true };
+  }
+
+  initialState(): UsersState {
+    return { users: [], selectedId: null };
+  }
+}
+```
+
 ## Alternatives
 
 Aren't you satisfied? there are some valid alternatives:

@@ -59,6 +59,10 @@ export interface NgSimpleStateConfig<K = any> {
      * Plugins for extending store functionality
      */
     plugins?: NgSimpleStatePlugin[];
+    /**
+     * Enable experimental WebMCP tool integration
+     */
+    webMcp?: boolean;
 }
 
 /**

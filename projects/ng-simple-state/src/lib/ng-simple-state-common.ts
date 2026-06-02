@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy, Directive, isDevMode, inject } from '@angular/core';
+import { Injectable, OnDestroy, Directive, isDevMode, inject, declareExperimentalWebMcpTool } from '@angular/core';
 import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
@@ -91,6 +91,17 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         this.notifyPluginsInit();
 
         this.isArray = Array.isArray(this.firstState);
+
+        if(config.webMcp) {
+            declareExperimentalWebMcpTool({
+                name: `${this.storeName}_getCurrentState`,
+                description: `Reads the current ${this.storeName} store state.`,
+                inputSchema: { type: 'object', properties: {} },
+                execute: () => ({
+                    content: [{ type: 'text', text: JSON.stringify(this.getCurrentState()) }],
+                }),
+            });
+        }
     }
 
     /**
