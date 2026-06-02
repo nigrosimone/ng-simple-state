@@ -80,10 +80,6 @@ describe('NgSimpleStateBaseSignalStore: Effects', () => {
         injector = TestBed.inject(Injector);
     });
 
-    afterEach(() => {
-        store.ngOnDestroy();
-    });
-
     it('should have destroyEffect method', () => {
         expect(typeof store.destroyEffect).toBe('function');
     });

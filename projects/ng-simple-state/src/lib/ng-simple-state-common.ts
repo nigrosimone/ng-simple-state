@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy, Directive, isDevMode, inject, declareExperimentalWebMcpTool } from '@angular/core';
+import { Injectable, Directive, isDevMode, inject, DestroyRef, declareExperimentalWebMcpTool } from '@angular/core';
 import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
@@ -9,7 +9,7 @@ import { NgSimpleStatePlugin, NG_SIMPLE_STATE_PLUGINS, NgSimpleStatePluginContex
 
 @Injectable()
 @Directive()
-export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> implements OnDestroy {
+export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> {
 
     protected abstract stackPoint: number;
     protected devTool?: NgSimpleStateDevTool;
@@ -103,6 +103,24 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
                 }),
             });
         }
+
+        inject(DestroyRef).onDestroy(() => {
+            this.devToolSend(undefined, 'onDestroy');
+
+            // Unregister from DevTool
+            if (this.devTool) {
+                this.devTool.unregisterStore(this.storeName);
+            }
+
+            // Notify plugins of store destroy
+            for (const plugin of this.plugins) {
+                if (plugin.onStoreDestroy) {
+                    plugin.onStoreDestroy(this.storeName);
+                }
+            }
+
+            this.destroyAllEffects();
+        });
     }
 
     /**
@@ -163,25 +181,6 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         for (const plugin of this.plugins) {
             if (plugin.onAfterStateChange) {
                 plugin.onAfterStateChange(context);
-            }
-        }
-    }
-
-    /**
-     * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
-     */
-    ngOnDestroy(): void {
-        this.devToolSend(undefined, 'ngOnDestroy');
-
-        // Unregister from DevTool
-        if (this.devTool) {
-            this.devTool.unregisterStore(this.storeName);
-        }
-
-        // Notify plugins of store destroy
-        for (const plugin of this.plugins) {
-            if (plugin.onStoreDestroy) {
-                plugin.onStoreDestroy(this.storeName);
             }
         }
     }
@@ -474,4 +473,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.storage.setItem(this.storeName, state);
         }
     }
+
+    /** @internal */
+    abstract destroyAllEffects(): void;
 }

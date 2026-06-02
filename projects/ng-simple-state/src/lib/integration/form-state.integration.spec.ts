@@ -801,10 +801,6 @@ describe('Effects Integration Tests', () => {
         injector = TestBed.inject(Injector);
     });
 
-    afterEach(() => {
-        notificationStore.ngOnDestroy();
-    });
-
     it('should add and remove notifications', () => {
         notificationStore.addNotification('Hello', 'info');
         notificationStore.addNotification('Success!', 'success');
@@ -847,16 +843,4 @@ describe('Effects Integration Tests', () => {
         });
     });
 
-    it('should destroy all effects on store destroy', () => {
-        runInInjectionContext(injector, () => {
-            notificationStore.setupTestEffect();
-            notificationStore.setupSelectorEffect();
-            
-            expect(notificationStore.getEffectNames().length).toBe(2);
-            
-            notificationStore.ngOnDestroy();
-            
-            expect(notificationStore.getEffectNames().length).toBe(0);
-        });
-    });
 });

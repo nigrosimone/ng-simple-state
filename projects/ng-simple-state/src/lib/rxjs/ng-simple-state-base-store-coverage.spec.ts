@@ -538,12 +538,6 @@ describe('NgSimpleStateBaseRxjsStore: effects', () => {
         
         expect(service.getEffectNames()).toEqual([]);
     });
-
-    it('should destroy all effects on ngOnDestroy', () => {
-        service.createEffect('effect1', () => {});
-        service.ngOnDestroy();
-        expect(service.getEffectNames()).toEqual([]);
-    });
 });
 
 

@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy, Directive } from '@angular/core';
+import { Injectable, inject, Directive, DestroyRef } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler, Subject, takeUntil, Subscription } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
@@ -7,13 +7,22 @@ import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateS
 @Injectable()
 @Directive()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> implements OnDestroy {
+export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
     protected stackPoint: number = 4;
     private readonly state$: BehaviorSubject<S> = new BehaviorSubject<S>(this.firstState);
     private readonly stateObs: Observable<S> = this.state$.asObservable();
     private readonly destroy$ = new Subject<void>();
     private readonly registeredEffects: Map<string, Subscription> = new Map();
+
+    constructor() {
+        super();
+        inject(DestroyRef).onDestroy(() => {
+            this.destroy$.next();
+            this.destroy$.complete();
+            this.state$.complete();
+        });
+    }
 
     /**
      * Apply state directly from DevTools time-travel.
@@ -29,17 +38,6 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      */
     public get state(): Observable<S> {
         return this.stateObs;
-    }
-
-    /**
-     * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
-     */
-    override ngOnDestroy(): void {
-        super.ngOnDestroy();
-        this.destroy$.next();
-        this.destroy$.complete();
-        this.state$.complete();
-        this.destroyAllEffects();
     }
 
     /**

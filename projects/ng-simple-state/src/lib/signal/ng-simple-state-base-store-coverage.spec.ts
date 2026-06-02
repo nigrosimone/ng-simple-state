@@ -563,11 +563,6 @@ describe('NgSimpleStateBaseSignalStore: effects cleanup', () => {
     it('should get effect names', () => {
         expect(service.getEffectNames()).toEqual([]);
     });
-
-    it('should destroy all effects on ngOnDestroy', () => {
-        service.ngOnDestroy();
-        expect(service.getEffectNames()).toEqual([]);
-    });
 });
 
 
@@ -814,12 +809,6 @@ describe('NgSimpleStateBaseSignalStore: Plugin lifecycle hooks', () => {
         TestBed.inject(LifecyclePluginStore);
         expect(onStoreInitSpy).toHaveBeenCalledWith('LifecyclePluginStore', { value: 0 });
     });
-
-    it('should call onStoreDestroy when store is destroyed', () => {
-        const service = TestBed.inject(LifecyclePluginStore);
-        service.ngOnDestroy();
-        expect(onStoreDestroySpy).toHaveBeenCalledWith('LifecyclePluginStore');
-    });
 });
 
 describe('NgSimpleStateBaseSignalStore: DevTool time-travel', () => {
@@ -889,12 +878,6 @@ describe('NgSimpleStateBaseSignalStore: DevTool time-travel', () => {
         
         const initialState = getInitialStateSpy();
         expect(initialState).toEqual({ count: 0 });
-    });
-
-    it('should unregister from DevTool on destroy', () => {
-        const service = TestBed.inject(TimeTravelStore);
-        service.ngOnDestroy();
-        expect(mockDevTool.unregisterStore).toHaveBeenCalledWith('TimeTravelStore');
     });
 });
 

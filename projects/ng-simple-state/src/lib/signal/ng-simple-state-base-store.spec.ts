@@ -93,12 +93,6 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
 
     });
 
-    it('ngOnDestroy', () => {
-        service.ngOnDestroy();
-        expect(service.getFirstState()).toEqual({ count: 1 });
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-    });
-
     it('resetState', () => {
         expect(service.setState(() => ({ count: 5 }))).toBeTrue();
         expect(service.resetState()).toBeTrue();

@@ -30,14 +30,6 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     }
 
     /**
-     * Cleanup registered effects on destroy
-     */
-    override ngOnDestroy(): void {
-        super.ngOnDestroy();
-        this.destroyAllEffects();
-    }
-
-    /**
      * Select a store state
      * @param selectFn State selector (if not provided return full state)
      * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
