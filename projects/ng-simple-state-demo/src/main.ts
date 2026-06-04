@@ -26,7 +26,8 @@ bootstrapApplication(AppComponent, {
       enableDevTool: isDevMode(),
       persistentStorage: new NgSimpleStateLocalStorage(),
       comparator: isEqual,
-      plugins: [undoRedoPlugin({ maxHistory: 50 })]
+      plugins: [undoRedoPlugin({ maxHistory: 50 })],
+      webMcp: true
     })
   ]
 });
