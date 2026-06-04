@@ -2,7 +2,7 @@ import { isDevMode, provideZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgSimpleStateLocalStorage, provideNgSimpleState, undoRedoPlugin } from 'ng-simple-state';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter, Routes } from '@angular/router';
+import { provideRouter, Routes, withExperimentalAutoCleanupInjectors } from '@angular/router';
 import isEqual from 'lodash.isequal';
 
 const routes: Routes = [
@@ -21,7 +21,7 @@ const routes: Routes = [
 bootstrapApplication(AppComponent, {
   providers: [
     provideZonelessChangeDetection(),
-    provideRouter(routes),
+    provideRouter(routes, withExperimentalAutoCleanupInjectors()),
     provideNgSimpleState({
       enableDevTool: isDevMode(),
       persistentStorage: new NgSimpleStateLocalStorage(),
