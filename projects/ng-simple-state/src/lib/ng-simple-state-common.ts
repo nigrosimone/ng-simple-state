@@ -477,7 +477,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     /**
      * Persist state to storage
      */
-    protected statePersist(state: S) {
+    private statePersist(state: S) {
         if (this.storage) {
             this.storage.setItem(this.storeName, state);
         }
