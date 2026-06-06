@@ -144,7 +144,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
     setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): boolean {
         const state = this._setState(stateFnOrNewState, actionName);
-        if (typeof state !== 'undefined') {
+        if (state !== undefined) {
             this.stateSig.set(state);
             return true;
         }
@@ -206,7 +206,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): boolean;
     replaceState(stateFnOrReplaceState: StateFnOrReplaceState<S>, actionName?: string): boolean {
         const state = this._replaceState(stateFnOrReplaceState, actionName);
-        if (typeof state !== 'undefined') {
+        if (state !== undefined) {
             this.stateSig.set(state);
             return true;
         }

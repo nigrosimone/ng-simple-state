@@ -129,7 +129,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): boolean;
     setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): boolean {
         const state = this._setState(stateFnOrNewState, actionName);
-        if (typeof state !== 'undefined') {
+        if (state !== undefined) {
             this.state$.next(state);
             return true;
         }
@@ -191,7 +191,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): boolean;
     replaceState(stateFnOrNewState: StateFnOrReplaceState<S>, actionName?: string): boolean {
         const state = this._replaceState(stateFnOrNewState, actionName);
-        if (typeof state !== 'undefined') {
+        if (state !== undefined) {
             this.state$.next(state);
             return true;
         }
