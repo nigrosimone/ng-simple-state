@@ -347,7 +347,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     /**
      * Get action name from stack trace
      */
-    protected getActionName(): string {
+    private getActionName(): string {
         if (!this.devMode && !this.plugins.length) {
             return 'no-action-needed';
         }
