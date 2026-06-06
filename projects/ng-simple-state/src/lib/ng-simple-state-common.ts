@@ -11,16 +11,18 @@ import { NgSimpleStatePlugin, NG_SIMPLE_STATE_PLUGINS, NgSimpleStatePluginContex
 @Directive()
 export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> {
 
+    /** @internal */
     protected abstract stackPoint: number;
-    protected devTool?: NgSimpleStateDevTool;
-    protected storage?: NgSimpleStateStorage<S>;
+    private devTool?: NgSimpleStateDevTool;
+    private storage?: NgSimpleStateStorage<S>;
+    /** @internal */
     readonly storeName: string;
     protected firstState!: S;
-    protected initState!: S;
-    protected isArray: boolean;
+    private initState!: S;
+    private isArray: boolean;
     protected devMode: boolean = isDevMode();
     protected comparator?: NgSimpleStateComparator<S>;
-    protected plugins: NgSimpleStatePlugin<S>[] = [];
+    private plugins: NgSimpleStatePlugin<S>[] = [];
     protected immerProduce?: <T>(state: T, producer: (draft: T) => void) => T;
     protected readonly registeredEffects: Map<string, (() => void)> = new Map();
 
