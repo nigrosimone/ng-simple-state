@@ -258,21 +258,21 @@ describe('NgSimpleStateBaseRxjsStore: deepFreeze edge cases', () => {
         const frozenState = Object.freeze({ count: 5 });
         
         // Access protected method via any cast
-        const result = (service as any).deepFreeze(frozenState);
+        const result = (service as any)._deepFreeze(frozenState);
         
         expect(result).toEqual({ count: 5 });
         expect(Object.isFrozen(result)).toBeTrue();
     });
 
     it('deepFreeze with null/undefined in dev mode', () => {
-        expect((service as any).devMode).toBeTrue();
+        expect((service as any)._devMode).toBeTrue();
         
         // deepFreeze should handle null gracefully
-        const nullResult = (service as any).deepFreeze(null);
+        const nullResult = (service as any)._deepFreeze(null);
         expect(nullResult).toBeNull();
         
         // deepFreeze should handle undefined gracefully
-        const undefinedResult = (service as any).deepFreeze(undefined);
+        const undefinedResult = (service as any)._deepFreeze(undefined);
         expect(undefinedResult).toBeUndefined();
     });
 
@@ -287,7 +287,7 @@ describe('NgSimpleStateBaseRxjsStore: deepFreeze edge cases', () => {
             } 
         };
         
-        const result = (service as any).deepFreeze(nestedState);
+        const result = (service as any)._deepFreeze(nestedState);
         
         expect(Object.isFrozen(result)).toBeTrue();
         expect(Object.isFrozen(result.nested)).toBeTrue();
@@ -386,7 +386,7 @@ describe('NgSimpleStateBaseRxjsStore: PROD mode (devMode=false)', () => {
 
     it('getCurrentState in PROD mode should not freeze', () => {
         // Set devMode to false to simulate production
-        (service as any).devMode = false;
+        (service as any)._devMode = false;
         
         const state = service.getCurrentState();
         expect(state).toEqual({ count: 1 });
@@ -395,7 +395,7 @@ describe('NgSimpleStateBaseRxjsStore: PROD mode (devMode=false)', () => {
         expect(Object.isFrozen(state)).toBeFalse();
         
         // Reset
-        (service as any).devMode = true;
+        (service as any)._devMode = true;
     });
 });
 

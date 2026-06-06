@@ -12,25 +12,32 @@ import { NgSimpleStatePlugin, NG_SIMPLE_STATE_PLUGINS, NgSimpleStatePluginContex
 export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> {
 
     /** @internal */
-    protected abstract stackPoint: number;
+    protected abstract _stackPoint: number;
     private devTool?: NgSimpleStateDevTool;
     private storage?: NgSimpleStateStorage<S>;
     /** @internal */
-    readonly storeName: string;
-    protected firstState!: S;
+    readonly _storeName: string;
+    /** @internal */
+    protected _firstState!: S;
     private initState!: S;
     private isArray: boolean;
-    protected devMode: boolean = isDevMode();
-    protected comparator?: NgSimpleStateComparator<S>;
+    /** @internal */
+    protected _devMode: boolean = isDevMode();
+    /** @internal */
+    protected _comparator?: NgSimpleStateComparator<S>;
     private plugins: NgSimpleStatePlugin<S>[] = [];
-    protected immerProduce?: <T>(state: T, producer: (draft: T) => void) => T;
-    protected readonly registeredEffects: Map<string, (() => void)> = new Map();
+    /** @internal */
+    protected _immerProduce?: <T>(state: T, producer: (draft: T) => void) => T;
+    /** @internal */
+    protected readonly _registeredEffects: Map<string, (() => void)> = new Map();
 
     /**
      * Apply state directly from DevTools time-travel (bypasses devtool send and plugins).
      * Must be implemented by concrete store classes.
+     * @private
+     * @internal
      */
-    protected abstract applyDevToolState(state: S): void;
+    protected abstract _applyDevToolState(state: S): void;
 
     constructor() {
 
@@ -50,15 +57,15 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.devTool = inject(NgSimpleStateDevTool);
         }
 
-        this.storeName = config.storeName;
+        this._storeName = config.storeName;
 
         if (typeof config.comparator === 'function') {
-            this.comparator = config.comparator;
+            this._comparator = config.comparator;
         }
 
         // Setup Immer if configured
         if (config.immerProduce) {
-            this.immerProduce = config.immerProduce;
+            this._immerProduce = config.immerProduce;
         }
 
         // Setup plugins - deduplicate by reference to avoid double-registration
@@ -69,37 +76,37 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         this.plugins = allPlugins.filter((plugin, index) => allPlugins.indexOf(plugin) === index) as NgSimpleStatePlugin<S>[];
 
         if (this.storage) {
-            const firstState = this.storage.getItem(this.storeName);
+            const firstState = this.storage.getItem(this._storeName);
             if (firstState) {
-                this.firstState = firstState;
+                this._firstState = firstState;
             }
         }
 
         this.initState = this.initialState();
-        if (!this.firstState) {
-            this.firstState = this.initState;
+        if (!this._firstState) {
+            this._firstState = this.initState;
         }
 
         // Register with DevTool for time-travel support
         if (this.devTool) {
-            this.devTool.registerStore(this.storeName, {
-                applyState: (state: unknown) => this.applyDevToolState(state as S),
+            this.devTool.registerStore(this._storeName, {
+                applyState: (state: unknown) => this._applyDevToolState(state as S),
                 getInitialState: () => this.initState
             });
         }
 
-        this.devToolSend(this.firstState, 'initialState');
+        this.devToolSend(this._firstState, 'initialState');
 
         // Notify plugins of store init
         this.notifyPluginsInit();
 
-        this.isArray = Array.isArray(this.firstState);
+        this.isArray = Array.isArray(this._firstState);
 
         if (config.webMcp) {
             const serialize = config.serializeState || JSON.stringify;
             declareExperimentalWebMcpTool({
-                name: `${this.storeName}_getCurrentState`,
-                description: `Reads the current ${this.storeName} store state.`,
+                name: `${this._storeName}_getCurrentState`,
+                description: `Reads the current ${this._storeName} store state.`,
                 inputSchema: { type: 'object', properties: {} },
                 execute: () => ({
                     content: [{ type: 'text', text: serialize(this.getCurrentState()) }],
@@ -112,13 +119,13 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
             // Unregister from DevTool
             if (this.devTool) {
-                this.devTool.unregisterStore(this.storeName);
+                this.devTool.unregisterStore(this._storeName);
             }
 
             // Notify plugins of store destroy
             for (const plugin of this.plugins) {
                 if (plugin.onStoreDestroy) {
-                    plugin.onStoreDestroy(this.storeName);
+                    plugin.onStoreDestroy(this._storeName);
                 }
             }
 
@@ -132,7 +139,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected notifyPluginsInit(): void {
         for (const plugin of this.plugins) {
             if (plugin.onStoreInit) {
-                plugin.onStoreInit(this.storeName, this.firstState);
+                plugin.onStoreInit(this._storeName, this._firstState);
             }
         }
     }
@@ -147,7 +154,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         const context: NgSimpleStatePluginContext<S> = {
-            storeName: this.storeName,
+            storeName: this._storeName,
             actionName,
             prevState,
             nextState,
@@ -174,7 +181,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         const context: NgSimpleStatePluginContext<S> = {
-            storeName: this.storeName,
+            storeName: this._storeName,
             actionName,
             prevState,
             nextState,
@@ -254,7 +261,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @returns The first state
      */
     getFirstState(): Readonly<S> | null {
-        return this.deepFreeze(this.firstState);
+        return this._deepFreeze(this._firstState);
     }
 
     /**
@@ -263,7 +270,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      *  - otherwise the initial state provided from `initialState()` method.
      */
     resetState(): boolean {
-        return this.replaceState(this.firstState, 'resetState');
+        return this.replaceState(this._firstState, 'resetState');
     }
 
     /**
@@ -322,7 +329,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         // If comparator is provided, use it to detect equality (avoids further work)
-        if (this.comparator && this.comparator(currState, state)) {
+        if (this._comparator && this._comparator(currState, state)) {
             return undefined;
         }
 
@@ -350,12 +357,12 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Get action name from stack trace
      */
     private getActionName(): string {
-        if (!this.devMode && !this.plugins.length) {
+        if (!this._devMode && !this.plugins.length) {
             return 'no-action-needed';
         }
         try {
             return new Error().stack
-                ?.split('\n')[this.stackPoint]
+                ?.split('\n')[this._stackPoint]
                 ?.trim()
                 ?.split(' ')[1]
                 ?.split('.')[1] || 'unknown';
@@ -403,7 +410,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             return undefined;
         }
         // If comparator is provided, use it to detect equality (avoids further work)
-        if (this.comparator && this.comparator(currState, newState)) {
+        if (this._comparator && this._comparator(currState, newState)) {
             return undefined;
         }
 
@@ -433,13 +440,13 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param actionName The action name
      * @returns True if dev tools are enabled
      */
-    protected devToolSend(newState: S | undefined, actionName: string): boolean {
+    private devToolSend(newState: S | undefined, actionName: string): boolean {
         if (!this.devTool) {
             return false;
         }
-        if (!this.devTool.send(this.storeName, actionName, newState)) {
+        if (!this.devTool.send(this._storeName, actionName, newState)) {
             /* istanbul ignore next */
-            console.log(this.storeName + '.' + actionName, newState);
+            console.log(this._storeName + '.' + actionName, newState);
         }
         return true;
     }
@@ -448,10 +455,11 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Recursively Object.freeze simple Javascript structures consisting of plain objects, arrays, and primitives.
      * Make the data immutable.
      * @returns immutable object
+     * @internal
      */
-    protected deepFreeze(object: S): Readonly<S> {
+    protected _deepFreeze(object: S): Readonly<S> {
         // No freezing in production (for better performance).
-        if (!this.devMode || !object) {
+        if (!this._devMode || !object) {
             return object as Readonly<S>;
         }
 
@@ -469,7 +477,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         // just freeze it and recurse on its values.
         Object.freeze(object);
         /* eslint-disable @typescript-eslint/no-explicit-any */
-        Object.keys(object).forEach(key => this.deepFreeze((object as any)[key]));
+        Object.keys(object).forEach(key => this._deepFreeze((object as any)[key]));
 
         return object as Readonly<S>;
     }
@@ -479,7 +487,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     private statePersist(state: S) {
         if (this.storage) {
-            this.storage.setItem(this.storeName, state);
+            this.storage.setItem(this._storeName, state);
         }
     }
 
@@ -488,10 +496,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param name Effect name to destroy
      */
     public destroyEffect(name: string): void {
-        const destroyFn = this.registeredEffects.get(name);
+        const destroyFn = this._registeredEffects.get(name);
         if (destroyFn) {
             destroyFn();
-            this.registeredEffects.delete(name);
+            this._registeredEffects.delete(name);
         }
     }
 
@@ -499,16 +507,16 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Destroy all registered effects
      */
     public destroyAllEffects(): void {
-        this.registeredEffects.forEach((destroyFn) => {
+        this._registeredEffects.forEach((destroyFn) => {
             destroyFn();
         });
-        this.registeredEffects.clear();
+        this._registeredEffects.clear();
     }
 
     /**
      * Get all registered effect names
      */
     public getEffectNames(): string[] {
-        return Array.from(this.registeredEffects.keys());
+        return Array.from(this._registeredEffects.keys());
     }
 }

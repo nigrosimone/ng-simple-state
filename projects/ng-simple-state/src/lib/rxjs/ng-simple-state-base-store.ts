@@ -10,8 +10,8 @@ import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateS
 export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
     /** @internal */
-    protected stackPoint: number = 4;
-    private readonly state$: BehaviorSubject<S> = new BehaviorSubject<S>(this.firstState);
+    protected _stackPoint: number = 4;
+    private readonly state$: BehaviorSubject<S> = new BehaviorSubject<S>(this._firstState);
     private readonly stateObs: Observable<S> = this.state$.asObservable();
     private readonly destroy$ = new Subject<void>();
 
@@ -28,7 +28,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * Apply state directly from DevTools time-travel.
      * Sets the BehaviorSubject without triggering devtool send or plugins.
      */
-    protected applyDevToolState(state: S): void {
+    protected _applyDevToolState(state: S): void {
         this.state$.next(state);
     }
 
@@ -52,7 +52,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
         }
         return this.state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
-            distinctUntilChanged(comparator ?? this.comparator as NgSimpleStateComparator),
+            distinctUntilChanged(comparator ?? this._comparator as NgSimpleStateComparator),
             observeOn(asyncScheduler)
         );
     }
@@ -77,7 +77,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
                 effectFn(value);
             });
 
-        this.registeredEffects.set(name, subscription.unsubscribe.bind(subscription));
+        this._registeredEffects.set(name, subscription.unsubscribe.bind(subscription));
     }
 
     /**
@@ -112,7 +112,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @returns The current state
      */
     getCurrentState(): Readonly<S> {
-        return this.devMode ? this.deepFreeze(this.state$.getValue()) : this.state$.getValue();
+        return this._devMode ? this._deepFreeze(this.state$.getValue()) : this.state$.getValue();
     }
 
     /**
@@ -164,8 +164,8 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
         const currentState = this.getCurrentState();
 
         // If Immer is configured, use it
-        if (this.immerProduce) {
-            const nextState = this.immerProduce(currentState as S, producer);
+        if (this._immerProduce) {
+            const nextState = this._immerProduce(currentState as S, producer);
             return this.replaceState(nextState, actionName ?? 'produce');
         }
 

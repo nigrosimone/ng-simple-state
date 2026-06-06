@@ -8,8 +8,8 @@ import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateS
 export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
     /** @internal */
-    protected stackPoint: number = 4;
-    private readonly stateSig: WritableSignal<S> = signal<S>(this.firstState);
+    protected _stackPoint: number = 4;
+    private readonly stateSig: WritableSignal<S> = signal<S>(this._firstState);
     private readonly stateSigRo: Signal<S> = this.stateSig.asReadonly();
     private readonly injector = inject(Injector);
 
@@ -17,7 +17,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * Apply state directly from DevTools time-travel.
      * Sets the signal without triggering devtool send or plugins.
      */
-    protected applyDevToolState(state: S): void {
+    protected _applyDevToolState(state: S): void {
         this.stateSig.set(state);
     }
 
@@ -39,7 +39,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         if (!selectFn) {
             return this.stateSigRo as unknown as Signal<K>;
         }
-        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator ?? this.comparator as NgSimpleStateComparator });
+        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator ?? this._comparator as NgSimpleStateComparator });
     }
 
     /**
@@ -92,7 +92,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
             })
         );
 
-        this.registeredEffects.set(name, effectRef.destroy.bind(effectRef));
+        this._registeredEffects.set(name, effectRef.destroy.bind(effectRef));
         return effectRef;
     }
 
@@ -127,7 +127,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * @returns The current state
      */
     getCurrentState(): Readonly<S> {
-        return this.devMode ? this.deepFreeze(this.stateSig()) : this.stateSig();
+        return this._devMode ? this._deepFreeze(this.stateSig()) : this.stateSig();
     }
 
     /**
@@ -179,8 +179,8 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         const currentState = this.getCurrentState();
 
         // If Immer is configured, use it
-        if (this.immerProduce) {
-            const nextState = this.immerProduce(currentState as S, producer);
+        if (this._immerProduce) {
+            const nextState = this._immerProduce(currentState as S, producer);
             return this.replaceState(nextState, actionName ?? 'produce');
         }
 

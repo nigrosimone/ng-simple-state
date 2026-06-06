@@ -249,19 +249,19 @@ describe('NgSimpleStateBaseSignalStore: deepFreeze edge cases', () => {
     it('deepFreeze with already frozen object', () => {
         const frozenState = Object.freeze({ count: 5 });
         
-        const result = (service as any).deepFreeze(frozenState);
+        const result = (service as any)._deepFreeze(frozenState);
         
         expect(result).toEqual({ count: 5 });
         expect(Object.isFrozen(result)).toBeTrue();
     });
 
     it('deepFreeze with null/undefined in dev mode', () => {
-        expect((service as any).devMode).toBeTrue();
+        expect((service as any)._devMode).toBeTrue();
         
-        const nullResult = (service as any).deepFreeze(null);
+        const nullResult = (service as any)._deepFreeze(null);
         expect(nullResult).toBeNull();
         
-        const undefinedResult = (service as any).deepFreeze(undefined);
+        const undefinedResult = (service as any)._deepFreeze(undefined);
         expect(undefinedResult).toBeUndefined();
     });
 
@@ -276,7 +276,7 @@ describe('NgSimpleStateBaseSignalStore: deepFreeze edge cases', () => {
             } 
         };
         
-        const result = (service as any).deepFreeze(nestedState);
+        const result = (service as any)._deepFreeze(nestedState);
         
         expect(Object.isFrozen(result)).toBeTrue();
         expect(Object.isFrozen(result.nested)).toBeTrue();
@@ -289,7 +289,7 @@ describe('NgSimpleStateBaseSignalStore: deepFreeze edge cases', () => {
             { id: 2, name: 'test2' }
         ];
         
-        const result = (service as any).deepFreeze(arrayState);
+        const result = (service as any)._deepFreeze(arrayState);
         
         expect(Object.isFrozen(result)).toBeTrue();
         expect(Object.isFrozen(result[0])).toBeTrue();
@@ -385,7 +385,7 @@ describe('NgSimpleStateBaseSignalStore: PROD mode (devMode=false)', () => {
 
     it('getCurrentState in PROD mode should not freeze', () => {
         // Set devMode to false to simulate production
-        (service as any).devMode = false;
+        (service as any)._devMode = false;
         
         const state = service.getCurrentState();
         expect(state).toEqual({ count: 1 });
@@ -394,7 +394,7 @@ describe('NgSimpleStateBaseSignalStore: PROD mode (devMode=false)', () => {
         expect(Object.isFrozen(state)).toBeFalse();
         
         // Reset
-        (service as any).devMode = true;
+        (service as any)._devMode = true;
     });
 });
 
@@ -833,7 +833,7 @@ describe('NgSimpleStateBaseSignalStore: DevTool time-travel', () => {
         }
 
         applyTestState(state: { count: number }): void {
-            (this as any).applyDevToolState(state);
+            (this as any)._applyDevToolState(state);
         }
     }
 

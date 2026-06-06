@@ -109,7 +109,7 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
 
     it('deepFreeze: DEV', () => {
         try {
-            expect(service['devMode']).toEqual(true);
+            expect(service['_devMode']).toEqual(true);
             const state = service.getFirstState();
             expect(state).toEqual({ count: 1 });
             (state as any).count = 2;
@@ -117,16 +117,16 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
         } catch (error: any) {
             expect(error.message).toEqual("Cannot assign to read only property 'count' of object '#<Object>'");
         } finally {
-            service['devMode'] = true;
-            expect(service['devMode']).toEqual(true);
+            service['_devMode'] = true;
+            expect(service['_devMode']).toEqual(true);
         }
     });
 
     it('deepFreeze: PROD', () => {
         try {
-            expect(service['devMode']).toEqual(true);
-            service['devMode'] = false;
-            expect(service['devMode']).toEqual(false);
+            expect(service['_devMode']).toEqual(true);
+            service['_devMode'] = false;
+            expect(service['_devMode']).toEqual(false);
             const state = service.getFirstState();
             expect(state).toEqual({ count: 1 });
             (state as any).count = 3;
@@ -134,8 +134,8 @@ describe('NgSimpleStateBaseSignalStore: Service', () => {
         } catch (error: any) {
             expect(error).toBeUndefined();
         } finally {
-            service['devMode'] = true;
-            expect(service['devMode']).toEqual(true);
+            service['_devMode'] = true;
+            expect(service['_devMode']).toEqual(true);
         }
     });
 
