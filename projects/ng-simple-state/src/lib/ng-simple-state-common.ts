@@ -11,8 +11,7 @@ import { NgSimpleStatePlugin, NG_SIMPLE_STATE_PLUGINS, NgSimpleStatePluginContex
 @Directive()
 export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> {
 
-    /** @internal */
-    protected abstract _stackPoint: number;
+    private _stackPoint: number = 4;
     private devTool?: NgSimpleStateDevTool;
     private storage?: NgSimpleStateStorage<S>;
     /** @internal */

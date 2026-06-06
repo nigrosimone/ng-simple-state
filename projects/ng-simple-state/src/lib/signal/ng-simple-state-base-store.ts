@@ -7,8 +7,6 @@ import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateS
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
-    /** @internal */
-    protected _stackPoint: number = 4;
     private readonly stateSig: WritableSignal<S> = signal<S>(this._firstState);
     private readonly stateSigRo: Signal<S> = this.stateSig.asReadonly();
     private readonly injector = inject(Injector);

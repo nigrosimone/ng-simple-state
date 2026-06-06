@@ -9,8 +9,6 @@ import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateS
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
-    /** @internal */
-    protected _stackPoint: number = 4;
     private readonly state$: BehaviorSubject<S> = new BehaviorSubject<S>(this._firstState);
     private readonly stateObs: Observable<S> = this.state$.asObservable();
     private readonly destroy$ = new Subject<void>();
