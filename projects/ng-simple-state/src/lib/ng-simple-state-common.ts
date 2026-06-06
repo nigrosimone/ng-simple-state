@@ -327,7 +327,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         // If comparator is provided, use it to detect equality (avoids further work)
-        if (this._comparator && this._comparator(currState, state)) {
+        if (this._comparator?.(currState, state)) {
             return undefined;
         }
 
