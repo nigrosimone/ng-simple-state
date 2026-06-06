@@ -197,7 +197,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Override this method for set a specific config for the store
      * @returns NgSimpleStateStoreConfig
      */
-    protected abstract storeConfig(): NgSimpleStateStoreConfig;
+    protected abstract storeConfig(): NgSimpleStateStoreConfig<S>;
 
     /**
      * Set into the store the initial state
