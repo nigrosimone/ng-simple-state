@@ -136,7 +136,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     /**
      * Notify plugins of store initialization
      */
-    protected notifyPluginsInit(): void {
+    private notifyPluginsInit(): void {
         for (const plugin of this.plugins) {
             if (plugin.onStoreInit) {
                 plugin.onStoreInit(this._storeName, this._firstState);
@@ -148,7 +148,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Notify plugins before state change
      * @returns false if any plugin prevents the change
      */
-    protected notifyPluginsBeforeChange(prevState: S, nextState: S, actionName: string): boolean {
+    private notifyPluginsBeforeChange(prevState: S, nextState: S, actionName: string): boolean {
         if (!this.plugins.length) {
             return true;
         }
@@ -175,7 +175,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     /**
      * Notify plugins after state change
      */
-    protected notifyPluginsAfterChange(prevState: S, nextState: S, actionName: string): void {
+    private notifyPluginsAfterChange(prevState: S, nextState: S, actionName: string): void {
         if (!this.plugins.length) {
             return;
         }
