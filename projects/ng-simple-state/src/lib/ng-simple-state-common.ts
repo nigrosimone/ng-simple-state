@@ -11,11 +11,10 @@ import { NgSimpleStatePlugin, NG_SIMPLE_STATE_PLUGINS, NgSimpleStatePluginContex
 @Directive()
 export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unknown>> {
 
-    private _stackPoint: number = 4;
+    private stackPoint: number = 4;
     private devTool?: NgSimpleStateDevTool;
     private storage?: NgSimpleStateStorage<S>;
-    /** @internal */
-    readonly _storeName: string;
+    private storeName: string;
     /** @internal */
     protected _firstState!: S;
     private initState!: S;
@@ -56,7 +55,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this.devTool = inject(NgSimpleStateDevTool);
         }
 
-        this._storeName = config.storeName;
+        this.storeName = config.storeName;
 
         if (typeof config.comparator === 'function') {
             this._comparator = config.comparator;
@@ -75,7 +74,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         this.plugins = allPlugins.filter((plugin, index) => allPlugins.indexOf(plugin) === index) as NgSimpleStatePlugin<S>[];
 
         if (this.storage) {
-            const firstState = this.storage.getItem(this._storeName);
+            const firstState = this.storage.getItem(this.storeName);
             if (firstState) {
                 this._firstState = firstState;
             }
@@ -88,7 +87,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
         // Register with DevTool for time-travel support
         if (this.devTool) {
-            this.devTool.registerStore(this._storeName, {
+            this.devTool.registerStore(this.storeName, {
                 applyState: (state: unknown) => this._applyDevToolState(state as S),
                 getInitialState: () => this.initState
             });
@@ -104,8 +103,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         if (config.webMcp) {
             const serialize = config.serializeState || JSON.stringify;
             declareExperimentalWebMcpTool({
-                name: `${this._storeName}_getCurrentState`,
-                description: `Reads the current ${this._storeName} store state.`,
+                name: `${this.storeName}_getCurrentState`,
+                description: `Reads the current ${this.storeName} store state.`,
                 inputSchema: { type: 'object', properties: {} },
                 execute: () => ({
                     content: [{ type: 'text', text: serialize(this.getCurrentState()) }],
@@ -118,13 +117,13 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
             // Unregister from DevTool
             if (this.devTool) {
-                this.devTool.unregisterStore(this._storeName);
+                this.devTool.unregisterStore(this.storeName);
             }
 
             // Notify plugins of store destroy
             for (const plugin of this.plugins) {
                 if (plugin.onStoreDestroy) {
-                    plugin.onStoreDestroy(this._storeName);
+                    plugin.onStoreDestroy(this.storeName);
                 }
             }
 
@@ -138,7 +137,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     private notifyPluginsInit(): void {
         for (const plugin of this.plugins) {
             if (plugin.onStoreInit) {
-                plugin.onStoreInit(this._storeName, this._firstState);
+                plugin.onStoreInit(this.storeName, this._firstState);
             }
         }
     }
@@ -153,7 +152,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         const context: NgSimpleStatePluginContext<S> = {
-            storeName: this._storeName,
+            storeName: this.storeName,
             actionName,
             prevState,
             nextState,
@@ -180,7 +179,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         const context: NgSimpleStatePluginContext<S> = {
-            storeName: this._storeName,
+            storeName: this.storeName,
             actionName,
             prevState,
             nextState,
@@ -361,7 +360,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
         try {
             return new Error().stack
-                ?.split('\n')[this._stackPoint]
+                ?.split('\n')[this.stackPoint]
                 ?.trim()
                 ?.split(' ')[1]
                 ?.split('.')[1] || 'unknown';
@@ -443,9 +442,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         if (!this.devTool) {
             return false;
         }
-        if (!this.devTool.send(this._storeName, actionName, newState)) {
+        if (!this.devTool.send(this.storeName, actionName, newState)) {
             /* istanbul ignore next */
-            console.log(this._storeName + '.' + actionName, newState);
+            console.log(this.storeName + '.' + actionName, newState);
         }
         return true;
     }
@@ -486,7 +485,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     private statePersist(state: S) {
         if (this.storage) {
-            this.storage.setItem(this._storeName, state);
+            this.storage.setItem(this.storeName, state);
         }
     }
 

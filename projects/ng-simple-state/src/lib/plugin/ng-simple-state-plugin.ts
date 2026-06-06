@@ -83,7 +83,6 @@ export interface NgSimpleStateUndoRedoForStore {
  * Minimal store shape accepted by forStore (avoids circular import)
  */
 export interface NgSimpleStateStoreRef<S> {
-    readonly _storeName: string;
     replaceState(newState: S): boolean;
 }
 
@@ -241,7 +240,7 @@ export function undoRedoPlugin<S>(options?: {
         },
         
         forStore(store: NgSimpleStateStoreRef<S>): NgSimpleStateUndoRedoForStore {
-            const name = store._storeName;
+            const name = (store as unknown as { storeName: string }).storeName;
             return {
                 undo(): boolean {
                     const h = getOrCreate(name);

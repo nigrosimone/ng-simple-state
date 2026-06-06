@@ -410,7 +410,7 @@ describe('undoRedoPlugin.forStore() Integration', () => {
         });
 
         store = TestBed.inject(ItemsStore);
-        history = plugin.forStore(store);
+        history = plugin.forStore(store as any);
     });
 
     it('should bind to the correct store without needing a storeName string', () => {
@@ -522,7 +522,7 @@ describe('undoRedoPlugin.forStore() Integration', () => {
 
     it('forStore via injected token should work the same way', () => {
         const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<ItemsState>;
-        const h = injected.forStore(store);
+        const h = injected.forStore(store as any);
 
         store.addItem('Item 2');
         expect(h.canUndo()).toBeTrue();
