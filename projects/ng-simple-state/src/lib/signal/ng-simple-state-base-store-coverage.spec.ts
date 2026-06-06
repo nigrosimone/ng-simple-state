@@ -712,11 +712,11 @@ describe('NgSimpleStateBaseSignalStore: comparator', () => {
     @Injectable()
     class ComparatorStore extends NgSimpleStateBaseSignalStore<{ count: number; timestamp: number }> {
 
-        storeConfig(): NgSimpleStateStoreConfig {
+        storeConfig() {
             return { 
                 storeName: 'ComparatorStore',
                 comparator: (prev, curr) => prev.count === curr.count
-            };
+            } satisfies NgSimpleStateStoreConfig<{ count: number; timestamp: number }>;
         }
 
         initialState() {
