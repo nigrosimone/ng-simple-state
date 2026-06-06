@@ -277,6 +277,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
      * @private
+     * @internal
      */
     protected _setState(newState: Partial<S>, actionName?: string): S | undefined;
     /**
@@ -285,6 +286,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
      * @private
+     * @internal
      */
     protected _setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): S | undefined;
     /**
@@ -293,6 +295,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
      * @private
+     * @internal
      */
     protected _setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined;
     protected _setState(stateFnOrNewState: StateFnOrNewState<S>, actionName?: string): S | undefined {
