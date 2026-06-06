@@ -381,6 +381,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
      * @private
+     * @internal
      */
     protected _replaceState(stateFnOrReplaceState: StateFnOrReplaceState<S>, actionName?: string): S | undefined;
     protected _replaceState(stateFnOrReplaceState: StateFnOrReplaceState<S>, actionName?: string): S | undefined {
