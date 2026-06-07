@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EffectsStore } from './effects.store';
 
@@ -52,24 +51,6 @@ import { EffectsStore } from './effects.store';
         }
       </ul>
     </div>
-
-    <div class="code-section">
-      <h4>Code Example</h4>
-      <pre><code>// Register an effect that logs all state changes
-store.createEffect('logger', (state) => &#123;
-  console.log('State changed:', state);
-&#125;);
-
-// Effect on specific selector - reacts only when count changes
-store.createSelectorEffect(
-  'countWatcher',
-  state => state.count,
-  (count) => console.log('Count is now:', count)
-);
-
-// Cleanup effect when done
-store.destroyEffect('logger');</code></pre>
-    </div>
   `,
   styles: [`
     .demo-section {
@@ -99,21 +80,12 @@ store.destroyEffect('logger');</code></pre>
       padding: 8px 16px;
       cursor: pointer;
     }
-    .code-section {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 4px;
-    }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-    }
     ul {
       max-height: 200px;
       overflow-y: auto;
     }
   `],
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   providers: [EffectsStore],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

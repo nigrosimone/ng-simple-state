@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LinkedSignalsStore } from './linked-signals.store';
 
@@ -89,21 +88,6 @@ import { LinkedSignalsStore } from './linked-signals.store';
         </label>
       </div>
     </div>
-
-    <div class="code-section">
-      <h4>Code Example</h4>
-      <pre><code>// In your Signal Store
-fahrenheit = this.linkedState(&#123;
-  source: state => state.celsius,
-  computation: (celsius) => (celsius * 9/5) + 32
-&#125;);
-
-// Linked signal for combining multiple properties
-fullName = this.linkedState(&#123;
-  source: state => (&#123; first: state.firstName, last: state.lastName &#125;),
-  computation: (&#123; first, last &#125;) => \`$&#123;first&#125; $&#123;last&#125;\`.trim()
-&#125;);</code></pre>
-    </div>
   `,
   styles: [`
     .demo-section {
@@ -127,17 +111,8 @@ fullName = this.linkedState(&#123;
       color: #666;
       margin-top: 15px;
     }
-    .code-section {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 4px;
-    }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-    }
   `],
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   providers: [LinkedSignalsStore],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
