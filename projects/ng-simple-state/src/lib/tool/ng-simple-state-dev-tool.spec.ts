@@ -395,6 +395,68 @@ describe('NgSimpleStateDevTool Time-travel', () => {
 
         expect(service.timeTraveling).toBe(false);
     });
+
+    it('should unregister store and remove it from registry', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        const storeRef = {
+            applyState: jasmine.createSpy('applyState'),
+            getInitialState: jasmine.createSpy('getInitialState').and.returnValue({ count: 0 })
+        };
+
+        service.registerStore('testStore', storeRef);
+        expect((service as any).stores.has('testStore')).toBeTrue();
+
+        service.unregisterStore('testStore');
+        expect((service as any).stores.has('testStore')).toBeFalse();
+    });
+
+    it('should apply state from DevTools JSON directly', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        const storeRef = {
+            applyState: jasmine.createSpy('applyState'),
+            getInitialState: jasmine.createSpy('getInitialState').and.returnValue({ count: 0 })
+        };
+
+        service.registerStore('testStore', storeRef);
+
+        (service as any).applyStateFromDevTools(JSON.stringify({ testStore: { count: 5 } }));
+
+        expect(storeRef.applyState).toHaveBeenCalledWith({ count: 5 });
+        expect((service as any).baseState.testStore).toEqual({ count: 5 });
+
+        service.unregisterStore('testStore');
+    });
+
+    it('should import computed states and update baseState', () => {
+        const service = TestBed.inject(NgSimpleStateDevTool);
+        const storeRef = {
+            applyState: jasmine.createSpy('applyState'),
+            getInitialState: jasmine.createSpy('getInitialState').and.returnValue({ count: 0 })
+        };
+        let legacyStoreName = '';
+        let legacyState: any = null;
+
+        service.setJumpCallback((storeName, state) => {
+            legacyStoreName = storeName;
+            legacyState = state as any;
+        });
+
+        service.registerStore('testStore', storeRef);
+
+        (service as any).importState(JSON.stringify({
+            computedStates: [
+                { state: { testStore: { count: 1 } } },
+                { state: { testStore: { count: 2 } } }
+            ]
+        }));
+
+        expect(storeRef.applyState).toHaveBeenCalledWith({ count: 2 });
+        expect((service as any).baseState.testStore).toEqual({ count: 2 });
+        expect(legacyStoreName).toBe('testStore');
+        expect(legacyState).toEqual({ count: 2 });
+
+        service.unregisterStore('testStore');
+    });
 });
 
 

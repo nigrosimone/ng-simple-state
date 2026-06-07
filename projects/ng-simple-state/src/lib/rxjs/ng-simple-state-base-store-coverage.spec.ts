@@ -724,3 +724,53 @@ describe('NgSimpleStateBaseRxjsStore: comparator', () => {
     });
 });
 
+describe('NgSimpleStateBaseRxjsStore: state observable and DevTools apply', () => {
+
+    @Injectable()
+    class DevToolsStateRxjsStore extends NgSimpleStateBaseRxjsStore<CounterState> {
+
+        override storeConfig(): NgSimpleStateStoreConfig {
+            return {
+                enableDevTool: true,
+                storeName: 'DevToolsStateRxjsStore'
+            };
+        }
+
+        initialState(): CounterState {
+            return { count: 1 };
+        }
+
+        updateCount(value: number): boolean {
+            return this.setState({ count: value });
+        }
+    }
+
+    let service: DevToolsStateRxjsStore;
+
+    beforeEach(() => {
+        (window as any)['devToolsExtension'] = new DevToolsExtension();
+        TestBed.configureTestingModule({
+            providers: [DevToolsStateRxjsStore]
+        });
+        service = TestBed.inject(DevToolsStateRxjsStore);
+    });
+
+    afterEach(() => {
+        (window as any)['devToolsExtension'] = null;
+    });
+
+    it('should expose state observable and emit current state', (done) => {
+        const values: number[] = [];
+
+        service.state.subscribe(state => {
+            values.push(state.count);
+            if (values.length === 2) {
+                expect(values).toEqual([1, 3]);
+                done();
+            }
+        });
+
+        (service as any)._applyDevToolState({ count: 3 });
+    });
+});
+
