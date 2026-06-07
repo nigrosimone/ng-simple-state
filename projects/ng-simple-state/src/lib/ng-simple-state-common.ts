@@ -334,8 +334,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         // Get action name before plugin notification
         const resolvedActionName = actionName ?? this.getActionName();
 
+        const hasPlugins = this.plugins.length > 0;
+
         // Notify plugins before change - they can prevent the change
-        if (!this.notifyPluginsBeforeChange(currState as S, state, resolvedActionName)) {
+        if (hasPlugins && !this.notifyPluginsBeforeChange(currState as S, state, resolvedActionName)) {
             return undefined;
         }
 
@@ -346,7 +348,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         this.storage && this.statePersist(state);
 
         // Notify plugins after change
-        this.notifyPluginsAfterChange(currState as S, state, resolvedActionName);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        hasPlugins && this.notifyPluginsAfterChange(currState as S, state, resolvedActionName);
 
         return state;
     }
