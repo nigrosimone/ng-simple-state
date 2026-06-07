@@ -4,6 +4,7 @@ import { NgSimpleStateLocalStorage, provideNgSimpleState, undoRedoPlugin } from 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Routes, withExperimentalAutoCleanupInjectors } from '@angular/router';
 import isEqual from 'lodash.isequal';
+import { FeaturesComponent } from './app/features/features.component';
 
 const routes: Routes = [
   {
@@ -13,7 +14,7 @@ const routes: Routes = [
   },
   {
     path: 'features',
-    loadComponent: () => import('./app/features/features.component').then(m => m.FeaturesComponent),
+    component: FeaturesComponent,
     loadChildren: () => import('./app/features/features.routes').then(m => m.featuresRoutes)
   },
 ];
