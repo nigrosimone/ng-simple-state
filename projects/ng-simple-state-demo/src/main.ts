@@ -1,4 +1,4 @@
-import { isDevMode, provideZonelessChangeDetection } from '@angular/core';
+import { isDevMode, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgSimpleStateLocalStorage, provideNgSimpleState, undoRedoPlugin } from 'ng-simple-state';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -21,6 +21,7 @@ const routes: Routes = [
 bootstrapApplication(AppComponent, {
   providers: [
     provideZonelessChangeDetection(),
+    provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withExperimentalAutoCleanupInjectors()),
     provideNgSimpleState({
       enableDevTool: isDevMode(),
