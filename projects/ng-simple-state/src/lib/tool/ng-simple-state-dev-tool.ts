@@ -50,21 +50,28 @@ interface DevToolsMessage {
     state?: string;
 }
 
-// Get Redux DevTools extension from window
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getReduxDevTools(): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const win = window as any;
+// Redux DevTools types
+interface ReduxDevToolsConnection {
+    init(state?: unknown): void;
+    send(action: string, state?: unknown): void;
+    subscribe(listener: (message: DevToolsMessage) => void): void;
+}
+
+interface ReduxDevTools {
+    connect(options?: { name?: string; features?: Record<string, unknown> }): ReduxDevToolsConnection | undefined;
+    [key: string]: unknown;
+}
+
+function getReduxDevTools(): ReduxDevTools | undefined {
+    const win = window as unknown as { __REDUX_DEVTOOLS_EXTENSION__?: ReduxDevTools; devToolsExtension?: ReduxDevTools };
     return win.__REDUX_DEVTOOLS_EXTENSION__ ?? win.devToolsExtension;
 }
 
 @Injectable({ providedIn: 'root' })
 export class NgSimpleStateDevTool {
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private readonly globalDevtools: any = getReduxDevTools();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private localDevTool: any;
+    private readonly globalDevtools: ReduxDevTools | undefined = getReduxDevTools();
+    private localDevTool?: ReduxDevToolsConnection;
     private readonly baseState: Record<string, unknown> = {};
     
     /** Registry of active stores for time-travel */
