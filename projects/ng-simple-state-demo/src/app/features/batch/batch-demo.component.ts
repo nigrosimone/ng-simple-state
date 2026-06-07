@@ -3,7 +3,6 @@ import { BatchState, BatchStore } from './batch.store';
 import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 'ng-simple-state';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-batch-demo',
   template: `
     <h3>Batch Updates Demo</h3>

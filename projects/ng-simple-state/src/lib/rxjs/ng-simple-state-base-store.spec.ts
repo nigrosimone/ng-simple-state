@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common';
 import { Component, DebugElement, Injectable, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -152,7 +151,7 @@ describe('NgSimpleStateBaseRxjsStore: Service', () => {
 @Component({
     selector: 'ng-test',
     template: `{{counter$ | async}}`,
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [CommonModule]
 })
 export class TestComponent extends NgSimpleStateBaseRxjsStore<CounterState> {

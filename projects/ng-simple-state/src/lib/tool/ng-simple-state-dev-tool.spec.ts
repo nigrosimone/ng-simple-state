@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';

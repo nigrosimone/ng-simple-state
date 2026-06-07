@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'app-features',
   template: `
     <h2>New Features Demo (v21.1.0+)</h2>

@@ -5,7 +5,6 @@ import type { NgSimpleStatePlugin } from './plugin/ng-simple-state-plugin';
 export type NgSimpleStateReplaceState<S> = (currentState: Readonly<S>) => S;
 export type NgSimpleStateSetState<S> = (currentState: Readonly<S>) => Partial<S>;
 export type NgSimpleStateSelectState<S, K> = (state: Readonly<S>) => K;
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export type NgSimpleStateComparator<K = any> = (previous: K, current: K) => boolean;
 
 /**
@@ -28,7 +27,6 @@ export interface NgSimpleStateLinkedOptions<S, K> {
 /**
  * NgSimpleState config option
  */
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export interface NgSimpleStateConfig<K = any> {
     /**
      * if `true` enable `Redux DevTools` browser extension for inspect the state of the store.
@@ -68,7 +66,6 @@ export interface NgSimpleStateConfig<K = any> {
 /**
  * NgSimpleState config option for store
  */
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export interface NgSimpleStateStoreConfig<K = any> extends NgSimpleStateConfig<K> {
     /** 
      * The store name 

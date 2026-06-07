@@ -211,7 +211,6 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * @param comparator A function used to compare the previous and current state for equality. Defaults to a `===` check.
      * @returns Observable of the selected state
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     abstract selectState<K = Partial<S>>(selectFn?: NgSimpleStateSelectState<S, K>, comparator?: NgSimpleStateComparator<K>): any;
 
     /**
@@ -477,7 +476,6 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         // At this point we know that we're dealing with either an array or plain object, so
         // just freeze it and recurse on its values.
         Object.freeze(object);
-        /* eslint-disable @typescript-eslint/no-explicit-any */
         Object.keys(object).forEach(key => this._deepFreeze((object as any)[key]));
 
         return object as Readonly<S>;

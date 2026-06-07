@@ -6,7 +6,6 @@ import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateS
 
 @Injectable()
 @Directive()
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> extends NgSimpleStateBaseCommonStore<S> {
 
     private readonly state$: BehaviorSubject<S> = new BehaviorSubject<S>(this._firstState);
