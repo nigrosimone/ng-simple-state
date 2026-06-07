@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, signal, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { BatchState, BatchStore } from './batch.store';
 import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 'ng-simple-state';
 
@@ -61,23 +60,6 @@ import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 
     </div>
 
     <button (click)="store.resetCounters()" class="reset">Reset All</button>
-
-    <div class="code-section">
-      <h4>Code Examples</h4>
-      <pre><code>import &#123; withTransaction &#125; from 'ng-simple-state';
-
-// Transaction with automatic rollback on error
-await withTransaction(store, async (tx) => &#123;
-  store.setState(&#123; step: 1 &#125;);
-  await apiCall(); // If this fails, state rolls back
-  store.setState(&#123; step: 2 &#125;);
-  tx.commit();
-&#125;);
-
-// Create rate-limited updaters
-const debouncedUpdate = createDebouncedUpdater(300);
-const throttledUpdate = createThrottledUpdater(500);</code></pre>
-    </div>
   `,
   styles: [`
     .demo-section {
@@ -123,18 +105,8 @@ const throttledUpdate = createThrottledUpdater(500);</code></pre>
       color: #666;
       font-style: italic;
     }
-    .code-section {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 4px;
-      margin-top: 20px;
-    }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-    }
   `],
-  imports: [CommonModule],
+  imports: [],
   providers: [BatchStore],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
