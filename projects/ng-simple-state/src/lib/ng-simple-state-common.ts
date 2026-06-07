@@ -414,11 +414,13 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             return undefined;
         }
 
+        const hasPlugins = this.plugins.length > 0;
+
         // Get action name before plugin notification
-        const resolvedActionName = actionName ?? this.getActionName();
+        const resolvedActionName = actionName ?? (hasPlugins ? this.getActionName() : 'no-action-needed');
 
         // Notify plugins before change - they can prevent the change
-        if (!this.notifyPluginsBeforeChange(currState as S, newState, resolvedActionName)) {
+        if (hasPlugins && !this.notifyPluginsBeforeChange(currState as S, newState, resolvedActionName)) {
             return undefined;
         }
 
@@ -429,7 +431,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         this.storage && this.statePersist(newState);
 
         // Notify plugins after change
-        this.notifyPluginsAfterChange(currState as S, newState, resolvedActionName);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        hasPlugins && this.notifyPluginsAfterChange(currState as S, newState, resolvedActionName);
 
         return newState;
     }
