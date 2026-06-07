@@ -1065,7 +1065,7 @@ provideNgHttpCaching({
 
 ### WebMCP
 
-Enable experimental WebMCP (only read current state)
+Enable experimental [WebMCP](https://angular.dev/ai/webmcp) (only read current state)
 
 ```ts
 import { Service, signal, inject, Signal } from '@angular/core';
