@@ -128,14 +128,14 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     }
 
     /**
-     * Set a new state
+     * Set a new state (patch)
      * @param newState New state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
     setState(newState: Partial<S>, actionName?: string): boolean;
     /**
-     * Set a new state
+     * Set a new state (patch)
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
@@ -190,14 +190,14 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     }
 
     /**
-     * Replace state
+     * Replace state (full replace)
      * @param newState New state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
      */
     replaceState(newState: S, actionName?: string): boolean;
     /**
-     * Replace state
+     * Replace state (full replace)
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns True if the state is changed
