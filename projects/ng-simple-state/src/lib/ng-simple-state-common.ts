@@ -278,7 +278,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     }
 
     /**
-     * Set a new state
+     * Set a new state (patch)
      * @param newState New state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
@@ -287,7 +287,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     protected _setState(newState: Partial<S>, actionName?: string): S | undefined;
     /**
-     * Set a new state
+     * Set a new state (patch)
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
@@ -296,7 +296,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     protected _setState(stateFn: NgSimpleStateSetState<S>, actionName?: string): S | undefined;
     /**
-     * Set a new state
+     * Set a new state (patch)
      * @param stateFnOrNewState State reducer or new state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
@@ -372,7 +372,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     }
 
     /**
-     * Replace state
+     * Replace state (full replace)
      * @param newState state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
@@ -381,7 +381,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     protected _replaceState(newState: S, actionName?: string): S | undefined;
     /**
-     * Replace state
+     * Replace state (full replace)
      * @param selectFn State reducer
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
@@ -390,7 +390,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      */
     protected _replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): S | undefined;
     /**
-     * Replace state
+     * Replace state (full replace)
      * @param stateFnOrReplaceState State reducer or state
      * @param actionName The action label into Redux DevTools (default is parent function name)
      * @returns state
