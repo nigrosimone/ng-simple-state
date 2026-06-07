@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { PluginsState, PluginsStore } from './plugins.store';
 import { NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin, NgSimpleStateUndoRedoForStore } from 'ng-simple-state';
 
@@ -39,66 +37,6 @@ import { NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin, NgSimpleStateUn
       </div>
       
     </div>
-
-    <div class="code-section">
-      <h4>Configuration</h4>
-      <pre><code>import &#123; provideNgSimpleState, undoRedoPlugin &#125; from 'ng-simple-state';
-
-// Create plugin instance
-const undoRedo = undoRedoPlugin(&#123; maxHistory: 50 &#125;);
-
-bootstrapApplication(AppComponent, &#123;
-  providers: [
-    provideNgSimpleState(&#123;
-      enableDevTool: isDevMode(),
-      plugins: [undoRedo]
-    &#125;)
-  ]
-&#125;);</code></pre>
-    </div>
-
-    <div class="code-section">
-      <h4>Usage in Component</h4>
-      <pre><code>// Inject the plugin and bind to a store
-const undoRedo = inject(NG_SIMPLE_STATE_UNDO_REDO);
-const history = undoRedo.forStore(this.store);
-
-// Reactive signals
-canUndo = history.selectCanUndo();
-canRedo = history.selectCanRedo();
-
-// Undo / Redo (calls replaceState automatically)
-history.undo();
-history.redo();
-
-// Clear history
-history.clearHistory();</code></pre>
-    </div>
-
-    <div class="code-section">
-      <h4>Custom Plugin Interface</h4>
-      <pre><code>import &#123; NgSimpleStatePlugin, NgSimpleStatePluginContext &#125; from 'ng-simple-state';
-
-const myPlugin: NgSimpleStatePlugin = &#123;
-  name: 'myPlugin',
-  
-  onBeforeStateChange(context) &#123;
-    // Return false to prevent state change
-  &#125;,
-  
-  onAfterStateChange(context) &#123;
-    // Called after state change
-  &#125;,
-  
-  onStoreInit(storeName, initialState) &#123;
-    // Called when store initializes
-  &#125;,
-  
-  onStoreDestroy(storeName) &#123;
-    // Called when store is destroyed
-  &#125;
-&#125;;</code></pre>
-    </div>
   `,
   styles: [`
     .demo-section {
@@ -130,23 +68,6 @@ const myPlugin: NgSimpleStatePlugin = &#123;
       background: #f9f9f9;
       border-radius: 4px;
     }
-    .plugin code {
-      display: block;
-      margin-top: 5px;
-      background: #eee;
-      padding: 5px;
-      font-size: 12px;
-    }
-    .code-section {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 4px;
-      margin-top: 20px;
-    }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-    }
     ul {
       list-style: none;
       padding: 0;
@@ -169,7 +90,7 @@ const myPlugin: NgSimpleStatePlugin = &#123;
       cursor: not-allowed;
     }
   `],
-  imports: [CommonModule, FormsModule],
+  imports: [],
   providers: [PluginsStore],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -36,7 +36,7 @@ import { RouterModule, RouterOutlet } from '@angular/router';
       color: white;
     }
   `],
-  imports: [RouterModule, RouterOutlet],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FeaturesComponent {}

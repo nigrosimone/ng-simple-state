@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -9,8 +8,7 @@ import { RouterModule } from '@angular/router';
   <router-outlet></router-outlet>
   `,
   imports: [
-    FormsModule,
-    RouterModule
+    RouterOutlet
 ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
