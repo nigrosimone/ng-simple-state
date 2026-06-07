@@ -13,7 +13,8 @@
     "signal",
     "state-management",
     "store",
-    "redux"
+    "redux",
+    "webmcp"
   ],
   "author": "Simone Nigro <nigro.simone@gmail.com>",
   "license": "MIT",
