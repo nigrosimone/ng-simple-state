@@ -3,7 +3,7 @@ import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
 import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
 import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
-import { type NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, type NgSimpleStateSetState, type NgSimpleStateComparator, type NgSimpleStateSelectState, type StateFnOrNewState, NgSimpleStateConfig, NgSimpleStateReplaceState, StateFnOrReplaceState } from './ng-simple-state-models';
+import { type NgSimpleStateStoreConfig, NG_SIMPLE_STORE_CONFIG, type NgSimpleStateSetState, type NgSimpleStateComparator, type NgSimpleStateSelectState, type StateFnOrNewState, NgSimpleStateConfig, NgSimpleStateReplaceState, StateFnOrReplaceState, NgSimpleStateProducer } from './ng-simple-state-models';
 import { NgSimpleStatePlugin, NG_SIMPLE_STATE_PLUGINS, NgSimpleStatePluginContext } from './plugin/ng-simple-state-plugin';
 
 
@@ -435,6 +435,45 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         hasPlugins && this.notifyPluginsAfterChange(currState as S, newState, resolvedActionName);
 
         return newState;
+    }
+
+    /**
+     * Set state using Immer-style producer function for immutable updates
+     * Allows writing mutable-looking code that produces immutable updates
+     * @param producer Producer function that receives draft state
+     * @param actionName The action label into Redux DevTools
+     * @returns True if the state is changed
+     * 
+     * @example
+     * ```ts
+     * // Instead of:
+     * this.setState(state => ({ 
+     *   ...state, 
+     *   users: state.users.map(u => u.id === id ? { ...u, name } : u) 
+     * }));
+     * 
+     * // You can write:
+     * this.produce(draft => {
+     *   const user = draft.users.find(u => u.id === id);
+     *   if (user) user.name = name;
+     * });
+     * ```
+     */
+    produce(producer: NgSimpleStateProducer<S>, actionName?: string): boolean {
+        const currentState = this.getCurrentState();
+
+        // If Immer is configured, use it
+        if (this._immerProduce) {
+            const nextState = this._immerProduce(currentState as S, producer);
+            return this.replaceState(nextState, actionName ?? 'produce');
+        }
+
+        // Fallback: use structuredClone for a deep copy
+        const draft = structuredClone(currentState) as S;
+        const result = producer(draft);
+        const nextState = result !== undefined ? result : draft;
+
+        return this.replaceState(nextState, actionName ?? 'produce');
     }
 
     /**

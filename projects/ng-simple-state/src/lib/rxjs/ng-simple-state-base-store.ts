@@ -2,7 +2,7 @@ import { Injectable, inject, Directive, DestroyRef } from '@angular/core';
 import { BehaviorSubject, Observable, asyncScheduler, Subject, takeUntil } from 'rxjs';
 import { map, distinctUntilChanged, observeOn } from 'rxjs/operators';
 import { NgSimpleStateBaseCommonStore } from '../ng-simple-state-common';
-import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState, StateFnOrReplaceState, NgSimpleStateProducer } from '../ng-simple-state-models';
+import type { NgSimpleStateComparator, NgSimpleStateReplaceState, NgSimpleStateSelectState, NgSimpleStateSetState, StateFnOrNewState, StateFnOrReplaceState } from '../ng-simple-state-models';
 
 @Injectable()
 @Directive()
@@ -133,45 +133,6 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
             return true;
         }
         return false;
-    }
-
-    /**
-     * Set state using Immer-style producer function for immutable updates
-     * Allows writing mutable-looking code that produces immutable updates
-     * @param producer Producer function that receives draft state
-     * @param actionName The action label into Redux DevTools
-     * @returns True if the state is changed
-     * 
-     * @example
-     * ```ts
-     * // Instead of:
-     * this.setState(state => ({ 
-     *   ...state, 
-     *   users: state.users.map(u => u.id === id ? { ...u, name } : u) 
-     * }));
-     * 
-     * // You can write:
-     * this.produce(draft => {
-     *   const user = draft.users.find(u => u.id === id);
-     *   if (user) user.name = name;
-     * });
-     * ```
-     */
-    produce(producer: NgSimpleStateProducer<S>, actionName?: string): boolean {
-        const currentState = this.getCurrentState();
-
-        // If Immer is configured, use it
-        if (this._immerProduce) {
-            const nextState = this._immerProduce(currentState as S, producer);
-            return this.replaceState(nextState, actionName ?? 'produce');
-        }
-
-        // Fallback: use structuredClone for a deep copy
-        const draft = structuredClone(currentState) as S;
-        const result = producer(draft);
-        const nextState = result !== undefined ? result : draft;
-
-        return this.replaceState(nextState, actionName ?? 'produce');
     }
 
     /**
