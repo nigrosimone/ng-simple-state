@@ -24,6 +24,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
     /**
      * Apply state directly from DevTools time-travel.
      * Sets the BehaviorSubject without triggering devtool send or plugins.
+     * @internal
      */
     protected _applyDevToolState(state: S): void {
         this.state$.next(state);
