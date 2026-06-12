@@ -23,7 +23,7 @@ npm i ng-simple-state
 | Option                 | Description                                                                                     | Default          |
 | ---------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
 | *enableDevTool*        | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`          |
-| *persistentStorage*    | Set the persistent storage `local` or `session`.                                                | `undefined`      |
+| *persistentStorage*    | Set the persistent storage `local`, `session` or instance of `NgSimpleStateStorage`.            | `undefined`      |
 | *comparator*           | A function used to compare the previous and current state for equality.                         | `a === b`        |
 | *serializeState*       | A function used to serialize the state to a string.                                             | `JSON.stringify` |
 | *deserializeState*     | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
@@ -514,6 +514,55 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
      * @returns True if the state is changed
      */
     replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): boolean;
+
+    /**
+     * Create a linked signal that derives from store state
+     * @param options LinkedSignal options with source, computation and equal
+     * @returns WritableSignal that is linked to the store state
+     */
+    linkedState<K>(options: NgSimpleStateLinkedOptions<S, K>): WritableSignal<K>;
+
+    /**
+     * Create an effect that reacts to state changes
+     * @param name Unique effect name
+     * @param effectFn Effect function that receives current state
+     * @returns EffectRef for cleanup
+     */
+    createEffect(name: string, effectFn: (state: S) => void | (() => void)): EffectRef;
+
+    /**
+     * Create an effect that reacts to selected state changes
+     * @param name Unique effect name
+     * @param selector State selector
+     * @param effectFn Effect function that receives selected value
+     * @returns EffectRef for cleanup
+     */
+    createSelectorEffect<K>(name: string, selector: (state: S) => K, effectFn: (selected: K) => void | (() => void)): EffectRef;
+
+    /**
+     * Set state using Immer-style producer function for immutable updates
+     * @param producer Producer function that receives draft state
+     * @param actionName The action label into Redux DevTools
+     * @returns True if the state is changed
+     */
+    produce(producer: NgSimpleStateProducer<S>, actionName?: string): boolean;
+
+    /**
+     * Destroy a specific effect by name
+     * @param name Effect name to destroy
+     */
+    destroyEffect(name: string): void;
+
+    /**
+     * Destroy all registered effects
+     */
+    destroyAllEffects(): void;
+
+    /**
+     * Get all registered effect names
+     * @returns Array of effect names
+     */
+    getEffectNames(): string[];
 }
 ```
 
@@ -1063,7 +1112,7 @@ provideNgHttpCaching({
 Enable experimental [WebMCP](https://angular.dev/ai/webmcp) (only read current state)
 
 ```ts
-import { Service, signal, inject, Signal } from '@angular/core';
+import { Injectable, inject, Signal } from '@angular/core';
 import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 export interface User {
@@ -1077,7 +1126,7 @@ export interface UsersState {
   selectedId: number | null;
 }
 
-@Service()
+@Injectable()
 export class UsersStore extends NgSimpleStateBaseSignalStore<UsersState> {
 
   storeConfig(): NgSimpleStateStoreConfig<UsersState> {
