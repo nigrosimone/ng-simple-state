@@ -440,11 +440,6 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
     public get state(): Signal<S>;
 
     /**
-     * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
-     */
-    ngOnDestroy(): void;
-
-    /**
      * Reset store to first loaded store state:
      *  - the last saved state
      *  - otherwise the initial state provided from `initialState()` method.
@@ -1486,11 +1481,6 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @returns Observable of the state
      */
     public get state(): BehaviorSubject<S>;
-
-    /**
-     * When you override this method, you have to call the `super.ngOnDestroy()` method in your `ngOnDestroy()` method.
-     */
-    ngOnDestroy(): void;
 
     /**
      * Reset store to first loaded store state:
