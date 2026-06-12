@@ -297,11 +297,13 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`          |
 | *storeName*          | The store name.                                                                                 | `undefined`      |
-| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `undefined`      |
+| *persistentStorage*  | Set the persistent storage `local`, `session` or instance of `NgSimpleStateStorage`.            | `undefined`      |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`        |
 | *serializeState*     | A function used to serialize the state to a string.                                             | `JSON.stringify` |
 | *deserializeState*   | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
-| *webMcp*               | Enable experimental WebMCP tool integration.                                                  | `false`          |
+| *plugins*            | Array of plugins to extend store functionality.                                                 | `[]`             |
+| *immerProduce*       | Custom Immer produce function for immutable updates.                                            | `undefined`      |
+| *webMcp*             | Enable experimental WebMCP tool integration.                                                    | `false`          |
 
 ### Testing
 
@@ -820,6 +822,35 @@ history.canRedo();
 
 // Clear history
 history.clearHistory();
+```
+
+#### persistPlugin
+
+You can use the built-in `persistPlugin` to implement custom storage logic (e.g., saving to a backend API or custom storage mechanism):
+
+```ts
+import { persistPlugin } from 'ng-simple-state';
+
+const myPersistPlugin = persistPlugin({
+  save: (storeName, state) => myCustomStorage.save(storeName, state),
+  load: (storeName) => myCustomStorage.load(storeName),
+  // Optional: filter which stores should be persisted
+  filter: (storeName) => storeName === 'MyStore' 
+});
+```
+
+#### provideNgSimpleStatePlugins
+
+If you need to register plugins outside of the initial `provideNgSimpleState` call, you can use `provideNgSimpleStatePlugins`:
+
+```ts
+import { provideNgSimpleStatePlugins } from 'ng-simple-state';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideNgSimpleStatePlugins([myCustomPlugin])
+  ]
+});
 ```
 
 #### Create Custom Plugin
@@ -1384,11 +1415,13 @@ The options are defined by `NgSimpleStateStoreConfig` interface:
 | -------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
 | *enableDevTool*      | if `true` enable `Redux DevTools` browser extension for inspect the state of the store.         | `false`          |
 | *storeName*          | The store name.                                                                                 | `undefined`      |
-| *persistentStorage*  | Set the persistent storage `local` or `session`                                                 | `undefined`      |
+| *persistentStorage*  | Set the persistent storage `local`, `session` or instance of `NgSimpleStateStorage`.            | `undefined`      |
 | *comparator*         | A function used to compare the previous and current state for equality.                         | `a === b`        |
 | *serializeState*     | A function used to serialize the state to a string.                                             | `JSON.stringify` |
 | *deserializeState*   | A function used to deserialize the state from a string.                                         | `JSON.parse`     |
-| *webMcp*               | Enable experimental WebMCP tool integration.                                                  | `false`          |
+| *plugins*            | Array of plugins to extend store functionality.                                                 | `[]`             |
+| *immerProduce*       | Custom Immer produce function for immutable updates.                                            | `undefined`      |
+| *webMcp*             | Enable experimental WebMCP tool integration.                                                    | `false`          |
 
 
 ### Testing
@@ -1529,7 +1562,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * Return the observable of the state
      * @returns Observable of the state
      */
-    public get state(): BehaviorSubject<S>;
+    public get state(): Observable<S>;
 
     /**
      * Reset store to first loaded store state:
@@ -1606,6 +1639,46 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
      * @returns True if the state is changed
      */
     replaceState(stateFn: NgSimpleStateReplaceState<S>, actionName?: string): boolean;
+
+    /**
+     * Create an effect that reacts to state changes
+     * @param name Unique effect name
+     * @param effectFn Effect function that receives current state
+     */
+    createEffect(name: string, effectFn: (state: S) => void): void;
+
+    /**
+     * Create an effect that reacts to selected state changes
+     * @param name Unique effect name
+     * @param selector State selector
+     * @param effectFn Effect function that receives selected value
+     */
+    createSelectorEffect<K>(name: string, selector: (state: S) => K, effectFn: (selected: K) => void): void;
+
+    /**
+     * Set state using Immer-style producer function for immutable updates
+     * @param producer Producer function that receives draft state
+     * @param actionName The action label into Redux DevTools
+     * @returns True if the state is changed
+     */
+    produce(producer: NgSimpleStateProducer<S>, actionName?: string): boolean;
+
+    /**
+     * Destroy a specific effect by name
+     * @param name Effect name to destroy
+     */
+    destroyEffect(name: string): void;
+
+    /**
+     * Destroy all registered effects
+     */
+    destroyAllEffects(): void;
+
+    /**
+     * Get all registered effect names
+     * @returns Array of effect names
+     */
+    getEffectNames(): string[];
 }
 ```
 
