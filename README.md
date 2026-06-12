@@ -2,6 +2,37 @@
 
 Simple state management in Angular with only Services and Signal.
 
+## Table of Contents
+
+- [Description](#description)
+- [Get Started](#get-started)
+- [Signal Store](#signal-store)
+  - [Manage component state without service](#manage-component-state-without-service)
+  - [Override global config](#override-global-config)
+  - [Testing](#testing)
+  - [Example: array store](#example-array-store)
+  - [NgSimpleStateBaseSignalStore API](#ngsimplestatebasesignalstore-api)
+- [Schematics CLI](#schematics-cli)
+- [Effect Management](#effect-management)
+- [Linked Signals](#linked-signals)
+- [Plugin System](#plugin-system)
+- [Transactions](#transactions)
+- [Debounced Updates](#debounced-updates)
+- [Throttled Updates](#throttled-updates)
+- [Immer-style Updates](#immer-style-updates)
+- [Redux DevTools Integration](#redux-devtools-integration)
+- [Integration with ng-http-caching](#integration-with-ng-http-caching)
+- [WebMCP](#webmcp)
+- [RxJS Store](#rxjs-store)
+  - [Manage component state without service](#manage-component-state-without-service-1)
+  - [Override global config](#override-global-config-1)
+  - [Testing](#testing-1)
+  - [Example: array store](#example-array-store-1)
+  - [NgSimpleStateBaseRxjsStore API](#ngsimplestatebaserxjsstore-api)
+- [Alternatives](#alternatives)
+- [Support](#support)
+- [My other libraries](#my-other-libraries)
+
 ## Description
 
 Sharing state between components as simple as possible and leverage the good parts of component state and Angular's dependency injection system.
