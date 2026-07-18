@@ -65,9 +65,13 @@ describe('NgSimpleStatePlugin: undoRedoPlugin', () => {
     });
 
     it('should respect maxHistory limit', () => {
-        // Add 6 changes (maxHistory is 5)
-        for (let i = 0; i < 6; i++) {
-            plugin.onAfterStateChange!({
+        // Dedicated plugin with a small limit to prove the oldest entries are trimmed.
+        const limited = undoRedoPlugin<{ count: number }>({ maxHistory: 2 });
+
+        // Add 5 changes: prevStates recorded are {0},{1},{2},{3},{4}.
+        // With maxHistory 2, only the last two prevStates ({3} and {4}) must survive.
+        for (let i = 0; i < 5; i++) {
+            limited.onAfterStateChange!({
                 storeName: 'TestStore',
                 actionName: `action${i}`,
                 prevState: { count: i },
@@ -75,10 +79,12 @@ describe('NgSimpleStatePlugin: undoRedoPlugin', () => {
                 timestamp: Date.now()
             });
         }
-        
-        // Oldest entry should be removed
-        // The undo should return the most recent previous state
-        expect(plugin.canUndo('TestStore')).toBeTrue();
+
+        // Exactly two undos are available (LIFO), oldest three were shifted out.
+        expect(limited.undo('TestStore')).toEqual({ count: 4 });
+        expect(limited.undo('TestStore')).toEqual({ count: 3 });
+        expect(limited.undo('TestStore')).toBeNull();
+        expect(limited.canUndo('TestStore')).toBeFalse();
     });
 
     it('should clear redo history on new action', () => {
