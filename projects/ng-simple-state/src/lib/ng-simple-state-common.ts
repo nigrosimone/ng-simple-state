@@ -332,8 +332,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
         const hasPlugins = this.plugins.length > 0;
 
-        // Get action name before plugin notification
-        const resolvedActionName = actionName ?? (hasPlugins ? this.getActionName() : 'no-action-needed');
+        // Get action name before plugin notification.
+        const needActionName = hasPlugins || !!this.devTool;
+        const resolvedActionName = actionName ?? (needActionName ? this.getActionName() : 'no-action-needed');
 
         // Notify plugins before change - they can prevent the change
         if (hasPlugins && !this.notifyPluginsBeforeChange(currState as S, state, resolvedActionName)) {
@@ -357,7 +358,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Get action name from stack trace
      */
     private getActionName(): string {
-        if (!this._devMode && !this.plugins.length) {
+        if (!this._devMode && !this.plugins.length && !this.devTool) {
             return 'no-action-needed';
         }
         try {
@@ -416,8 +417,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
         const hasPlugins = this.plugins.length > 0;
 
-        // Get action name before plugin notification
-        const resolvedActionName = actionName ?? (hasPlugins ? this.getActionName() : 'no-action-needed');
+        // Get action name before plugin notification.
+        const needActionName = hasPlugins || !!this.devTool;
+        const resolvedActionName = actionName ?? (needActionName ? this.getActionName() : 'no-action-needed');
 
         // Notify plugins before change - they can prevent the change
         if (hasPlugins && !this.notifyPluginsBeforeChange(currState as S, newState, resolvedActionName)) {

@@ -297,6 +297,30 @@ describe('NgSimpleStateBaseSignalStore: deepFreeze edge cases', () => {
 });
 
 
+@Injectable()
+export class CounterStoreDevToolNoActionName extends NgSimpleStateBaseSignalStore<CounterState> {
+
+    override storeConfig(): NgSimpleStateStoreConfig {
+        return {
+            enableDevTool: true,
+            storeName: 'devToolNoActionNameStoreSignal'
+        };
+    }
+
+    initialState(): CounterState {
+        return { count: 1 };
+    }
+
+    // Note: no explicit actionName passed to setState/replaceState.
+    incrementNoName(): boolean {
+        return this.setState(state => ({ count: state.count + 1 }));
+    }
+
+    replaceNoName(): boolean {
+        return this.replaceState(state => ({ count: state.count + 1 }));
+    }
+}
+
 describe('NgSimpleStateBaseSignalStore: __REDUX_DEVTOOLS_EXTENSION__', () => {
 
     beforeEach(() => {
@@ -320,9 +344,41 @@ describe('NgSimpleStateBaseSignalStore: __REDUX_DEVTOOLS_EXTENSION__', () => {
 
         const service = TestBed.inject(CounterStoreWithCustomStorage);
         expect(service.getCurrentState()).toEqual({ count: 1 });
-        
+
         expect(service.increment()).toBeTrue();
         expect((window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name).toBe('customStorageStoreSignal.increment');
+    });
+
+    it('should infer the action name from the calling method when DevTools is enabled and no actionName is passed (setState)', () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({ enableDevTool: true }),
+                CounterStoreDevToolNoActionName
+            ]
+        });
+
+        const service = TestBed.inject(CounterStoreDevToolNoActionName);
+        expect(service.incrementNoName()).toBeTrue();
+
+        const sentAction = (window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name;
+        expect(sentAction).not.toBe('devToolNoActionNameStoreSignal.no-action-needed');
+        expect(sentAction).toBe('devToolNoActionNameStoreSignal.incrementNoName');
+    });
+
+    it('should infer the action name from the calling method when DevTools is enabled and no actionName is passed (replaceState)', () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({ enableDevTool: true }),
+                CounterStoreDevToolNoActionName
+            ]
+        });
+
+        const service = TestBed.inject(CounterStoreDevToolNoActionName);
+        expect(service.replaceNoName()).toBeTrue();
+
+        const sentAction = (window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name;
+        expect(sentAction).not.toBe('devToolNoActionNameStoreSignal.no-action-needed');
+        expect(sentAction).toBe('devToolNoActionNameStoreSignal.replaceNoName');
     });
 });
 
@@ -505,6 +561,15 @@ describe('NgSimpleStateBaseSignalStore: linkedState method', () => {
                 source: state => state.count * state.multiplier
             });
         }
+
+        getDoubledCountAlwaysEqual() {
+            return this.linkedState({
+                source: state => state.count,
+                computation: (count) => count * 2,
+                // Custom equality: treat every recomputation as "unchanged"
+                equal: () => true
+            });
+        }
     }
 
     let service: LinkedStateTestStore;
@@ -529,9 +594,19 @@ describe('NgSimpleStateBaseSignalStore: linkedState method', () => {
     it('should update linked signal when source changes', () => {
         const doubled = service.getDoubledCount();
         expect(doubled()).toBe(10);
-        
+
         service.setCount(10);
         expect(doubled()).toBe(20);
+    });
+
+    it('should honor the custom equal option', () => {
+        const doubled = service.getDoubledCountAlwaysEqual();
+        expect(doubled()).toBe(10);
+
+        // With equal: () => true, recomputations are treated as unchanged,
+        // so the value must stay at the initial 10 even after the source changes.
+        service.setCount(50);
+        expect(doubled()).toBe(10);
     });
 });
 

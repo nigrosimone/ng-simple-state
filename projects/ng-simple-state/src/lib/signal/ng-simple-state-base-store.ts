@@ -56,7 +56,8 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
                     return options.computation(source, previous?.value);
                 }
                 return source;
-            }
+            },
+            equal: options.equal
         });
     }
 
