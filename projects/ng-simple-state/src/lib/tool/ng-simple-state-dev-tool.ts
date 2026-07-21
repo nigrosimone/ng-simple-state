@@ -63,6 +63,10 @@ interface ReduxDevTools {
 }
 
 function getReduxDevTools(): ReduxDevTools | undefined {
+    // `window` is absent during server side rendering
+    if (typeof window === 'undefined') {
+        return undefined;
+    }
     const win = window as unknown as { __REDUX_DEVTOOLS_EXTENSION__?: ReduxDevTools; devToolsExtension?: ReduxDevTools };
     return win.__REDUX_DEVTOOLS_EXTENSION__ ?? win.devToolsExtension;
 }
@@ -366,7 +370,11 @@ export class NgSimpleStateDevTool {
         this.currentPositionSig.set(entry.id);
         
         if (this.localDevTool) {
-            Object.assign(this.baseState, { [storeName]: state });
+            // an undefined state (store destroyed) must not overwrite the slice:
+            // it would be dropped by JSON.stringify and break export/time-travel
+            if (state !== undefined) {
+                Object.assign(this.baseState, { [storeName]: state });
+            }
             this.localDevTool.send(
                 `${storeName}.${actionName}`,
                 this.baseState

@@ -99,7 +99,14 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         // Register with DevTool for time-travel support
         if (this.devTool) {
             this.devTool.registerStore(this.storeName, {
-                applyState: (state: unknown) => this._applyDevToolState(state as S),
+                applyState: (state: unknown) => {
+                    this._applyDevToolState(state as S);
+                    // keep the persisted state aligned, otherwise a reload would
+                    // resurrect the value from before the time-travel jump
+                    if (this.storage) {
+                        this.statePersist(state as S);
+                    }
+                },
                 getInitialState: () => this.initState
             });
         }
@@ -386,7 +393,7 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
                 // avoid function call if not necessary
                 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                this.devTool && this.devToolSend(commit.nextState, commit.actionName);
+                this.devTool && this.devToolSend(commit.nextState, commit.actionName, commit.prevState);
                 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                 this.storage && this.statePersist(commit.nextState);
 
@@ -519,13 +526,14 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Send to dev tool a new state
      * @param newState new state
      * @param actionName The action name
+     * @param prevState the state before the change, used to compute the diff
      * @returns True if dev tools are enabled
      */
-    private devToolSend(newState: S | undefined, actionName: string): boolean {
+    private devToolSend(newState: S | undefined, actionName: string, prevState?: S): boolean {
         if (!this.devTool) {
             return false;
         }
-        if (!this.devTool.send(this.storeName, actionName, newState)) {
+        if (!this.devTool.send(this.storeName, actionName, newState, prevState)) {
             /* istanbul ignore next */
             console.log(this.storeName + '.' + actionName, newState);
         }
