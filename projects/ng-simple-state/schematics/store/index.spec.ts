@@ -131,9 +131,7 @@ describe('store schematic', () => {
   // --- Options: skipTests ---
 
   describe('skipTests option', () => {
-    it('should still generate spec file (skipTests not fully wired)', async () => {
-      // NOTE: The current implementation has `skipTests ? noop() : noop()` which
-      // does nothing. This test documents the current behavior.
+    it('should not generate the spec file when skipTests is true', async () => {
       const tree = await runner.runSchematic<StoreOptions>('store', {
         name: 'my-feature',
         type: 'signal',
@@ -141,8 +139,64 @@ describe('store schematic', () => {
         skipTests: true,
       });
 
-      // Currently spec is always generated (noop branch is identical)
+      expect(tree.files).toContain('/src/app/my-feature/my-feature.store.ts');
+      expect(tree.files).not.toContain('/src/app/my-feature/my-feature.store.spec.ts');
+    });
+
+    it('should generate the spec file when skipTests is false', async () => {
+      const tree = await runner.runSchematic<StoreOptions>('store', {
+        name: 'my-feature',
+        type: 'signal',
+        path: 'src/app',
+        skipTests: false,
+      });
+
       expect(tree.files).toContain('/src/app/my-feature/my-feature.store.spec.ts');
+    });
+  });
+
+  // --- Options: prefix ---
+
+  describe('prefix option', () => {
+    it('should prepend the prefix to the generated symbols', async () => {
+      const tree = await runner.runSchematic<StoreOptions>('store', {
+        name: 'my-feature',
+        type: 'signal',
+        path: 'src/app',
+        prefix: 'app',
+      });
+
+      const content = tree.readContent('/src/app/my-feature/my-feature.store.ts');
+      expect(content).toContain('export class AppMyFeatureStore');
+      expect(content).toContain('export interface AppMyFeatureState');
+      expect(content).toContain("storeName: 'AppMyFeatureStore'");
+      // the file name is not prefixed
+      expect(tree.files).toContain('/src/app/my-feature/my-feature.store.ts');
+    });
+
+    it('should leave the symbols untouched when no prefix is given', async () => {
+      const tree = await runner.runSchematic<StoreOptions>('store', {
+        name: 'my-feature',
+        type: 'signal',
+        path: 'src/app',
+      });
+
+      const content = tree.readContent('/src/app/my-feature/my-feature.store.ts');
+      expect(content).toContain('export class MyFeatureStore');
+      expect(content).toContain('export interface MyFeatureState');
+    });
+
+    it('should keep the spec file consistent with the prefixed class', async () => {
+      const tree = await runner.runSchematic<StoreOptions>('store', {
+        name: 'my-feature',
+        type: 'signal',
+        path: 'src/app',
+        prefix: 'app',
+      });
+
+      const content = tree.readContent('/src/app/my-feature/my-feature.store.spec.ts');
+      expect(content).toContain('AppMyFeatureStore');
+      expect(content).toContain("from './my-feature.store'");
     });
   });
 

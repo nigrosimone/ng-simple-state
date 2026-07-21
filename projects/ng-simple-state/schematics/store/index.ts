@@ -5,6 +5,7 @@ import {
   apply,
   applyTemplates,
   chain,
+  filter,
   mergeWith,
   move,
   url,
@@ -34,9 +35,11 @@ function buildPath(options: StoreOptions): string {
 export function store(options: StoreOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const path = buildPath(options);
-    
+
     const templateSource = apply(url('./files'), [
-      options.skipTests ? noop() : noop(),
+      options.skipTests
+        ? filter(filePath => !/\.spec\.ts(\.template)?$/.test(filePath))
+        : noop(),
       applyTemplates({
         ...strings,
         ...options,
@@ -44,6 +47,9 @@ export function store(options: StoreOptions): Rule {
         classify: strings.classify,
         dasherize: strings.dasherize,
         camelize: strings.camelize,
+        // base name of the generated symbols: `prefix` is applied here so that the
+        // class, the state interface and the storeName all stay consistent
+        className: `${strings.classify(options.prefix || '')}${strings.classify(options.name)}`,
         isSignal: options.type === 'signal',
         isRxjs: options.type === 'rxjs',
         hasPersistentStorage: options.persistentStorage && options.persistentStorage !== 'none',

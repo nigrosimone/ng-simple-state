@@ -1,18 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { <%= classify(name) %>Store, <%= classify(name) %>State } from './<%= dasherize(name) %>.store';
+import { <%= className %>Store, <%= className %>State } from './<%= dasherize(name) %>.store';
 import { provideNgSimpleState } from 'ng-simple-state';
 
-describe('<%= classify(name) %>Store', () => {
-  let store: <%= classify(name) %>Store;
+describe('<%= className %>Store', () => {
+  let store: <%= className %>Store;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         ...provideNgSimpleState(),
-        <%= classify(name) %>Store
+        <%= className %>Store
       ]
     });
-    store = TestBed.inject(<%= classify(name) %>Store);
+    store = TestBed.inject(<%= className %>Store);
   });
 
   it('should be created', () => {
