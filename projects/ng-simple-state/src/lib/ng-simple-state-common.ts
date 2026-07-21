@@ -48,7 +48,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         } else if (config.persistentStorage === 'session') {
             this.storage = new NgSimpleStateSessionStorage(config);
         } else if (typeof config.persistentStorage === 'object') {
-            this.storage = config.persistentStorage as NgSimpleStateStorage<S>;
+            // a storage instance can be shared between stores: bind it to this store
+            // config so that `serializeState`/`deserializeState` are honoured here too
+            this.storage = (config.persistentStorage as NgSimpleStateStorage<S>)
+                .withConfig(config as NgSimpleStateStoreConfig<S>);
         }
 
         if (config.enableDevTool) {
