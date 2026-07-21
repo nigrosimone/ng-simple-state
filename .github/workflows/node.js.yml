@@ -3,7 +3,7 @@ name: Node.js CI
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [master]
+    branches: [main, master]
 
 jobs:
   build:
@@ -24,3 +24,5 @@ jobs:
         run: npm run lint ng-simple-state
       - name: Test
         run: npm run test ng-simple-state -- --coverage --no-watch
+      - name: Test schematics
+        run: npm run test:schematics

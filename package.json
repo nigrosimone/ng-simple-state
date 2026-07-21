@@ -25,8 +25,9 @@
     "start": "ng serve",
     "build": "ng build",
     "build:lib": "ng build ng-simple-state",
+    "build:schematics": "node projects/ng-simple-state/schematics/build.mjs",
     "test": "ng test",
-    "test:schematics": "tsc -p projects/ng-simple-state/schematics/tsconfig.schematics.json && xcopy /E /I /Y projects\\ng-simple-state\\schematics\\store\\files projects\\ng-simple-state\\schematics\\out\\store\\files && jasmine projects/ng-simple-state/schematics/out/store/index.spec.js",
+    "test:schematics": "tsc -p projects/ng-simple-state/schematics/tsconfig.schematics.json && node -e \"require('fs').cpSync('projects/ng-simple-state/schematics/store/files','projects/ng-simple-state/schematics/out/store/files',{recursive:true})\" && jasmine projects/ng-simple-state/schematics/out/store/index.spec.js",
     "lint": "ng lint",
     "docs": "typedoc --out docs projects/ng-simple-state/src/public-api.ts --readme README.md",
     "docs:watch": "typedoc --watch --out docs projects/ng-simple-state/src/public-api.ts"
