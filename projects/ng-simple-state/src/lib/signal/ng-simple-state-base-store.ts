@@ -93,7 +93,15 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
             })
         );
 
-        this._registeredEffects.set(name, effectRef.destroy.bind(effectRef));
+        // on teardown the last cleanup must run too, otherwise whatever the effect
+        // acquired (timers, subscriptions, listeners) would leak
+        this._registeredEffects.set(name, () => {
+            effectRef.destroy();
+            if (cleanup) {
+                cleanup();
+                cleanup = undefined;
+            }
+        });
         return effectRef;
     }
 
