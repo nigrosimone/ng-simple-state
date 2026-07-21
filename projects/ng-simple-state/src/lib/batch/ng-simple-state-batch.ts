@@ -171,7 +171,7 @@ export function createDebouncedUpdater<S>(
  * // First call executes immediately, subsequent calls are throttled
  * update({ scrollPosition: 100 }); // Executes immediately
  * update({ scrollPosition: 150 }); // Queued
- * update({ scrollPosition: 200 }); // Replaces queued update
+ * update({ scrollPosition: 200 }); // Merged into the queued update
  *
  * // After 100ms, { scrollPosition: 200 } is applied
  *
@@ -206,8 +206,10 @@ export function createThrottledUpdater<S>(
             lastCall = now;
             updateFn(state);
         } else {
-            pendingState = state;
-            
+            // merge, do not replace: these are partial patches, so overwriting the
+            // queued one would silently drop the fields it carried
+            pendingState = { ...pendingState, ...state };
+
             if (timeoutId === null) {
                 timeoutId = setTimeout(() => {
                     timeoutId = null;
