@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-store';
 import { NgSimpleStateBaseRxjsStore } from '../rxjs/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
-import { NgSimpleStatePlugin } from '../plugin/ng-simple-state-plugin';
+import { NgSimpleStatePlugin, persistPlugin } from '../plugin/ng-simple-state-plugin';
 
 interface CounterState { count: number; name: string }
 
@@ -101,5 +101,67 @@ describe('Regression: plugin hook ordering', () => {
 
         expect(store.getCurrentState().count).toBe(2);
         expect(notified).toEqual(['outer:1', 'nested:2']);
+    });
+});
+
+describe('Regression: persistPlugin', () => {
+
+    it('should hydrate the store through the load() callback', () => {
+        const saved: Record<string, unknown> = { HydratedStore: { count: 42, name: 'restored' } };
+        const plugin = persistPlugin<CounterState>({
+            save: (storeName, state) => { saved[storeName] = state; },
+            load: storeName => (saved[storeName] as CounterState) ?? null
+        });
+
+        @Injectable()
+        class HydratedStore extends NgSimpleStateBaseSignalStore<CounterState> {
+            protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+                return { storeName: 'HydratedStore', plugins: [plugin as NgSimpleStatePlugin] };
+            }
+            initialState(): CounterState { return { count: 0, name: 'a' }; }
+        }
+
+        TestBed.configureTestingModule({ providers: [HydratedStore] });
+
+        expect(TestBed.inject(HydratedStore).getCurrentState()).toEqual({ count: 42, name: 'restored' });
+    });
+
+    it('should keep initialState() when load() returns null', () => {
+        const plugin = persistPlugin<CounterState>({
+            save: () => undefined,
+            load: () => null
+        });
+
+        @Injectable()
+        class EmptyStore extends NgSimpleStateBaseSignalStore<CounterState> {
+            protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+                return { storeName: 'EmptyLoadStore', plugins: [plugin as NgSimpleStatePlugin] };
+            }
+            initialState(): CounterState { return { count: 0, name: 'a' }; }
+        }
+
+        TestBed.configureTestingModule({ providers: [EmptyStore] });
+
+        expect(TestBed.inject(EmptyStore).getCurrentState()).toEqual({ count: 0, name: 'a' });
+    });
+
+    it('should not load a store excluded by filter()', () => {
+        const plugin = persistPlugin<CounterState>({
+            save: () => undefined,
+            load: () => ({ count: 99, name: 'nope' }),
+            filter: storeName => storeName === 'SomeOtherStore'
+        });
+
+        @Injectable()
+        class FilteredStore extends NgSimpleStateBaseSignalStore<CounterState> {
+            protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+                return { storeName: 'FilteredLoadStore', plugins: [plugin as NgSimpleStatePlugin] };
+            }
+            initialState(): CounterState { return { count: 0, name: 'a' }; }
+        }
+
+        TestBed.configureTestingModule({ providers: [FilteredStore] });
+
+        expect(TestBed.inject(FilteredStore).getCurrentState()).toEqual({ count: 0, name: 'a' });
     });
 });

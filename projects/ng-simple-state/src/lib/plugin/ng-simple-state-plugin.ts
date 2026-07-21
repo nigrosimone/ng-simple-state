@@ -35,9 +35,10 @@ export interface NgSimpleStatePlugin<S = unknown> {
     onAfterStateChange?(context: NgSimpleStatePluginContext<S>): void;
     
     /**
-     * Called when store is initialized
+     * Called when store is initialized.
+     * Return a state to hydrate the store with it, or nothing to leave it untouched.
      */
-    onStoreInit?(storeName: string, initialState: Readonly<S>): void;
+    onStoreInit?(storeName: string, initialState: Readonly<S>): void | S | null;
     
     /**
      * Called when store is destroyed
@@ -118,6 +119,13 @@ export function persistPlugin<S>(options: {
 }): NgSimpleStatePlugin<S> {
     return {
         name: 'persist',
+        onStoreInit(storeName) {
+            if (options.filter && !options.filter(storeName)) {
+                return;
+            }
+            // hydrate the store with whatever was persisted before
+            return options.load(storeName);
+        },
         onAfterStateChange(context) {
             if (options.filter && !options.filter(context.storeName)) {
                 return;

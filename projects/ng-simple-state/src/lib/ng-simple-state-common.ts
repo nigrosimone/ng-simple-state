@@ -92,6 +92,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this._firstState = this.initState;
         }
 
+        // Notify plugins of store init: a plugin may hydrate the store (see persistPlugin).
+        // Must run before the first devtool report so that it shows the state really used.
+        this.notifyPluginsInit();
+
         // Register with DevTool for time-travel support
         if (this.devTool) {
             this.devTool.registerStore(this.storeName, {
@@ -101,9 +105,6 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         }
 
         this.devToolSend(this._firstState, 'initialState');
-
-        // Notify plugins of store init
-        this.notifyPluginsInit();
 
         this.isArray = Array.isArray(this._firstState);
 
@@ -139,12 +140,17 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     }
 
     /**
-     * Notify plugins of store initialization
+     * Notify plugins of store initialization.
+     * A plugin returning a state hydrates the store with it (the last one wins),
+     * which is how `persistPlugin` restores what it previously saved.
      */
     private notifyPluginsInit(): void {
         for (const plugin of this.plugins) {
             if (plugin.onStoreInit) {
-                plugin.onStoreInit(this.storeName, this._firstState);
+                const hydratedState = plugin.onStoreInit(this.storeName, this._firstState);
+                if (hydratedState !== undefined && hydratedState !== null) {
+                    this._firstState = hydratedState as S;
+                }
             }
         }
     }
