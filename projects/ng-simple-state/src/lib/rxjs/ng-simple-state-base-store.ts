@@ -48,9 +48,11 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
         if (!selectFn) {
             return this.stateObs as unknown as Observable<K>;
         }
+        // NB: the store level comparator compares two full states (S) and must not be
+        // reused here, where the compared values are the selected slice (K).
         return this.state$.pipe(
             map(state => selectFn(state as Readonly<S>)),
-            distinctUntilChanged(comparator ?? this._comparator as NgSimpleStateComparator),
+            distinctUntilChanged(comparator),
             observeOn(asyncScheduler)
         );
     }

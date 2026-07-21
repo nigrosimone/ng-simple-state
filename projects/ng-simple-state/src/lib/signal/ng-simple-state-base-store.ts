@@ -37,7 +37,9 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         if (!selectFn) {
             return this.stateSigRo as unknown as Signal<K>;
         }
-        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator ?? this._comparator as NgSimpleStateComparator });
+        // NB: the store level comparator compares two full states (S) and must not be
+        // reused here, where the compared values are the selected slice (K).
+        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator });
     }
 
     /**
