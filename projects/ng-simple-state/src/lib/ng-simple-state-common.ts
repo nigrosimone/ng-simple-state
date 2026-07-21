@@ -28,6 +28,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected _immerProduce?: <T>(state: T, producer: (draft: T) => void) => T;
     /** @internal */
     protected readonly _registeredEffects: Map<string, (() => void)> = new Map();
+    /** State changes committed but whose side effects still have to run */
+    private readonly pendingCommits: { prevState: S; nextState: S; actionName: string }[] = [];
+    /** True while `_afterCommit` is draining the queue */
+    private isFlushingCommits: boolean = false;
 
     /**
      * Apply state directly from DevTools time-travel (bypasses devtool send and plugins).
@@ -344,17 +348,48 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             return undefined;
         }
 
-        // avoid function call if not necessary
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.devTool && this.devToolSend(state, resolvedActionName);
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.storage && this.statePersist(state);
-
-        // Notify plugins after change
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        hasPlugins && this.notifyPluginsAfterChange(currState as S, state, resolvedActionName);
+        // Side effects are deferred: they must observe the committed state (see _afterCommit)
+        this.pendingCommits.push({ prevState: currState as S, nextState: state, actionName: resolvedActionName });
 
         return state;
+    }
+
+    /**
+     * Flush the side effects of the committed state changes: dev tools,
+     * persistence and `onAfterStateChange` plugin hooks.
+     *
+     * Concrete stores must call this right after they applied the new state, so
+     * that everything downstream observes the committed value.
+     *
+     * A state change can be triggered again from a hook (or from a synchronous
+     * subscriber of the state): those nested changes are appended to the queue
+     * and drained, in order, by the outermost call — so no change is skipped and
+     * the persisted state stays the last one.
+     * @private
+     * @internal
+     */
+    protected _afterCommit(): void {
+        if (this.isFlushingCommits) {
+            // a flush is already running: it will drain what has just been queued
+            return;
+        }
+        this.isFlushingCommits = true;
+        try {
+            while (this.pendingCommits.length) {
+                const commit = this.pendingCommits.shift() as { prevState: S; nextState: S; actionName: string };
+
+                // avoid function call if not necessary
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                this.devTool && this.devToolSend(commit.nextState, commit.actionName);
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                this.storage && this.statePersist(commit.nextState);
+
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                this.plugins.length && this.notifyPluginsAfterChange(commit.prevState, commit.nextState, commit.actionName);
+            }
+        } finally {
+            this.isFlushingCommits = false;
+        }
     }
 
     /**
@@ -429,15 +464,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             return undefined;
         }
 
-        // avoid function call if not necessary
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.devTool && this.devToolSend(newState, resolvedActionName);
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.storage && this.statePersist(newState);
-
-        // Notify plugins after change
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        hasPlugins && this.notifyPluginsAfterChange(currState as S, newState, resolvedActionName);
+        // Side effects are deferred: they must observe the committed state (see _afterCommit)
+        this.pendingCommits.push({ prevState: currState as S, nextState: newState, actionName: resolvedActionName });
 
         return newState;
     }

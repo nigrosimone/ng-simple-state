@@ -149,6 +149,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         const state = this._setState(stateFnOrNewState, actionName);
         if (state !== undefined) {
             this.stateSig.set(state);
+            this._afterCommit();
             return true;
         }
         return false;
@@ -172,6 +173,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         const state = this._replaceState(stateFnOrReplaceState, actionName);
         if (state !== undefined) {
             this.stateSig.set(state);
+            this._afterCommit();
             return true;
         }
         return false;

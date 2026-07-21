@@ -133,6 +133,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
         const state = this._setState(stateFnOrNewState, actionName);
         if (state !== undefined) {
             this.state$.next(state);
+            this._afterCommit();
             return true;
         }
         return false;
@@ -156,6 +157,7 @@ export abstract class NgSimpleStateBaseRxjsStore<S extends object | Array<any>> 
         const state = this._replaceState(stateFnOrNewState, actionName);
         if (state !== undefined) {
             this.state$.next(state);
+            this._afterCommit();
             return true;
         }
         return false;
