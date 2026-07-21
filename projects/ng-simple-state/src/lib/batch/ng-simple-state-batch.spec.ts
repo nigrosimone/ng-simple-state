@@ -110,11 +110,11 @@ describe('withTransaction', () => {
 describe('createDebouncedUpdater', () => {
     
     beforeEach(() => {
-        jasmine.clock().install();
+        vi.useFakeTimers();
     });
 
     afterEach(() => {
-        jasmine.clock().uninstall();
+        vi.useRealTimers();
     });
 
     it('should debounce updates', () => {
@@ -130,7 +130,7 @@ describe('createDebouncedUpdater', () => {
         
         expect(updates.length).toBe(0);
         
-        jasmine.clock().tick(100);
+        vi.advanceTimersByTime(100);
         
         expect(updates.length).toBe(1);
         expect(updates[0].count).toBe(3);
@@ -146,7 +146,7 @@ describe('createDebouncedUpdater', () => {
         update({ count: 1 } as any);
         update({ name: 'test' } as any);
         
-        jasmine.clock().tick(100);
+        vi.advanceTimersByTime(100);
         
         expect(updates[0]).toEqual({ count: 1, name: 'test' });
     });
@@ -174,7 +174,7 @@ describe('createDebouncedUpdater', () => {
         update({ count: 1 });
         cancel();
         
-        jasmine.clock().tick(100);
+        vi.advanceTimersByTime(100);
         
         expect(updates.length).toBe(0);
     });
@@ -184,11 +184,11 @@ describe('createDebouncedUpdater', () => {
 describe('createThrottledUpdater', () => {
     
     beforeEach(() => {
-        jasmine.clock().install();
+        vi.useFakeTimers();
     });
 
     afterEach(() => {
-        jasmine.clock().uninstall();
+        vi.useRealTimers();
     });
 
     it('should execute first update immediately', () => {
@@ -217,7 +217,7 @@ describe('createThrottledUpdater', () => {
         
         expect(updates.length).toBe(1);
         
-        jasmine.clock().tick(100);
+        vi.advanceTimersByTime(100);
         
         expect(updates.length).toBe(2);
         expect(updates[1].count).toBe(3);
@@ -234,7 +234,7 @@ describe('createThrottledUpdater', () => {
         update({ count: 2 });
         cancel();
         
-        jasmine.clock().tick(100);
+        vi.advanceTimersByTime(100);
         
         expect(updates.length).toBe(1);
     });

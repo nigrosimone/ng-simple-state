@@ -1,8 +1,9 @@
+import type { Mock } from 'vitest';
 import { Injectable, Signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from './ng-simple-state-base-store';
 import { BASE_KEY, NgSimpleStateStorage } from '../storage/ng-simple-state-browser-storage';
-import { DevToolsExtension } from '../tool/ng-simple-state-dev-tool.spec';
+import { DevToolsExtension } from '../tool/dev-tools-extension.mock';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 import { NgSimpleStatePlugin } from '../plugin/ng-simple-state-plugin';
 import { provideNgSimpleState, provideNgSimpleStatePlugins } from '../ng-simple-state-provider';
@@ -840,8 +841,8 @@ describe('provideNgSimpleStatePlugins', () => {
 
 describe('NgSimpleStateBaseSignalStore: Plugin lifecycle hooks', () => {
 
-    let onStoreInitSpy: jasmine.Spy;
-    let onStoreDestroySpy: jasmine.Spy;
+    let onStoreInitSpy: Mock;
+    let onStoreDestroySpy: Mock;
     let lifecyclePlugin: NgSimpleStatePlugin;
 
     @Injectable()
@@ -861,8 +862,8 @@ describe('NgSimpleStateBaseSignalStore: Plugin lifecycle hooks', () => {
     }
 
     beforeEach(() => {
-        onStoreInitSpy = jasmine.createSpy('onStoreInit');
-        onStoreDestroySpy = jasmine.createSpy('onStoreDestroy');
+        onStoreInitSpy = vi.fn();
+        onStoreDestroySpy = vi.fn();
         
         lifecyclePlugin = {
             name: 'lifecyclePlugin',
@@ -888,8 +889,8 @@ describe('NgSimpleStateBaseSignalStore: Plugin lifecycle hooks', () => {
 describe('NgSimpleStateBaseSignalStore: DevTool time-travel', () => {
 
     let mockDevTool: any;
-    let applyStateSpy: jasmine.Spy;
-    let getInitialStateSpy: jasmine.Spy;
+    let applyStateSpy: Mock;
+    let getInitialStateSpy: Mock;
 
     @Injectable()
     class TimeTravelStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
@@ -912,18 +913,18 @@ describe('NgSimpleStateBaseSignalStore: DevTool time-travel', () => {
     }
 
     beforeEach(() => {
-        applyStateSpy = jasmine.createSpy('applyState');
-        getInitialStateSpy = jasmine.createSpy('getInitialState');
+        applyStateSpy = vi.fn();
+        getInitialStateSpy = vi.fn();
         
         mockDevTool = {
-            send: jasmine.createSpy('send').and.returnValue(true),
-            registerStore: jasmine.createSpy('registerStore').and.callFake(
+            send: vi.fn().mockReturnValue(true),
+            registerStore: vi.fn().mockImplementation(
                 (storeName: string, callbacks: { applyState: (s: unknown) => void, getInitialState: () => unknown }) => {
-                    applyStateSpy.and.callFake(callbacks.applyState);
-                    getInitialStateSpy.and.callFake(callbacks.getInitialState);
+                    applyStateSpy.mockImplementation(callbacks.applyState);
+                    getInitialStateSpy.mockImplementation(callbacks.getInitialState);
                 }
             ),
-            unregisterStore: jasmine.createSpy('unregisterStore')
+            unregisterStore: vi.fn()
         };
 
         TestBed.configureTestingModule({

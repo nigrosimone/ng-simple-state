@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseRxjsStore } from './ng-simple-state-base-store';
 import { BASE_KEY, NgSimpleStateStorage } from '../storage/ng-simple-state-browser-storage';
-import { DevToolsExtension } from '../tool/ng-simple-state-dev-tool.spec';
+import { DevToolsExtension } from '../tool/dev-tools-extension.mock';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 import { provideNgSimpleState } from './../ng-simple-state-provider';
 
@@ -139,7 +139,7 @@ describe('NgSimpleStateBaseRxjsStore: Custom Storage', () => {
         localStorage.clear();
     });
 
-    it('should use custom storage object', (done) => {
+    it('should use custom storage object', () => new Promise<void>(done => {
         expect(service.getCurrentState()).toEqual({ count: 1 });
         expect(service.increment()).toBeTrue();
         service.selectCount().subscribe(value => {
@@ -147,7 +147,7 @@ describe('NgSimpleStateBaseRxjsStore: Custom Storage', () => {
             expect(localStorage.getItem(BASE_KEY + 'customStorageStore')).toBe(JSON.stringify({ count: 2 }));
             done();
         });
-    });
+    }));
 
     it('should load from custom storage', () => {
         localStorage.setItem(BASE_KEY + 'customStorageStore', JSON.stringify({ count: 99 }));
@@ -211,7 +211,7 @@ describe('NgSimpleStateBaseRxjsStore: Custom Serializer', () => {
         localStorage.clear();
     });
 
-    it('should use custom serializeState', (done) => {
+    it('should use custom serializeState', () => new Promise<void>(done => {
         TestBed.configureTestingModule({
             providers: [CounterStoreWithCustomSerializer]
         });
@@ -225,7 +225,7 @@ describe('NgSimpleStateBaseRxjsStore: Custom Serializer', () => {
             expect(stored).toBe('custom_{"count":2}');
             done();
         });
-    });
+    }));
 
     it('should use custom deserializeState', () => {
         // Pre-populate with custom format
@@ -361,13 +361,13 @@ describe('NgSimpleStateBaseRxjsStore: setState with direct object', () => {
         expect(service.getCurrentState()).toEqual({ count: 10 });
     });
 
-    it('selectState with custom comparator parameter', (done) => {
+    it('selectState with custom comparator parameter', () => new Promise<void>(done => {
         const customComparator = (a: number, b: number) => a === b;
         service.selectState(state => state.count, customComparator).subscribe(value => {
             expect(value).toBe(1);
             done();
         });
-    });
+    }));
 });
 
 
@@ -758,7 +758,7 @@ describe('NgSimpleStateBaseRxjsStore: state observable and DevTools apply', () =
         (window as any)['devToolsExtension'] = null;
     });
 
-    it('should expose state observable and emit current state', (done) => {
+    it('should expose state observable and emit current state', () => new Promise<void>(done => {
         const values: number[] = [];
 
         service.state.subscribe(state => {
@@ -770,6 +770,6 @@ describe('NgSimpleStateBaseRxjsStore: state observable and DevTools apply', () =
         });
 
         (service as any)._applyDevToolState({ count: 3 });
-    });
+    }));
 });
 

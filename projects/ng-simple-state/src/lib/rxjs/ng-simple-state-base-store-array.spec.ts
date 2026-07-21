@@ -44,35 +44,35 @@ describe('NgSimpleStateBaseRxjsStoreArray', () => {
     });
 
 
-    it('initialState -> selectState', (done) => {
+    it('initialState -> selectState', () => new Promise<void>(done => {
         service.selectState().subscribe(value => {
             expect(value).toEqual([1]);
             expect(service.getCurrentState()).toEqual([1]);
             done();
         });
-    });
+    }));
 
     it('no changes', () => {
         expect(service.setState((state) => state as any)).toBeFalse();
     });
 
-    it('add -> setState -> selectState', (done) => {
+    it('add -> setState -> selectState', () => new Promise<void>(done => {
         expect(service.add(2)).toBeTrue();
         service.selectState().subscribe(value => {
             expect(value).toEqual([1, 2]);
             expect(service.getCurrentState()).toEqual([1, 2]);
             done();
         });
-    });
+    }));
 
-    it('del -> setState -> selectState', (done) => {
+    it('del -> setState -> selectState', () => new Promise<void>(done => {
         expect(service.del(1)).toBeTrue();
         service.selectState().subscribe(value => {
             expect(value).toEqual([]);
             expect(service.getCurrentState()).toEqual([]);
             done();
         });
-    });
+    }));
 
     it('resetState', () => {
         expect(service.add(2)).toBeTrue();
