@@ -3,9 +3,45 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
 import { NgSimpleStateLocalStorage } from '../storage/ng-simple-state-local-storage';
-import { BASE_KEY } from '../storage/ng-simple-state-browser-storage';
+import { BASE_KEY, NgSimpleStateStorage } from '../storage/ng-simple-state-browser-storage';
 
 interface CounterState { count: number }
+
+/**
+ * A browser storage that refuses every write, as a full quota or a private
+ * browsing session would.
+ *
+ * The underlying `Storage` is injected rather than patching the global one: a
+ * real `Storage` turns `localStorage.setItem = fn` into `setItem('setItem', fn)`
+ * through its named property setter, so the method would never be replaced.
+ */
+function createFullStorage(): Storage {
+    return {
+        length: 0,
+        clear: () => undefined,
+        getItem: () => null,
+        key: () => null,
+        removeItem: () => undefined,
+        setItem: () => { throw new DOMException('quota', 'QuotaExceededError'); }
+    } as Storage;
+}
+
+/** Uses the base implementation on top of a storage that always fails. */
+class FullStorage extends NgSimpleStateStorage<CounterState> {
+    constructor() {
+        super(createFullStorage());
+    }
+}
+
+/** Overrides the base implementation to throw, as a custom storage could. */
+class ThrowingStorage extends NgSimpleStateStorage<CounterState> {
+    constructor() {
+        super(createFullStorage());
+    }
+    override setItem(): boolean {
+        throw new DOMException('quota', 'QuotaExceededError');
+    }
+}
 
 describe('Regression: storage resilience', () => {
 
@@ -33,8 +69,8 @@ describe('Regression: storage resilience', () => {
     it('should not throw nor lose the state change when the storage write fails', () => {
         @Injectable()
         class QuotaStore extends NgSimpleStateBaseSignalStore<CounterState> {
-            protected storeConfig(): NgSimpleStateStoreConfig {
-                return { storeName: 'QuotaStore', persistentStorage: 'local' };
+            protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+                return { storeName: 'QuotaStore', persistentStorage: new FullStorage() };
             }
             initialState(): CounterState { return { count: 0 }; }
             increment(): boolean { return this.setState(state => ({ count: state.count + 1 })); }
@@ -43,27 +79,31 @@ describe('Regression: storage resilience', () => {
         TestBed.configureTestingModule({ providers: [QuotaStore] });
         const store = TestBed.inject(QuotaStore);
 
-        const originalSetItem = localStorage.setItem;
-        localStorage.setItem = () => { throw new DOMException('quota', 'QuotaExceededError'); };
-        try {
-            expect(() => store.increment()).not.toThrow();
-        } finally {
-            localStorage.setItem = originalSetItem;
+        expect(() => store.increment()).not.toThrow();
+        expect(store.getCurrentState()).toEqual({ count: 1 });
+    });
+
+    it('should survive a custom storage that throws instead of reporting failure', () => {
+        @Injectable()
+        class ThrowingStore extends NgSimpleStateBaseSignalStore<CounterState> {
+            protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+                return { storeName: 'ThrowingStore', persistentStorage: new ThrowingStorage() };
+            }
+            initialState(): CounterState { return { count: 0 }; }
+            increment(): boolean { return this.setState(state => ({ count: state.count + 1 })); }
         }
 
+        TestBed.configureTestingModule({ providers: [ThrowingStore] });
+        const store = TestBed.inject(ThrowingStore);
+
+        expect(() => store.increment()).not.toThrow();
         expect(store.getCurrentState()).toEqual({ count: 1 });
     });
 
     it('should report a failed write through setItem() instead of throwing', () => {
-        const storage = new NgSimpleStateLocalStorage<CounterState>();
+        const storage = new FullStorage();
 
-        const originalSetItem = localStorage.setItem;
-        localStorage.setItem = () => { throw new DOMException('quota', 'QuotaExceededError'); };
-        try {
-            expect(storage.setItem('AnyStore', { count: 1 })).toBeFalse();
-        } finally {
-            localStorage.setItem = originalSetItem;
-        }
+        expect(storage.setItem('AnyStore', { count: 1 })).toBeFalse();
     });
 
     it('should return null from getItem() when the stored value cannot be deserialized', () => {

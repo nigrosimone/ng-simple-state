@@ -571,11 +571,17 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     }
 
     /**
-     * Persist state to storage
+     * Persist state to storage.
+     * The built-in storages report a failure instead of throwing, but a custom
+     * one may not: persistence must never take the state change down with it.
      */
     private statePersist(state: S) {
         if (this.storage) {
-            this.storage.setItem(this.storeName, state);
+            try {
+                this.storage.setItem(this.storeName, state);
+            } catch {
+                /* persistence is best effort: the state stays applied */
+            }
         }
     }
 

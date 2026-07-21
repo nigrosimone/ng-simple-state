@@ -44,25 +44,24 @@ function createStorage(): Storage {
 }
 
 /**
- * Install a working `localStorage`/`sessionStorage`.
+ * Install `localStorage`/`sessionStorage`, unconditionally.
  *
- * Node defines both as global getters that resolve to `undefined` unless the
- * runtime is started with `--localstorage-file`, and since jsdom shares its
- * global object with Node those getters shadow the DOM ones. Each test file
- * gets its own instance, which also keeps the specs isolated from one another.
+ * Whether a usable one already exists depends on the Node version: recent
+ * releases define both as global getters that resolve to `undefined` unless
+ * started with `--localstorage-file`, and since jsdom shares its global object
+ * with Node those getters shadow the DOM ones. Installing them only when missing
+ * therefore makes the specs run against a plain object on one machine and a real
+ * `Storage` on another — and the two do not behave alike, a real one turning
+ * `localStorage.setItem = fn` into `setItem('setItem', fn)` through its named
+ * property setter.
+ *
+ * Always installing the same implementation keeps developers and CI in
+ * agreement, and gives each test file its own isolated storage.
  */
 for (const name of ['localStorage', 'sessionStorage'] as const) {
-    let available = false;
-    try {
-        available = !!globalThis[name];
-    } catch {
-        /* accessing the global can throw: treat it as unavailable */
-    }
-    if (!available) {
-        Object.defineProperty(globalThis, name, {
-            value: createStorage(),
-            configurable: true,
-            writable: true
-        });
-    }
+    Object.defineProperty(globalThis, name, {
+        value: createStorage(),
+        configurable: true,
+        writable: true
+    });
 }
