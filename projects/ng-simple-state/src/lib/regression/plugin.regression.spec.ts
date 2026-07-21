@@ -3,7 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-store';
 import { NgSimpleStateBaseRxjsStore } from '../rxjs/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
-import { NgSimpleStatePlugin, persistPlugin } from '../plugin/ng-simple-state-plugin';
+import { NgSimpleStatePlugin, NG_SIMPLE_STATE_UNDO_REDO, persistPlugin, undoRedoPlugin } from '../plugin/ng-simple-state-plugin';
+import { provideNgSimpleState, provideNgSimpleStatePlugins } from '../ng-simple-state-provider';
 
 interface CounterState { count: number; name: string }
 
@@ -163,5 +164,40 @@ describe('Regression: persistPlugin', () => {
         TestBed.configureTestingModule({ providers: [FilteredStore] });
 
         expect(TestBed.inject(FilteredStore).getCurrentState()).toEqual({ count: 0, name: 'a' });
+    });
+});
+
+describe('Regression: plugin providers', () => {
+
+    it('should register NG_SIMPLE_STATE_UNDO_REDO from provideNgSimpleStatePlugins()', () => {
+        const plugin = undoRedoPlugin();
+        TestBed.configureTestingModule({ providers: [provideNgSimpleStatePlugins([plugin])] });
+
+        expect(TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO, null)).toBe(plugin);
+    });
+
+    it('should keep both plugin sets when the two providers are combined', () => {
+        const undoRedo = undoRedoPlugin<CounterState>();
+        const logger: NgSimpleStatePlugin = { name: 'logger', onAfterStateChange: () => undefined };
+
+        @Injectable()
+        class CombinedStore extends NgSimpleStateBaseSignalStore<CounterState> {
+            protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+                return { storeName: 'CombinedProvidersStore' };
+            }
+            initialState(): CounterState { return { count: 0, name: 'a' }; }
+            increment(): boolean { return this.setState(state => ({ count: state.count + 1 })); }
+        }
+
+        TestBed.configureTestingModule({
+            providers: [
+                provideNgSimpleState({ plugins: [undoRedo as NgSimpleStatePlugin] }),
+                provideNgSimpleStatePlugins([logger]),
+                CombinedStore
+            ]
+        });
+        TestBed.inject(CombinedStore).increment();
+
+        expect(undoRedo.canUndo('CombinedProvidersStore')).toBeTrue();
     });
 });
