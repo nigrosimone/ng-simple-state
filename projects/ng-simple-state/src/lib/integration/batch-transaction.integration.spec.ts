@@ -364,11 +364,11 @@ describe('Batch Operations Integration Tests', () => {
     describe('Debounced Updates', () => {
 
         beforeEach(() => {
-            jasmine.clock().install();
+            vi.useFakeTimers();
         });
 
         afterEach(() => {
-            jasmine.clock().uninstall();
+            vi.useRealTimers();
         });
 
         it('should debounce rapid updates', () => {
@@ -385,7 +385,7 @@ describe('Batch Operations Integration Tests', () => {
 
             expect(updates.length).toBe(0);
 
-            jasmine.clock().tick(200);
+            vi.advanceTimersByTime(200);
 
             expect(updates.length).toBe(1);
             expect(updates[0].notes).toBe('Third');
@@ -403,7 +403,7 @@ describe('Batch Operations Integration Tests', () => {
             update({ discount: 10 } as Partial<OrderState>);
             update({ shippingCost: 5 } as Partial<OrderState>);
 
-            jasmine.clock().tick(100);
+            vi.advanceTimersByTime(100);
 
             expect(updates.length).toBe(1);
             expect(updates[0]).toEqual({ notes: 'Note', discount: 10, shippingCost: 5 });
@@ -434,7 +434,7 @@ describe('Batch Operations Integration Tests', () => {
             update({ notes: 'Cancelled' } as Partial<OrderState>);
             cancel();
 
-            jasmine.clock().tick(100);
+            vi.advanceTimersByTime(100);
 
             expect(updates.length).toBe(0);
         });
@@ -443,11 +443,11 @@ describe('Batch Operations Integration Tests', () => {
     describe('Throttled Updates', () => {
 
         beforeEach(() => {
-            jasmine.clock().install();
+            vi.useFakeTimers();
         });
 
         afterEach(() => {
-            jasmine.clock().uninstall();
+            vi.useRealTimers();
         });
 
         it('should execute first update immediately', () => {
@@ -478,7 +478,7 @@ describe('Batch Operations Integration Tests', () => {
 
             expect(updates.length).toBe(1);
 
-            jasmine.clock().tick(100);
+            vi.advanceTimersByTime(100);
 
             expect(updates.length).toBe(2);
             expect(updates[1].notes).toBe('Third');
@@ -496,7 +496,7 @@ describe('Batch Operations Integration Tests', () => {
             update({ notes: 'Pending' } as Partial<OrderState>);
             cancel();
 
-            jasmine.clock().tick(100);
+            vi.advanceTimersByTime(100);
 
             expect(updates.length).toBe(1);
         });

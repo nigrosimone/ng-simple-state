@@ -48,16 +48,16 @@ describe('NgSimpleStateBaseRxjsStore: Service', () => {
     });
 
 
-    it('initialState -> selectState', (done) => {
+    it('initialState -> selectState', () => new Promise<void>(done => {
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(1);
             expect(service.getFirstState()).toEqual({ count: 1 });
             expect(service.getCurrentState()).toEqual({ count: 1 });
             done();
         });
-    });
+    }));
 
-    it('increment -> setState -> selectState', (done) => {
+    it('increment -> setState -> selectState', () => new Promise<void>(done => {
         expect(service.increment()).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(2);
@@ -65,9 +65,9 @@ describe('NgSimpleStateBaseRxjsStore: Service', () => {
             expect(service.getCurrentState()).toEqual({ count: 2 });
             done();
         });
-    });
+    }));
 
-    it('decrement -> setState -> selectState', (done) => {
+    it('decrement -> setState -> selectState', () => new Promise<void>(done => {
         expect(service.decrement()).toBeTrue();
         service.selectState().subscribe(value => {
             expect(value).toEqual({ count: 0 });
@@ -75,22 +75,22 @@ describe('NgSimpleStateBaseRxjsStore: Service', () => {
             expect(service.getCurrentState()).toEqual({ count: 0 });
             done();
         });
-    });
+    }));
 
     it('no changes', () => {
         expect(service.setState(state => state)).toBeFalse();
     });
 
-    it('get state', (done) => {
+    it('get state', () => new Promise<void>(done => {
         service.state.subscribe(state => {
             expect(state.count).toBe(1);
             expect(service.getFirstState()).toEqual({ count: 1 });
             expect(service.getCurrentState()).toEqual({ count: 1 });
             done();
         });
-    });
+    }));
 
-    it('decrement -> setState', (done) => {
+    it('decrement -> setState', () => new Promise<void>(done => {
         expect(service.setState(() => ({ count: 5 }))).toBeTrue();
         service.selectState(state => state.count).subscribe(value => {
             expect(value).toBe(5);
@@ -98,7 +98,7 @@ describe('NgSimpleStateBaseRxjsStore: Service', () => {
             expect(service.getCurrentState()).toEqual({ count: 5 });
             done();
         });
-    });
+    }));
 
     it('resetState', () => {
         expect(service.setState(() => ({ count: 5 }))).toBeTrue();

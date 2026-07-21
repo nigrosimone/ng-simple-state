@@ -119,12 +119,12 @@ describe('NgSimpleStateBaseSignalStore: Effects', () => {
     });
 
     it('should call previous cleanup before running effect again', async () => {
-        const cleanup1 = jasmine.createSpy('cleanup1');
-        const cleanup2 = jasmine.createSpy('cleanup2');
+        const cleanup1 = vi.fn();
+        const cleanup2 = vi.fn();
 
-        const effectFn = jasmine
-            .createSpy('effectFn')
-            .and.returnValues(cleanup1, cleanup2);
+        const effectFn = vi.fn()
+            .mockReturnValueOnce(cleanup1)
+            .mockReturnValueOnce(cleanup2);
 
         TestBed.runInInjectionContext(() => {
             store.createEffect('test', effectFn);

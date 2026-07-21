@@ -6,16 +6,16 @@ import { NgSimpleStateBaseRxjsStore, NgSimpleStateStoreConfig } from 'ng-simple-
 <% } %>
 
 /**
- * State interface for <%= classify(name) %>Store
+ * State interface for <%= className %>Store
  */
-export interface <%= classify(name) %>State {
+export interface <%= className %>State {
   // TODO: Define your state properties here
   loading: boolean;
   error: string | null;
 }
 
 /**
- * <%= classify(name) %> Store
+ * <%= className %> Store
  * 
  * @description
  * A store for managing <%= name %> state.
@@ -23,15 +23,15 @@ export interface <%= classify(name) %>State {
 <% } else { %> * Uses RxJS for reactive state management.
 <% } %> */
 @Injectable()
-<% if (isSignal) { %>export class <%= classify(name) %>Store extends NgSimpleStateBaseSignalStore<<%= classify(name) %>State> {
-<% } else { %>export class <%= classify(name) %>Store extends NgSimpleStateBaseRxjsStore<<%= classify(name) %>State> {
+<% if (isSignal) { %>export class <%= className %>Store extends NgSimpleStateBaseSignalStore<<%= className %>State> {
+<% } else { %>export class <%= className %>Store extends NgSimpleStateBaseRxjsStore<<%= className %>State> {
 <% } %>
   /**
    * Store configuration
    */
-  protected storeConfig(): NgSimpleStateStoreConfig<<%= classify(name) %>State> {
+  protected storeConfig(): NgSimpleStateStoreConfig<<%= className %>State> {
     return {
-      storeName: '<%= classify(name) %>Store',<% if (enableDevTool) { %>
+      storeName: '<%= className %>Store',<% if (enableDevTool) { %>
       enableDevTool: true,<% } %><% if (hasPersistentStorage) { %>
       persistentStorage: '<%= persistentStorageValue %>',<% } %>
     };
@@ -40,7 +40,7 @@ export interface <%= classify(name) %>State {
   /**
    * Initial state
    */
-  protected initialState(): <%= classify(name) %>State {
+  protected initialState(): <%= className %>State {
     return {
       loading: false,
       error: null,

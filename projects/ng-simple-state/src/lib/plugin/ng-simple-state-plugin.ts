@@ -35,9 +35,10 @@ export interface NgSimpleStatePlugin<S = unknown> {
     onAfterStateChange?(context: NgSimpleStatePluginContext<S>): void;
     
     /**
-     * Called when store is initialized
+     * Called when store is initialized.
+     * Return a state to hydrate the store with it, or nothing to leave it untouched.
      */
-    onStoreInit?(storeName: string, initialState: Readonly<S>): void;
+    onStoreInit?(storeName: string, initialState: Readonly<S>): void | S | null;
     
     /**
      * Called when store is destroyed
@@ -118,6 +119,13 @@ export function persistPlugin<S>(options: {
 }): NgSimpleStatePlugin<S> {
     return {
         name: 'persist',
+        onStoreInit(storeName) {
+            if (options.filter && !options.filter(storeName)) {
+                return;
+            }
+            // hydrate the store with whatever was persisted before
+            return options.load(storeName);
+        },
         onAfterStateChange(context) {
             if (options.filter && !options.filter(context.storeName)) {
                 return;
@@ -201,9 +209,13 @@ export function undoRedoPlugin<S>(options?: {
             }
             // Mark as undo operation
             h.undoRedoMode = 'undo';
-            return h.past.pop()!;
+            const state = h.past.pop()!;
+            // the caller applies the state itself: keep the reactive flags aligned
+            // with the stacks right away instead of waiting for onAfterStateChange
+            updateSignals(storeName);
+            return state;
         },
-        
+
         redo(storeName: string): S | null {
             const h = getOrCreate(storeName);
             if (h.future.length === 0) {
@@ -211,7 +223,9 @@ export function undoRedoPlugin<S>(options?: {
             }
             // Mark as redo operation
             h.undoRedoMode = 'redo';
-            return h.future.pop()!;
+            const state = h.future.pop()!;
+            updateSignals(storeName);
+            return state;
         },
         
         canUndo(storeName: string): boolean {
@@ -247,9 +261,18 @@ export function undoRedoPlugin<S>(options?: {
                     if (h.past.length === 0) {
                         return false;
                     }
+                    const previousMode = h.undoRedoMode;
                     h.undoRedoMode = 'undo';
                     const prevState = h.past.pop()!;
-                    store.replaceState(prevState);
+                    // the store can refuse the change (plugin veto, comparator, same
+                    // reference): roll the bookkeeping back, otherwise the entry would
+                    // be lost and the next action recorded as a redo
+                    if (!store.replaceState(prevState)) {
+                        h.past.push(prevState);
+                        h.undoRedoMode = previousMode;
+                        updateSignals(name);
+                        return false;
+                    }
                     return true;
                 },
                 redo(): boolean {
@@ -257,9 +280,15 @@ export function undoRedoPlugin<S>(options?: {
                     if (h.future.length === 0) {
                         return false;
                     }
+                    const previousMode = h.undoRedoMode;
                     h.undoRedoMode = 'redo';
                     const nextState = h.future.pop()!;
-                    store.replaceState(nextState);
+                    if (!store.replaceState(nextState)) {
+                        h.future.push(nextState);
+                        h.undoRedoMode = previousMode;
+                        updateSignals(name);
+                        return false;
+                    }
                     return true;
                 },
                 canUndo(): boolean {

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { NgSimpleStateBaseRxjsStore } from './ng-simple-state-base-store';
 import { BASE_KEY } from '../storage/ng-simple-state-browser-storage';
-import { DevToolsExtension } from '../tool/ng-simple-state-dev-tool.spec';
+import { DevToolsExtension } from '../tool/dev-tools-extension.mock';
 import { NgSimpleStateStoreConfig } from './../ng-simple-state-models';
 import { provideNgSimpleState } from './../ng-simple-state-provider';
 
@@ -69,7 +69,7 @@ describe('NgSimpleStateBaseRxjsStore misc 1', () => {
         localStorage.clear();
     });
 
-    it('dev tool', (done) => {
+    it('dev tool', () => new Promise<void>(done => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
@@ -80,9 +80,9 @@ describe('NgSimpleStateBaseRxjsStore misc 1', () => {
             expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 3 } });
             done();
         });
-    });
+    }));
 
-    it('dev tool action name', (done) => {
+    it('dev tool action name', () => new Promise<void>(done => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
@@ -93,7 +93,7 @@ describe('NgSimpleStateBaseRxjsStore misc 1', () => {
             expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 5 } });
             done();
         });
-    });
+    }));
 
 });
 
@@ -127,7 +127,7 @@ describe('NgSimpleStateBaseRxjsStore misc 2', () => {
         sessionStorage.clear();
     });
 
-    it('dev tool', (done) => {
+    it('dev tool', () => new Promise<void>(done => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
@@ -138,9 +138,9 @@ describe('NgSimpleStateBaseRxjsStore misc 2', () => {
             expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 3 } });
             done();
         });
-    });
+    }));
 
-    it('dev tool action name', (done) => {
+    it('dev tool action name', () => new Promise<void>(done => {
         expect((window as any)['devToolsExtension'].name).toBe('storeName.initialState');
         expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 2 } });
 
@@ -151,6 +151,6 @@ describe('NgSimpleStateBaseRxjsStore misc 2', () => {
             expect((window as any)['devToolsExtension'].state).toEqual({ storeName: { count: 5 } });
             done();
         });
-    });
+    }));
 
 });

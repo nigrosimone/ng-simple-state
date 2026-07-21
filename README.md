@@ -870,6 +870,10 @@ const myPersistPlugin = persistPlugin({
 });
 ```
 
+`save` runs after every state change, while `load` runs once when the store is
+created: returning a state from it hydrates the store, returning `null` keeps the
+state provided by `initialState()`.
+
 #### provideNgSimpleStatePlugins
 
 If you need to register plugins outside of the initial `provideNgSimpleState` call, you can use `provideNgSimpleStatePlugins`:
@@ -903,7 +907,8 @@ const myCustomPlugin: NgSimpleStatePlugin = {
     console.log(`After: ${context.actionName}`, context.nextState);
   },
   
-  onStoreInit(storeName: string, initialState: unknown): void {
+  // return a state to hydrate the store with it, or nothing to leave it untouched
+  onStoreInit(storeName: string, initialState: unknown): void | unknown {
     console.log(`Store ${storeName} initialized`);
   },
   
@@ -984,7 +989,7 @@ const { update, cancel } = createThrottledUpdater<MyState>(
 // First call executes immediately, subsequent calls are throttled
 update({ scrollPosition: 100 }); // Executes immediately
 update({ scrollPosition: 150 }); // Queued
-update({ scrollPosition: 200 }); // Replaces queued update
+update({ scrollPosition: 200 }); // Merged into the queued update
 
 // After 100ms, { scrollPosition: 200 } is applied
 

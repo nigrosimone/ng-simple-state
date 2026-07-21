@@ -24,6 +24,11 @@ echo Building library...
 :: 3. Use 'call' for npm commands to prevent the script from exiting early
 call npm run build ng-simple-state || exit /b
 
+echo Building schematics...
+:: ng-packagr does not bundle the schematics: without this the "schematics" entry
+:: in package.json would point at a collection missing from the package
+call npm run build:schematics || exit /b
+
 echo Copying metadata files...
 copy /y "%ROOT_DIR%README.md" "%ROOT_DIR%dist\ng-simple-state\README.md" > nul || exit /b
 copy /y "%ROOT_DIR%LICENSE" "%ROOT_DIR%dist\ng-simple-state\LICENSE" > nul || exit /b

@@ -3,28 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateDevTool } from './ng-simple-state-dev-tool';
 import { provideNgSimpleState } from '../ng-simple-state-provider';
 import { NgZone } from '@angular/core';
-
-export class DevToolsExtension {
-    name: string | null = null;
-    state: string | null = null;
-
-    connect(): any {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const self = this;
-        return {
-            send: (name: string, state: any) => {
-                self.name = name;
-                self.state = state;
-            },
-            init: () => {
-                // ...
-            },
-            subscribe: () => {
-                return () => { };
-            }
-        };
-    }
-}
+import { DevToolsExtension } from './dev-tools-extension.mock';
 
 describe('NgSimpleStateDevTool', () => {
 
@@ -35,7 +14,7 @@ describe('NgSimpleStateDevTool', () => {
             providers: [provideNgSimpleState({ enableDevTool: true })]
         });
         const ngZone = TestBed.inject(NgZone);
-        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        vi.spyOn(ngZone, 'runOutsideAngular').mockImplementation((fn: Function) => fn());
         const service = TestBed.inject(NgSimpleStateDevTool);
 
         expect(service.isActive()).toBe(true);
@@ -51,7 +30,7 @@ describe('NgSimpleStateDevTool', () => {
             providers: [provideNgSimpleState({ enableDevTool: true })]
         });
         const ngZone = TestBed.inject(NgZone);
-        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        vi.spyOn(ngZone, 'runOutsideAngular').mockImplementation((fn: Function) => fn());
         const service = TestBed.inject(NgSimpleStateDevTool);
 
         service.send('test', 'test', 'test');
@@ -73,7 +52,7 @@ describe('NgSimpleStateDevTool', () => {
             providers: [provideNgSimpleState({ enableDevTool: true })]
         });
         const ngZone = TestBed.inject(NgZone);
-        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        vi.spyOn(ngZone, 'runOutsideAngular').mockImplementation((fn: Function) => fn());
         const service = TestBed.inject(NgSimpleStateDevTool);
 
         service.send('test', 'test', 'test');
@@ -92,7 +71,7 @@ describe('NgSimpleStateDevTool History', () => {
             providers: [provideNgSimpleState({ enableDevTool: true })]
         });
         const ngZone = TestBed.inject(NgZone);
-        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        vi.spyOn(ngZone, 'runOutsideAngular').mockImplementation((fn: Function) => fn());
     });
 
     afterEach(() => {
@@ -273,7 +252,7 @@ describe('NgSimpleStateDevTool Time-travel', () => {
             providers: [provideNgSimpleState({ enableDevTool: true })]
         });
         const ngZone = TestBed.inject(NgZone);
-        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        vi.spyOn(ngZone, 'runOutsideAngular').mockImplementation((fn: Function) => fn());
     });
 
     afterEach(() => {
@@ -398,8 +377,8 @@ describe('NgSimpleStateDevTool Time-travel', () => {
     it('should unregister store and remove it from registry', () => {
         const service = TestBed.inject(NgSimpleStateDevTool);
         const storeRef = {
-            applyState: jasmine.createSpy('applyState'),
-            getInitialState: jasmine.createSpy('getInitialState').and.returnValue({ count: 0 })
+            applyState: vi.fn(),
+            getInitialState: vi.fn().mockReturnValue({ count: 0 })
         };
 
         service.registerStore('testStore', storeRef);
@@ -412,8 +391,8 @@ describe('NgSimpleStateDevTool Time-travel', () => {
     it('should apply state from DevTools JSON directly', () => {
         const service = TestBed.inject(NgSimpleStateDevTool);
         const storeRef = {
-            applyState: jasmine.createSpy('applyState'),
-            getInitialState: jasmine.createSpy('getInitialState').and.returnValue({ count: 0 })
+            applyState: vi.fn(),
+            getInitialState: vi.fn().mockReturnValue({ count: 0 })
         };
 
         service.registerStore('testStore', storeRef);
@@ -429,8 +408,8 @@ describe('NgSimpleStateDevTool Time-travel', () => {
     it('should import computed states and update baseState', () => {
         const service = TestBed.inject(NgSimpleStateDevTool);
         const storeRef = {
-            applyState: jasmine.createSpy('applyState'),
-            getInitialState: jasmine.createSpy('getInitialState').and.returnValue({ count: 0 })
+            applyState: vi.fn(),
+            getInitialState: vi.fn().mockReturnValue({ count: 0 })
         };
         let legacyStoreName = '';
         let legacyState: any = null;
@@ -489,7 +468,7 @@ describe('NgSimpleStateDevTool Redux DevTools dispatch handlers', () => {
             providers: [provideNgSimpleState({ enableDevTool: true })]
         });
         const ngZone = TestBed.inject(NgZone);
-        spyOn(ngZone, 'runOutsideAngular').and.callFake((fn: Function) => fn());
+        vi.spyOn(ngZone, 'runOutsideAngular').mockImplementation((fn: Function) => fn());
     });
 
     afterEach(() => {

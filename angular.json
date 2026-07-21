@@ -25,11 +25,13 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "main": "projects/ng-simple-state/src/test.ts",
             "tsConfig": "projects/ng-simple-state/tsconfig.spec.json",
-            "karmaConfig": "projects/ng-simple-state/karma.conf.js"
+            "runner": "vitest",
+            "setupFiles": [
+              "projects/ng-simple-state/src/test-setup.ts"
+            ]
           }
         },
         "lint": {
@@ -120,20 +122,10 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "main": "projects/ng-simple-state-demo/src/test.ts",
             "tsConfig": "projects/ng-simple-state-demo/tsconfig.spec.json",
-            "karmaConfig": "projects/ng-simple-state-demo/karma.conf.js",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              "projects/ng-simple-state-demo/src/favicon.ico",
-              "projects/ng-simple-state-demo/src/assets"
-            ],
-            "styles": [
-              "projects/ng-simple-state-demo/src/styles.scss"
-            ],
-            "scripts": []
+            "runner": "vitest"
           }
         },
         "lint": {

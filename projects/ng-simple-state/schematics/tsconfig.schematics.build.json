@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.schematics.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "../../../dist/ng-simple-state/schematics",
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": [
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "./**/files/**",
+    "./out/**",
+    "./**/*.spec.ts"
+  ]
+}

@@ -25,8 +25,9 @@
     "start": "ng serve",
     "build": "ng build",
     "build:lib": "ng build ng-simple-state",
+    "build:schematics": "node projects/ng-simple-state/schematics/build.mjs",
     "test": "ng test",
-    "test:schematics": "tsc -p projects/ng-simple-state/schematics/tsconfig.schematics.json && xcopy /E /I /Y projects\\ng-simple-state\\schematics\\store\\files projects\\ng-simple-state\\schematics\\out\\store\\files && jasmine projects/ng-simple-state/schematics/out/store/index.spec.js",
+    "test:schematics": "tsc -p projects/ng-simple-state/schematics/tsconfig.schematics.json && node projects/ng-simple-state/schematics/copy-assets.mjs projects/ng-simple-state/schematics/out && jasmine projects/ng-simple-state/schematics/out/store/index.spec.js",
     "lint": "ng lint",
     "docs": "typedoc --out docs projects/ng-simple-state/src/public-api.ts --readme README.md",
     "docs:watch": "typedoc --watch --out docs projects/ng-simple-state/src/public-api.ts"
@@ -62,22 +63,19 @@
     "@types/node": "^25.9.2",
     "@typescript-eslint/eslint-plugin": "^8.60.1",
     "@typescript-eslint/parser": "^8.60.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "angular-eslint": "^22.0.0",
     "eslint": "^10.4.1",
     "globals": "^17.6.0",
     "istanbul-lib-instrument": "^6.0.3",
     "jasmine": "^6.3.0",
     "jasmine-core": "^6.3.0",
-    "jasmine-spec-reporter": "^7.0.0",
-    "karma": "^6.4.4",
-    "karma-chrome-launcher": "^3.2.0",
-    "karma-coverage": "^2.2.1",
-    "karma-jasmine": "^5.1.0",
-    "karma-jasmine-html-reporter": "^2.2.0",
+    "jsdom": "^29.1.1",
     "ng-packagr": "^22.0.0",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.19",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=24.0.0"

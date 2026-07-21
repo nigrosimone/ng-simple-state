@@ -35,7 +35,7 @@ export interface NgSimpleStateConfig<K = any> {
     /**
      * Set the persistent storage `local`, `session` or instance of `NgSimpleStateStorage`.
      */
-    persistentStorage?: 'session' | 'local' | NgSimpleStateStorage;
+    persistentStorage?: 'session' | 'local' | NgSimpleStateStorage<K>;
     /**
      * A function used to compare the previous and current state for equality. 
      */

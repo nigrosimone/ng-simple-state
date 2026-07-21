@@ -37,7 +37,9 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         if (!selectFn) {
             return this.stateSigRo as unknown as Signal<K>;
         }
-        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator ?? this._comparator as NgSimpleStateComparator });
+        // NB: the store level comparator compares two full states (S) and must not be
+        // reused here, where the compared values are the selected slice (K).
+        return computed(() => selectFn(this.stateSig() as Readonly<S>), { equal: comparator });
     }
 
     /**
@@ -91,7 +93,15 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
             })
         );
 
-        this._registeredEffects.set(name, effectRef.destroy.bind(effectRef));
+        // on teardown the last cleanup must run too, otherwise whatever the effect
+        // acquired (timers, subscriptions, listeners) would leak
+        this._registeredEffects.set(name, () => {
+            effectRef.destroy();
+            if (cleanup) {
+                cleanup();
+                cleanup = undefined;
+            }
+        });
         return effectRef;
     }
 
@@ -147,6 +157,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         const state = this._setState(stateFnOrNewState, actionName);
         if (state !== undefined) {
             this.stateSig.set(state);
+            this._afterCommit();
             return true;
         }
         return false;
@@ -170,6 +181,7 @@ export abstract class NgSimpleStateBaseSignalStore<S extends object | Array<any>
         const state = this._replaceState(stateFnOrReplaceState, actionName);
         if (state !== undefined) {
             this.stateSig.set(state);
+            this._afterCommit();
             return true;
         }
         return false;

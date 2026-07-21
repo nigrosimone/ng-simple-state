@@ -28,6 +28,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     protected _immerProduce?: <T>(state: T, producer: (draft: T) => void) => T;
     /** @internal */
     protected readonly _registeredEffects: Map<string, (() => void)> = new Map();
+    /** State changes committed but whose side effects still have to run */
+    private readonly pendingCommits: { prevState: S; nextState: S; actionName: string }[] = [];
+    /** True while `_afterCommit` is draining the queue */
+    private isFlushingCommits: boolean = false;
 
     /**
      * Apply state directly from DevTools time-travel (bypasses devtool send and plugins).
@@ -48,7 +52,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
         } else if (config.persistentStorage === 'session') {
             this.storage = new NgSimpleStateSessionStorage(config);
         } else if (typeof config.persistentStorage === 'object') {
-            this.storage = config.persistentStorage as NgSimpleStateStorage<S>;
+            // a storage instance can be shared between stores: bind it to this store
+            // config so that `serializeState`/`deserializeState` are honoured here too
+            this.storage = (config.persistentStorage as NgSimpleStateStorage<S>)
+                .withConfig(config as NgSimpleStateStoreConfig<S>);
         }
 
         if (config.enableDevTool) {
@@ -85,18 +92,26 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             this._firstState = this.initState;
         }
 
+        // Notify plugins of store init: a plugin may hydrate the store (see persistPlugin).
+        // Must run before the first devtool report so that it shows the state really used.
+        this.notifyPluginsInit();
+
         // Register with DevTool for time-travel support
         if (this.devTool) {
             this.devTool.registerStore(this.storeName, {
-                applyState: (state: unknown) => this._applyDevToolState(state as S),
+                applyState: (state: unknown) => {
+                    this._applyDevToolState(state as S);
+                    // keep the persisted state aligned, otherwise a reload would
+                    // resurrect the value from before the time-travel jump
+                    if (this.storage) {
+                        this.statePersist(state as S);
+                    }
+                },
                 getInitialState: () => this.initState
             });
         }
 
         this.devToolSend(this._firstState, 'initialState');
-
-        // Notify plugins of store init
-        this.notifyPluginsInit();
 
         this.isArray = Array.isArray(this._firstState);
 
@@ -132,12 +147,17 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     }
 
     /**
-     * Notify plugins of store initialization
+     * Notify plugins of store initialization.
+     * A plugin returning a state hydrates the store with it (the last one wins),
+     * which is how `persistPlugin` restores what it previously saved.
      */
     private notifyPluginsInit(): void {
         for (const plugin of this.plugins) {
             if (plugin.onStoreInit) {
-                plugin.onStoreInit(this.storeName, this._firstState);
+                const hydratedState = plugin.onStoreInit(this.storeName, this._firstState);
+                if (hydratedState !== undefined && hydratedState !== null) {
+                    this._firstState = hydratedState as S;
+                }
             }
         }
     }
@@ -341,17 +361,48 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             return undefined;
         }
 
-        // avoid function call if not necessary
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.devTool && this.devToolSend(state, resolvedActionName);
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.storage && this.statePersist(state);
-
-        // Notify plugins after change
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        hasPlugins && this.notifyPluginsAfterChange(currState as S, state, resolvedActionName);
+        // Side effects are deferred: they must observe the committed state (see _afterCommit)
+        this.pendingCommits.push({ prevState: currState as S, nextState: state, actionName: resolvedActionName });
 
         return state;
+    }
+
+    /**
+     * Flush the side effects of the committed state changes: dev tools,
+     * persistence and `onAfterStateChange` plugin hooks.
+     *
+     * Concrete stores must call this right after they applied the new state, so
+     * that everything downstream observes the committed value.
+     *
+     * A state change can be triggered again from a hook (or from a synchronous
+     * subscriber of the state): those nested changes are appended to the queue
+     * and drained, in order, by the outermost call — so no change is skipped and
+     * the persisted state stays the last one.
+     * @private
+     * @internal
+     */
+    protected _afterCommit(): void {
+        if (this.isFlushingCommits) {
+            // a flush is already running: it will drain what has just been queued
+            return;
+        }
+        this.isFlushingCommits = true;
+        try {
+            while (this.pendingCommits.length) {
+                const commit = this.pendingCommits.shift() as { prevState: S; nextState: S; actionName: string };
+
+                // avoid function call if not necessary
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                this.devTool && this.devToolSend(commit.nextState, commit.actionName, commit.prevState);
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                this.storage && this.statePersist(commit.nextState);
+
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                this.plugins.length && this.notifyPluginsAfterChange(commit.prevState, commit.nextState, commit.actionName);
+            }
+        } finally {
+            this.isFlushingCommits = false;
+        }
     }
 
     /**
@@ -426,15 +477,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
             return undefined;
         }
 
-        // avoid function call if not necessary
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.devTool && this.devToolSend(newState, resolvedActionName);
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.storage && this.statePersist(newState);
-
-        // Notify plugins after change
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        hasPlugins && this.notifyPluginsAfterChange(currState as S, newState, resolvedActionName);
+        // Side effects are deferred: they must observe the committed state (see _afterCommit)
+        this.pendingCommits.push({ prevState: currState as S, nextState: newState, actionName: resolvedActionName });
 
         return newState;
     }
@@ -482,13 +526,14 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
      * Send to dev tool a new state
      * @param newState new state
      * @param actionName The action name
+     * @param prevState the state before the change, used to compute the diff
      * @returns True if dev tools are enabled
      */
-    private devToolSend(newState: S | undefined, actionName: string): boolean {
+    private devToolSend(newState: S | undefined, actionName: string, prevState?: S): boolean {
         if (!this.devTool) {
             return false;
         }
-        if (!this.devTool.send(this.storeName, actionName, newState)) {
+        if (!this.devTool.send(this.storeName, actionName, newState, prevState)) {
             /* istanbul ignore next */
             console.log(this.storeName + '.' + actionName, newState);
         }
@@ -526,11 +571,17 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     }
 
     /**
-     * Persist state to storage
+     * Persist state to storage.
+     * The built-in storages report a failure instead of throwing, but a custom
+     * one may not: persistence must never take the state change down with it.
      */
     private statePersist(state: S) {
         if (this.storage) {
-            this.storage.setItem(this.storeName, state);
+            try {
+                this.storage.setItem(this.storeName, state);
+            } catch {
+                /* persistence is best effort: the state stays applied */
+            }
         }
     }
 
