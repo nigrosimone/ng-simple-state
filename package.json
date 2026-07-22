@@ -30,7 +30,9 @@
     "test:schematics": "tsc -p projects/ng-simple-state/schematics/tsconfig.schematics.json && node projects/ng-simple-state/schematics/copy-assets.mjs projects/ng-simple-state/schematics/out && jasmine projects/ng-simple-state/schematics/out/store/index.spec.js",
     "lint": "ng lint",
     "docs": "typedoc --out docs projects/ng-simple-state/src/public-api.ts --readme README.md",
-    "docs:watch": "typedoc --watch --out docs projects/ng-simple-state/src/public-api.ts"
+    "docs:watch": "typedoc --watch --out docs projects/ng-simple-state/src/public-api.ts",
+    "release:bump": "node .github/scripts/release.mjs bump",
+    "release:notes": "node .github/scripts/release.mjs notes"
   },
   "dependencies": {
     "@angular/common": "^22.0.0",

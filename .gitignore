@@ -48,3 +48,6 @@ Thumbs.db
 /projects/ng-simple-state/coverage
 /projects/ng-simple-state/schematics/out
 /docs
+
+# release artifacts
+RELEASE_NOTES.md
