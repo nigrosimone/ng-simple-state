@@ -1,4 +1,8 @@
-import { isDevMode, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import {
+  isDevMode,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgSimpleStateLocalStorage, provideNgSimpleState, undoRedoPlugin } from 'ng-simple-state';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -10,12 +14,12 @@ const routes: Routes = [
   {
     path: '',
     redirectTo: 'features',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'features',
     component: FeaturesComponent,
-    loadChildren: () => import('./app/features/features.routes').then(m => m.featuresRoutes)
+    loadChildren: () => import('./app/features/features.routes').then((m) => m.featuresRoutes),
   },
 ];
 
@@ -29,7 +33,7 @@ bootstrapApplication(AppComponent, {
       persistentStorage: new NgSimpleStateLocalStorage(),
       comparator: isEqual,
       plugins: [undoRedoPlugin({ maxHistory: 50 })],
-      webMcp: true
-    })
-  ]
+      webMcp: true,
+    }),
+  ],
 });

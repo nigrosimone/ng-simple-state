@@ -20,6 +20,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install --force
+      - name: Check formatting
+        run: npm run format:check
       - name: Lint
         run: npm run lint ng-simple-state
       - name: Test

@@ -6,12 +6,6 @@
     "sourceMap": false,
     "types": ["node"]
   },
-  "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "./**/files/**",
-    "./out/**",
-    "./**/*.spec.ts"
-  ]
+  "include": ["./**/*.ts"],
+  "exclude": ["./**/files/**", "./out/**", "./**/*.spec.ts"]
 }

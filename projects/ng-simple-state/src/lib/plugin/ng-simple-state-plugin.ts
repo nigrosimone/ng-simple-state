@@ -4,314 +4,318 @@ import { InjectionToken, signal, Signal, WritableSignal } from '@angular/core';
  * Plugin hook context containing store information
  */
 export interface NgSimpleStatePluginContext<S = unknown> {
-    /** Store name */
-    storeName: string;
-    /** Action name */
-    actionName: string;
-    /** Current state before change */
-    prevState: Readonly<S>;
-    /** New state after change */
-    nextState: Readonly<S>;
-    /** Timestamp of the action */
-    timestamp: number;
+  /** Store name */
+  storeName: string;
+  /** Action name */
+  actionName: string;
+  /** Current state before change */
+  prevState: Readonly<S>;
+  /** New state after change */
+  nextState: Readonly<S>;
+  /** Timestamp of the action */
+  timestamp: number;
 }
 
 /**
  * Plugin lifecycle hooks
  */
 export interface NgSimpleStatePlugin<S = unknown> {
-    /** Plugin name for identification */
-    name: string;
-    
-    /**
-     * Called before state change is applied
-     * Return false to prevent the state change
-     */
-    onBeforeStateChange?(context: NgSimpleStatePluginContext<S>): boolean | void;
-    
-    /**
-     * Called after state change is applied
-     */
-    onAfterStateChange?(context: NgSimpleStatePluginContext<S>): void;
-    
-    /**
-     * Called when store is initialized.
-     * Return a state to hydrate the store with it, or nothing to leave it untouched.
-     */
-    onStoreInit?(storeName: string, initialState: Readonly<S>): void | S | null;
-    
-    /**
-     * Called when store is destroyed
-     */
-    onStoreDestroy?(storeName: string): void;
+  /** Plugin name for identification */
+  name: string;
+
+  /**
+   * Called before state change is applied
+   * Return false to prevent the state change
+   */
+  onBeforeStateChange?(context: NgSimpleStatePluginContext<S>): boolean | void;
+
+  /**
+   * Called after state change is applied
+   */
+  onAfterStateChange?(context: NgSimpleStatePluginContext<S>): void;
+
+  /**
+   * Called when store is initialized.
+   * Return a state to hydrate the store with it, or nothing to leave it untouched.
+   */
+  onStoreInit?(storeName: string, initialState: Readonly<S>): void | S | null;
+
+  /**
+   * Called when store is destroyed
+   */
+  onStoreDestroy?(storeName: string): void;
 }
 
 /**
  * Plugin configuration
  */
 export interface NgSimpleStatePluginConfig {
-    plugins: NgSimpleStatePlugin[];
+  plugins: NgSimpleStatePlugin[];
 }
 
 /**
  * InjectionToken for plugins
  */
 export const NG_SIMPLE_STATE_PLUGINS = new InjectionToken<NgSimpleStatePlugin[]>(
-    'ng-simple-state.plugins'
+  'ng-simple-state.plugins',
 );
 
 /**
  * Store-bound undo/redo helper — no store name needed
  */
 export interface NgSimpleStateUndoRedoForStore {
-    /** Undo: restores the previous state on the store. Returns true if successful. */
-    undo(): boolean;
-    /** Redo: restores the next state on the store. Returns true if successful. */
-    redo(): boolean;
-    /** Whether undo is available (plain check) */
-    canUndo(): boolean;
-    /** Whether redo is available (plain check) */
-    canRedo(): boolean;
-    /** Reactive signal for canUndo */
-    selectCanUndo(): Signal<boolean>;
-    /** Reactive signal for canRedo */
-    selectCanRedo(): Signal<boolean>;
-    /** Clear undo/redo history */
-    clearHistory(): void;
+  /** Undo: restores the previous state on the store. Returns true if successful. */
+  undo(): boolean;
+  /** Redo: restores the next state on the store. Returns true if successful. */
+  redo(): boolean;
+  /** Whether undo is available (plain check) */
+  canUndo(): boolean;
+  /** Whether redo is available (plain check) */
+  canRedo(): boolean;
+  /** Reactive signal for canUndo */
+  selectCanUndo(): Signal<boolean>;
+  /** Reactive signal for canRedo */
+  selectCanRedo(): Signal<boolean>;
+  /** Clear undo/redo history */
+  clearHistory(): void;
 }
 
 /**
  * Minimal store shape accepted by forStore (avoids circular import)
  */
 export interface NgSimpleStateStoreRef<S> {
-    replaceState(newState: S): boolean;
+  replaceState(newState: S): boolean;
 }
 
 /**
  * Type for the undoRedoPlugin instance
  */
 export type NgSimpleStateUndoRedoPlugin<S = unknown> = NgSimpleStatePlugin<S> & {
-    undo: (storeName: string) => S | null;
-    redo: (storeName: string) => S | null;
-    canUndo: (storeName: string) => boolean;
-    canRedo: (storeName: string) => boolean;
-    selectCanUndo: (storeName: string) => Signal<boolean>;
-    selectCanRedo: (storeName: string) => Signal<boolean>;
-    clearHistory: (storeName: string) => void;
-    /** Returns a store-bound helper that eliminates storeName strings */
-    forStore: (store: NgSimpleStateStoreRef<S>) => NgSimpleStateUndoRedoForStore;
+  undo: (storeName: string) => S | null;
+  redo: (storeName: string) => S | null;
+  canUndo: (storeName: string) => boolean;
+  canRedo: (storeName: string) => boolean;
+  selectCanUndo: (storeName: string) => Signal<boolean>;
+  selectCanRedo: (storeName: string) => Signal<boolean>;
+  clearHistory: (storeName: string) => void;
+  /** Returns a store-bound helper that eliminates storeName strings */
+  forStore: (store: NgSimpleStateStoreRef<S>) => NgSimpleStateUndoRedoForStore;
 };
 
 /**
  * InjectionToken for the undoRedoPlugin instance
  */
 export const NG_SIMPLE_STATE_UNDO_REDO = new InjectionToken<NgSimpleStateUndoRedoPlugin>(
-    'ng-simple-state.undoRedo'
+  'ng-simple-state.undoRedo',
 );
 
 /**
  * Persist plugin - custom persistence logic
  */
 export function persistPlugin<S>(options: {
-    save: (storeName: string, state: S) => void;
-    load: (storeName: string) => S | null;
-    filter?: (storeName: string) => boolean;
+  save: (storeName: string, state: S) => void;
+  load: (storeName: string) => S | null;
+  filter?: (storeName: string) => boolean;
 }): NgSimpleStatePlugin<S> {
-    return {
-        name: 'persist',
-        onStoreInit(storeName) {
-            if (options.filter && !options.filter(storeName)) {
-                return;
-            }
-            // hydrate the store with whatever was persisted before
-            return options.load(storeName);
-        },
-        onAfterStateChange(context) {
-            if (options.filter && !options.filter(context.storeName)) {
-                return;
-            }
-            options.save(context.storeName, context.nextState);
-        }
-    };
+  return {
+    name: 'persist',
+    onStoreInit(storeName) {
+      if (options.filter && !options.filter(storeName)) {
+        return;
+      }
+      // hydrate the store with whatever was persisted before
+      return options.load(storeName);
+    },
+    onAfterStateChange(context) {
+      if (options.filter && !options.filter(context.storeName)) {
+        return;
+      }
+      options.save(context.storeName, context.nextState);
+    },
+  };
 }
 
 /**
  * Undo/Redo plugin - enables state history
  */
 export function undoRedoPlugin<S>(options?: {
-    maxHistory?: number;
+  maxHistory?: number;
 }): NgSimpleStateUndoRedoPlugin<S> {
-    const maxHistory = options?.maxHistory ?? 50;
-    const history: Map<string, { past: S[]; future: S[]; undoRedoMode: 'none' | 'undo' | 'redo' }> = new Map();
-    const signals: Map<string, { canUndo: WritableSignal<boolean>; canRedo: WritableSignal<boolean> }> = new Map();
-    
-    const getOrCreate = (storeName: string) => {
-        if (!history.has(storeName)) {
-            history.set(storeName, { past: [], future: [], undoRedoMode: 'none' });
-        }
-        return history.get(storeName)!;
-    };
-    
-    const getOrCreateSignals = (storeName: string) => {
-        if (!signals.has(storeName)) {
-            signals.set(storeName, { canUndo: signal(false), canRedo: signal(false) });
-        }
-        return signals.get(storeName)!;
-    };
-    
-    const updateSignals = (storeName: string) => {
-        const h = getOrCreate(storeName);
-        const s = getOrCreateSignals(storeName);
-        s.canUndo.set(h.past.length > 0);
-        s.canRedo.set(h.future.length > 0);
-    };
-    
-    return {
-        name: 'undoRedo',
-        
-        onAfterStateChange(context) {
-            const h = getOrCreate(context.storeName);
-            
-            if (h.undoRedoMode === 'undo') {
-                // Push current state to future for redo
-                h.future.push(context.prevState);
-                h.undoRedoMode = 'none';
-                updateSignals(context.storeName);
-                return;
-            }
-            
-            if (h.undoRedoMode === 'redo') {
-                // Push current state to past for undo
-                h.past.push(context.prevState);
-                h.undoRedoMode = 'none';
-                updateSignals(context.storeName);
-                return;
-            }
-            
-            // Normal action - record to history
-            h.past.push(context.prevState);
-            if (h.past.length > maxHistory) {
-                h.past.shift();
-            }
-            h.future = []; // Clear redo stack on new action
-            updateSignals(context.storeName);
-        },
-        
-        onStoreDestroy(storeName) {
-            history.delete(storeName);
-            signals.delete(storeName);
-        },
-        
-        undo(storeName: string): S | null {
-            const h = getOrCreate(storeName);
-            if (h.past.length === 0) {
-                return null;
-            }
-            // Mark as undo operation
-            h.undoRedoMode = 'undo';
-            const state = h.past.pop()!;
-            // the caller applies the state itself: keep the reactive flags aligned
-            // with the stacks right away instead of waiting for onAfterStateChange
-            updateSignals(storeName);
-            return state;
-        },
+  const maxHistory = options?.maxHistory ?? 50;
+  const history: Map<string, { past: S[]; future: S[]; undoRedoMode: 'none' | 'undo' | 'redo' }> =
+    new Map();
+  const signals: Map<
+    string,
+    { canUndo: WritableSignal<boolean>; canRedo: WritableSignal<boolean> }
+  > = new Map();
 
-        redo(storeName: string): S | null {
-            const h = getOrCreate(storeName);
-            if (h.future.length === 0) {
-                return null;
-            }
-            // Mark as redo operation
-            h.undoRedoMode = 'redo';
-            const state = h.future.pop()!;
-            updateSignals(storeName);
-            return state;
+  const getOrCreate = (storeName: string) => {
+    if (!history.has(storeName)) {
+      history.set(storeName, { past: [], future: [], undoRedoMode: 'none' });
+    }
+    return history.get(storeName)!;
+  };
+
+  const getOrCreateSignals = (storeName: string) => {
+    if (!signals.has(storeName)) {
+      signals.set(storeName, { canUndo: signal(false), canRedo: signal(false) });
+    }
+    return signals.get(storeName)!;
+  };
+
+  const updateSignals = (storeName: string) => {
+    const h = getOrCreate(storeName);
+    const s = getOrCreateSignals(storeName);
+    s.canUndo.set(h.past.length > 0);
+    s.canRedo.set(h.future.length > 0);
+  };
+
+  return {
+    name: 'undoRedo',
+
+    onAfterStateChange(context) {
+      const h = getOrCreate(context.storeName);
+
+      if (h.undoRedoMode === 'undo') {
+        // Push current state to future for redo
+        h.future.push(context.prevState);
+        h.undoRedoMode = 'none';
+        updateSignals(context.storeName);
+        return;
+      }
+
+      if (h.undoRedoMode === 'redo') {
+        // Push current state to past for undo
+        h.past.push(context.prevState);
+        h.undoRedoMode = 'none';
+        updateSignals(context.storeName);
+        return;
+      }
+
+      // Normal action - record to history
+      h.past.push(context.prevState);
+      if (h.past.length > maxHistory) {
+        h.past.shift();
+      }
+      h.future = []; // Clear redo stack on new action
+      updateSignals(context.storeName);
+    },
+
+    onStoreDestroy(storeName) {
+      history.delete(storeName);
+      signals.delete(storeName);
+    },
+
+    undo(storeName: string): S | null {
+      const h = getOrCreate(storeName);
+      if (h.past.length === 0) {
+        return null;
+      }
+      // Mark as undo operation
+      h.undoRedoMode = 'undo';
+      const state = h.past.pop()!;
+      // the caller applies the state itself: keep the reactive flags aligned
+      // with the stacks right away instead of waiting for onAfterStateChange
+      updateSignals(storeName);
+      return state;
+    },
+
+    redo(storeName: string): S | null {
+      const h = getOrCreate(storeName);
+      if (h.future.length === 0) {
+        return null;
+      }
+      // Mark as redo operation
+      h.undoRedoMode = 'redo';
+      const state = h.future.pop()!;
+      updateSignals(storeName);
+      return state;
+    },
+
+    canUndo(storeName: string): boolean {
+      return getOrCreate(storeName).past.length > 0;
+    },
+
+    canRedo(storeName: string): boolean {
+      return getOrCreate(storeName).future.length > 0;
+    },
+
+    selectCanUndo(storeName: string): Signal<boolean> {
+      return getOrCreateSignals(storeName).canUndo.asReadonly();
+    },
+
+    selectCanRedo(storeName: string): Signal<boolean> {
+      return getOrCreateSignals(storeName).canRedo.asReadonly();
+    },
+
+    clearHistory(storeName: string): void {
+      history.delete(storeName);
+      const s = signals.get(storeName);
+      if (s) {
+        s.canUndo.set(false);
+        s.canRedo.set(false);
+      }
+    },
+
+    forStore(store: NgSimpleStateStoreRef<S>): NgSimpleStateUndoRedoForStore {
+      const name = (store as unknown as { storeName: string }).storeName;
+      return {
+        undo(): boolean {
+          const h = getOrCreate(name);
+          if (h.past.length === 0) {
+            return false;
+          }
+          const previousMode = h.undoRedoMode;
+          h.undoRedoMode = 'undo';
+          const prevState = h.past.pop()!;
+          // the store can refuse the change (plugin veto, comparator, same
+          // reference): roll the bookkeeping back, otherwise the entry would
+          // be lost and the next action recorded as a redo
+          if (!store.replaceState(prevState)) {
+            h.past.push(prevState);
+            h.undoRedoMode = previousMode;
+            updateSignals(name);
+            return false;
+          }
+          return true;
         },
-        
-        canUndo(storeName: string): boolean {
-            return getOrCreate(storeName).past.length > 0;
+        redo(): boolean {
+          const h = getOrCreate(name);
+          if (h.future.length === 0) {
+            return false;
+          }
+          const previousMode = h.undoRedoMode;
+          h.undoRedoMode = 'redo';
+          const nextState = h.future.pop()!;
+          if (!store.replaceState(nextState)) {
+            h.future.push(nextState);
+            h.undoRedoMode = previousMode;
+            updateSignals(name);
+            return false;
+          }
+          return true;
         },
-        
-        canRedo(storeName: string): boolean {
-            return getOrCreate(storeName).future.length > 0;
+        canUndo(): boolean {
+          return getOrCreate(name).past.length > 0;
         },
-        
-        selectCanUndo(storeName: string): Signal<boolean> {
-            return getOrCreateSignals(storeName).canUndo.asReadonly();
+        canRedo(): boolean {
+          return getOrCreate(name).future.length > 0;
         },
-        
-        selectCanRedo(storeName: string): Signal<boolean> {
-            return getOrCreateSignals(storeName).canRedo.asReadonly();
+        selectCanUndo(): Signal<boolean> {
+          return getOrCreateSignals(name).canUndo.asReadonly();
         },
-        
-        clearHistory(storeName: string): void {
-            history.delete(storeName);
-            const s = signals.get(storeName);
-            if (s) {
-                s.canUndo.set(false);
-                s.canRedo.set(false);
-            }
+        selectCanRedo(): Signal<boolean> {
+          return getOrCreateSignals(name).canRedo.asReadonly();
         },
-        
-        forStore(store: NgSimpleStateStoreRef<S>): NgSimpleStateUndoRedoForStore {
-            const name = (store as unknown as { storeName: string }).storeName;
-            return {
-                undo(): boolean {
-                    const h = getOrCreate(name);
-                    if (h.past.length === 0) {
-                        return false;
-                    }
-                    const previousMode = h.undoRedoMode;
-                    h.undoRedoMode = 'undo';
-                    const prevState = h.past.pop()!;
-                    // the store can refuse the change (plugin veto, comparator, same
-                    // reference): roll the bookkeeping back, otherwise the entry would
-                    // be lost and the next action recorded as a redo
-                    if (!store.replaceState(prevState)) {
-                        h.past.push(prevState);
-                        h.undoRedoMode = previousMode;
-                        updateSignals(name);
-                        return false;
-                    }
-                    return true;
-                },
-                redo(): boolean {
-                    const h = getOrCreate(name);
-                    if (h.future.length === 0) {
-                        return false;
-                    }
-                    const previousMode = h.undoRedoMode;
-                    h.undoRedoMode = 'redo';
-                    const nextState = h.future.pop()!;
-                    if (!store.replaceState(nextState)) {
-                        h.future.push(nextState);
-                        h.undoRedoMode = previousMode;
-                        updateSignals(name);
-                        return false;
-                    }
-                    return true;
-                },
-                canUndo(): boolean {
-                    return getOrCreate(name).past.length > 0;
-                },
-                canRedo(): boolean {
-                    return getOrCreate(name).future.length > 0;
-                },
-                selectCanUndo(): Signal<boolean> {
-                    return getOrCreateSignals(name).canUndo.asReadonly();
-                },
-                selectCanRedo(): Signal<boolean> {
-                    return getOrCreateSignals(name).canRedo.asReadonly();
-                },
-                clearHistory(): void {
-                    history.delete(name);
-                    const s = signals.get(name);
-                    if (s) {
-                        s.canUndo.set(false);
-                        s.canRedo.set(false);
-                    }
-                }
-            };
-        }
-    };
+        clearHistory(): void {
+          history.delete(name);
+          const s = signals.get(name);
+          if (s) {
+            s.canUndo.set(false);
+            s.canRedo.set(false);
+          }
+        },
+      };
+    },
+  };
 }

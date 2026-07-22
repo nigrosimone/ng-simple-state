@@ -4,10 +4,10 @@ import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 export function ngAdd(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     context.logger.info('Adding ng-simple-state to your project...');
-    
+
     // Add install task
     context.addTask(new NodePackageInstallTask());
-    
+
     context.logger.info(`
 ✅ ng-simple-state has been installed!
 
@@ -37,7 +37,7 @@ Next steps:
 
 For more information, visit: https://github.com/nigrosimone/ng-simple-state
     `);
-    
+
     return tree;
   };
 }

@@ -9,10 +9,9 @@ export interface EffectsState {
 
 @Injectable()
 export class EffectsStore extends NgSimpleStateBaseSignalStore<EffectsState> {
-
   storeConfig(): NgSimpleStateStoreConfig<EffectsState> {
     return {
-      storeName: 'EffectsStore'
+      storeName: 'EffectsStore',
     };
   }
 
@@ -20,7 +19,7 @@ export class EffectsStore extends NgSimpleStateBaseSignalStore<EffectsState> {
     return {
       count: 0,
       lastAction: 'init',
-      history: []
+      history: [],
     };
   }
 
@@ -40,52 +39,55 @@ export class EffectsStore extends NgSimpleStateBaseSignalStore<EffectsState> {
     // Using queueMicrotask to break the synchronous chain and avoid infinite loop
     this.createSelectorEffect(
       'countWatcher',
-      state => state.count,
+      (state) => state.count,
       (count) => {
         console.log('[CountWatcher Effect] Count is now:', count);
         // Update history asynchronously to avoid effect loop
         queueMicrotask(() => {
           const currentHistory = this.getCurrentState().history;
-          this.setState({
-            history: [...currentHistory, `Count changed to ${count}`]
-          }, 'historyUpdate');
+          this.setState(
+            {
+              history: [...currentHistory, `Count changed to ${count}`],
+            },
+            'historyUpdate',
+          );
         });
-      }
+      },
     );
   }
 
   // Selectors
   selectCount(): Signal<number> {
-    return this.selectState(state => state.count);
+    return this.selectState((state) => state.count);
   }
 
   selectLastAction(): Signal<string> {
-    return this.selectState(state => state.lastAction);
+    return this.selectState((state) => state.lastAction);
   }
 
   selectHistory(): Signal<string[]> {
-    return this.selectState(state => state.history);
+    return this.selectState((state) => state.history);
   }
 
   // Actions - simple state updates, history is tracked by effect
   increment(): void {
-    this.setState(state => ({
+    this.setState((state) => ({
       count: state.count + 1,
-      lastAction: 'increment'
+      lastAction: 'increment',
     }));
   }
 
   decrement(): void {
-    this.setState(state => ({
+    this.setState((state) => ({
       count: state.count - 1,
-      lastAction: 'decrement'
+      lastAction: 'decrement',
     }));
   }
 
   setCount(value: number): void {
     this.setState({
       count: value,
-      lastAction: `setCount(${value})`
+      lastAction: `setCount(${value})`,
     });
   }
 
@@ -97,7 +99,9 @@ export class EffectsStore extends NgSimpleStateBaseSignalStore<EffectsState> {
 
   unregisterCountWatcherEffect(): void {
     this.destroyEffect('countWatcher');
-    console.log('>>> CountWatcher effect destroyed - "[CountWatcher Effect]" messages and history updates will stop');
+    console.log(
+      '>>> CountWatcher effect destroyed - "[CountWatcher Effect]" messages and history updates will stop',
+    );
   }
 
   // Re-register effects
@@ -111,24 +115,27 @@ export class EffectsStore extends NgSimpleStateBaseSignalStore<EffectsState> {
   registerCountWatcherEffect(): void {
     this.createSelectorEffect(
       'countWatcher',
-      state => state.count,
+      (state) => state.count,
       (count) => {
         console.log('[CountWatcher Effect] Count is now:', count);
         queueMicrotask(() => {
           const currentHistory = this.getCurrentState().history;
-          this.setState({
-            history: [...currentHistory, `Count changed to ${count}`]
-          }, 'historyUpdate');
+          this.setState(
+            {
+              history: [...currentHistory, `Count changed to ${count}`],
+            },
+            'historyUpdate',
+          );
         });
-      }
+      },
     );
     console.log('>>> CountWatcher effect registered');
   }
 
   clearHistory(): void {
-    this.setState({ 
-      history: [], 
-      lastAction: 'clearHistory' 
+    this.setState({
+      history: [],
+      lastAction: 'clearHistory',
     });
   }
 }

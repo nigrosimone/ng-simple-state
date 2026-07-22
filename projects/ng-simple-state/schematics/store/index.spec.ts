@@ -5,7 +5,6 @@ import { StoreOptions } from './index';
 const collectionPath = path.join(__dirname, '../collection.json');
 
 describe('store schematic', () => {
-
   let runner: SchematicTestRunner;
 
   beforeEach(() => {

@@ -9,11 +9,10 @@ export interface LinkedSignalsState {
 
 @Injectable()
 export class LinkedSignalsStore extends NgSimpleStateBaseSignalStore<LinkedSignalsState> {
-  
   // Linked signal that computes Fahrenheit from Celsius
   fahrenheit: WritableSignal<number> = this.linkedState({
-    source: state => state.celsius,
-    computation: (celsius) => (celsius * 9/5) + 32
+    source: (state) => state.celsius,
+    computation: (celsius) => (celsius * 9) / 5 + 32,
   });
 
   // Computed signal for full name (read-only derived state)
@@ -24,7 +23,7 @@ export class LinkedSignalsStore extends NgSimpleStateBaseSignalStore<LinkedSigna
 
   storeConfig(): NgSimpleStateStoreConfig<LinkedSignalsState> {
     return {
-      storeName: 'LinkedSignalsStore'
+      storeName: 'LinkedSignalsStore',
     };
   }
 
@@ -32,21 +31,21 @@ export class LinkedSignalsStore extends NgSimpleStateBaseSignalStore<LinkedSigna
     return {
       celsius: 20,
       firstName: 'John',
-      lastName: 'Doe'
+      lastName: 'Doe',
     };
   }
 
   // Selectors
   selectCelsius(): Signal<number> {
-    return this.selectState(state => state.celsius);
+    return this.selectState((state) => state.celsius);
   }
 
   selectFirstName(): Signal<string> {
-    return this.selectState(state => state.firstName);
+    return this.selectState((state) => state.firstName);
   }
 
   selectLastName(): Signal<string> {
-    return this.selectState(state => state.lastName);
+    return this.selectState((state) => state.lastName);
   }
 
   // Actions
@@ -56,7 +55,7 @@ export class LinkedSignalsStore extends NgSimpleStateBaseSignalStore<LinkedSigna
 
   setFahrenheit(fahrenheit: number): void {
     // Convert Fahrenheit to Celsius and update store
-    const celsius = (fahrenheit - 32) * 5/9;
+    const celsius = ((fahrenheit - 32) * 5) / 9;
     this.setState({ celsius: Math.round(celsius * 100) / 100 });
   }
 
@@ -72,7 +71,7 @@ export class LinkedSignalsStore extends NgSimpleStateBaseSignalStore<LinkedSigna
     const parts = fullName.split(' ');
     this.setState({
       firstName: parts[0] || '',
-      lastName: parts.slice(1).join(' ') || ''
+      lastName: parts.slice(1).join(' ') || '',
     });
   }
 }

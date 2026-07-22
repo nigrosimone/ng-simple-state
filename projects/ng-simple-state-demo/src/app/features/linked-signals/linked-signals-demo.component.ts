@@ -6,38 +6,41 @@ import { LinkedSignalsStore } from './linked-signals.store';
   selector: 'app-linked-signals-demo',
   template: `
     <h3>Linked Signals Demo (Angular 21+)</h3>
-    <p>Linked signals create bidirectional computed values from store state using Angular's linkedSignal.</p>
-    
+    <p>
+      Linked signals create bidirectional computed values from store state using Angular's
+      linkedSignal.
+    </p>
+
     <div class="demo-section">
       <h4>Temperature Converter</h4>
       <p>The Fahrenheit signal is linked to Celsius in the store.</p>
-      
+
       <div class="row">
         <label>
           <strong>Celsius:</strong>
-          <input 
-            type="number" 
-            [ngModel]="celsius()" 
+          <input
+            type="number"
+            [ngModel]="celsius()"
             (ngModelChange)="store.setCelsius($event)"
             style="width: 80px"
           />
           °C
         </label>
       </div>
-      
+
       <div class="row">
         <label>
           <strong>Fahrenheit (linked):</strong>
-          <input 
-            type="number" 
-            [ngModel]="store.fahrenheit()" 
+          <input
+            type="number"
+            [ngModel]="store.fahrenheit()"
             (ngModelChange)="store.setFahrenheit($event)"
             style="width: 80px"
           />
           °F
         </label>
       </div>
-      
+
       <p class="info">
         <em>Change either value - the store updates and the linked signal recalculates!</em>
       </p>
@@ -46,29 +49,21 @@ import { LinkedSignalsStore } from './linked-signals.store';
     <div class="demo-section">
       <h4>Name Composition</h4>
       <p>The fullName signal is linked to firstName and lastName in the store.</p>
-      
+
       <div class="row">
         <label>
           <strong>First Name:</strong>
-          <input 
-            type="text" 
-            [ngModel]="firstName()" 
-            (ngModelChange)="store.setFirstName($event)"
-          />
+          <input type="text" [ngModel]="firstName()" (ngModelChange)="store.setFirstName($event)" />
         </label>
       </div>
-      
+
       <div class="row">
         <label>
           <strong>Last Name:</strong>
-          <input 
-            type="text" 
-            [ngModel]="lastName()" 
-            (ngModelChange)="store.setLastName($event)"
-          />
+          <input type="text" [ngModel]="lastName()" (ngModelChange)="store.setLastName($event)" />
         </label>
       </div>
-      
+
       <div class="row">
         <label>
           <strong>Full Name (computed):</strong>
@@ -78,46 +73,44 @@ import { LinkedSignalsStore } from './linked-signals.store';
       <div class="row">
         <label>
           <strong>Set Full Name:</strong>
-          <input 
-            type="text" 
-            #fullNameInput
-            [value]="store.fullName()"
-          />
+          <input type="text" #fullNameInput [value]="store.fullName()" />
           <button (click)="store.setFullName(fullNameInput.value)">Set</button>
         </label>
       </div>
     </div>
   `,
-  styles: [`
-    .demo-section {
-      margin: 20px 0;
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .row {
-      margin: 10px 0;
-    }
-    label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    input {
-      padding: 5px;
-    }
-    .info {
-      color: #666;
-      margin-top: 15px;
-    }
-  `],
+  styles: [
+    `
+      .demo-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .row {
+        margin: 10px 0;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      input {
+        padding: 5px;
+      }
+      .info {
+        color: #666;
+        margin-top: 15px;
+      }
+    `,
+  ],
   imports: [FormsModule],
   providers: [LinkedSignalsStore],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LinkedSignalsDemoComponent {
   store = inject(LinkedSignalsStore);
-  
+
   celsius: Signal<number> = this.store.selectCelsius();
   firstName: Signal<string> = this.store.selectFirstName();
   lastName: Signal<string> = this.store.selectLastName();

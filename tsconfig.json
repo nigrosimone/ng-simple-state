@@ -14,9 +14,7 @@
     "sourceMap": true,
     "types": ["jasmine"],
     "paths": {
-      "ng-simple-state": [
-        "./projects/ng-simple-state/src/public-api.ts"
-      ]
+      "ng-simple-state": ["./projects/ng-simple-state/src/public-api.ts"]
     },
     "declaration": false,
     "experimentalDecorators": true,

@@ -15,21 +15,21 @@ const schematicsDir = dirname(fileURLToPath(import.meta.url));
 const outDir = join(schematicsDir, '../../../dist/ng-simple-state/schematics');
 
 if (!existsSync(join(schematicsDir, '../../../dist/ng-simple-state'))) {
-    console.error('dist/ng-simple-state not found: run "npm run build:lib" first.');
-    process.exit(1);
+  console.error('dist/ng-simple-state not found: run "npm run build:lib" first.');
+  process.exit(1);
 }
 
 rmSync(outDir, { recursive: true, force: true });
 
 console.log('Compiling schematics...');
 execFileSync(
-    process.execPath,
-    [
-        join(schematicsDir, '../../../node_modules/typescript/lib/tsc.js'),
-        '-p',
-        join(schematicsDir, 'tsconfig.schematics.build.json')
-    ],
-    { stdio: 'inherit' }
+  process.execPath,
+  [
+    join(schematicsDir, '../../../node_modules/typescript/lib/tsc.js'),
+    '-p',
+    join(schematicsDir, 'tsconfig.schematics.build.json'),
+  ],
+  { stdio: 'inherit' },
 );
 
 console.log('Copying schematics assets...');

@@ -16,26 +16,28 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <hr />
     <router-outlet></router-outlet>
   `,
-  styles: [`
-    nav ul {
-      display: flex;
-      gap: 10px;
-      list-style: none;
-      padding: 0;
-      flex-wrap: wrap;
-    }
-    nav a {
-      padding: 5px 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      text-decoration: none;
-    }
-    nav a.active {
-      background: #007bff;
-      color: white;
-    }
-  `],
+  styles: [
+    `
+      nav ul {
+        display: flex;
+        gap: 10px;
+        list-style: none;
+        padding: 0;
+        flex-wrap: wrap;
+      }
+      nav a {
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-decoration: none;
+      }
+      nav a.active {
+        background: #007bff;
+        color: white;
+      }
+    `,
+  ],
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FeaturesComponent {}

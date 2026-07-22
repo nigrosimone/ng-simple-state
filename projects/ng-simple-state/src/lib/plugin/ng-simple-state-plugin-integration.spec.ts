@@ -3,534 +3,522 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
 import { provideNgSimpleState } from '../ng-simple-state-provider';
-import { undoRedoPlugin, NG_SIMPLE_STATE_UNDO_REDO, NgSimpleStateUndoRedoPlugin, NgSimpleStateUndoRedoForStore } from './ng-simple-state-plugin';
+import {
+  undoRedoPlugin,
+  NG_SIMPLE_STATE_UNDO_REDO,
+  NgSimpleStateUndoRedoPlugin,
+  NgSimpleStateUndoRedoForStore,
+} from './ng-simple-state-plugin';
 
 // --- Test Store ---
 
 interface ItemsState {
-    items: string[];
-    lastAction: string;
+  items: string[];
+  lastAction: string;
 }
 
 @Injectable()
 class ItemsStore extends NgSimpleStateBaseSignalStore<ItemsState> {
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'ItemsStore',
+    };
+  }
 
-    storeConfig(): NgSimpleStateStoreConfig {
-        return {
-            storeName: 'ItemsStore'
-        };
-    }
+  initialState(): ItemsState {
+    return {
+      items: ['Item 1'],
+      lastAction: 'init',
+    };
+  }
 
-    initialState(): ItemsState {
-        return {
-            items: ['Item 1'],
-            lastAction: 'init'
-        };
-    }
+  selectItems(): Signal<string[]> {
+    return this.selectState((state) => state.items);
+  }
 
-    selectItems(): Signal<string[]> {
-        return this.selectState(state => state.items);
-    }
+  addItem(item: string): boolean {
+    return this.setState((state) => ({
+      items: [...state.items, item],
+      lastAction: `addItem("${item}")`,
+    }));
+  }
 
-    addItem(item: string): boolean {
-        return this.setState(state => ({
-            items: [...state.items, item],
-            lastAction: `addItem("${item}")`
-        }));
-    }
-
-    removeItem(index: number): boolean {
-        return this.setState(state => ({
-            items: state.items.filter((_, i) => i !== index),
-            lastAction: `removeItem(${index})`
-        }));
-    }
+  removeItem(index: number): boolean {
+    return this.setState((state) => ({
+      items: state.items.filter((_, i) => i !== index),
+      lastAction: `removeItem(${index})`,
+    }));
+  }
 }
 
 // --- Integration Tests ---
 
 describe('undoRedoPlugin Integration (with real store + DI)', () => {
+  let store: ItemsStore;
+  let plugin: ReturnType<typeof undoRedoPlugin<ItemsState>>;
+  const storeName = 'ItemsStore';
 
-    let store: ItemsStore;
-    let plugin: ReturnType<typeof undoRedoPlugin<ItemsState>>;
-    const storeName = 'ItemsStore';
+  beforeEach(() => {
+    plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
 
-    beforeEach(() => {
-        plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
-
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({
-                    plugins: [plugin]
-                }),
-                ItemsStore
-            ]
-        });
-
-        store = TestBed.inject(ItemsStore);
+    TestBed.configureTestingModule({
+      providers: [
+        provideNgSimpleState({
+          plugins: [plugin],
+        }),
+        ItemsStore,
+      ],
     });
 
-    it('should register the plugin only once (no duplicates)', () => {
-        // Access internal plugins array to verify no duplicates
-        const plugins = (store as any).plugins;
-        const undoRedoPlugins = plugins.filter((p: any) => p.name === 'undoRedo');
-        expect(undoRedoPlugins.length).toBe(1);
-    });
+    store = TestBed.inject(ItemsStore);
+  });
 
-    it('should track state changes via real store actions', () => {
-        expect(plugin.canUndo(storeName)).toBeFalse();
+  it('should register the plugin only once (no duplicates)', () => {
+    // Access internal plugins array to verify no duplicates
+    const plugins = (store as any).plugins;
+    const undoRedoPlugins = plugins.filter((p: any) => p.name === 'undoRedo');
+    expect(undoRedoPlugins.length).toBe(1);
+  });
 
-        store.addItem('Item 2');
+  it('should track state changes via real store actions', () => {
+    expect(plugin.canUndo(storeName)).toBeFalse();
 
-        expect(plugin.canUndo(storeName)).toBeTrue();
-        expect(plugin.canRedo(storeName)).toBeFalse();
-    });
+    store.addItem('Item 2');
 
-    it('should undo a real store action and enable redo', () => {
-        store.addItem('Item 2');
+    expect(plugin.canUndo(storeName)).toBeTrue();
+    expect(plugin.canRedo(storeName)).toBeFalse();
+  });
 
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
-        expect(plugin.canUndo(storeName)).toBeTrue();
-        expect(plugin.canRedo(storeName)).toBeFalse();
+  it('should undo a real store action and enable redo', () => {
+    store.addItem('Item 2');
 
-        // Perform undo
-        const prevState = plugin.undo(storeName);
-        expect(prevState).toBeTruthy();
-        expect(prevState!.items).toEqual(['Item 1']);
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    expect(plugin.canUndo(storeName)).toBeTrue();
+    expect(plugin.canRedo(storeName)).toBeFalse();
 
-        store.replaceState(prevState!);
+    // Perform undo
+    const prevState = plugin.undo(storeName);
+    expect(prevState).toBeTruthy();
+    expect(prevState!.items).toEqual(['Item 1']);
 
-        expect(store.getCurrentState().items).toEqual(['Item 1']);
+    store.replaceState(prevState!);
 
-        // Redo should now be available
-        expect(plugin.canRedo(storeName)).toBeTrue();
-    });
+    expect(store.getCurrentState().items).toEqual(['Item 1']);
 
-    it('should redo after undo', () => {
-        store.addItem('Item 2');
+    // Redo should now be available
+    expect(plugin.canRedo(storeName)).toBeTrue();
+  });
 
-        // Undo
-        const prevState = plugin.undo(storeName);
-        store.replaceState(prevState!);
+  it('should redo after undo', () => {
+    store.addItem('Item 2');
 
-        expect(store.getCurrentState().items).toEqual(['Item 1']);
-        expect(plugin.canRedo(storeName)).toBeTrue();
+    // Undo
+    const prevState = plugin.undo(storeName);
+    store.replaceState(prevState!);
 
-        // Redo
-        const nextState = plugin.redo(storeName);
-        expect(nextState).toBeTruthy();
-        expect(nextState!.items).toEqual(['Item 1', 'Item 2']);
+    expect(store.getCurrentState().items).toEqual(['Item 1']);
+    expect(plugin.canRedo(storeName)).toBeTrue();
 
-        store.replaceState(nextState!);
+    // Redo
+    const nextState = plugin.redo(storeName);
+    expect(nextState).toBeTruthy();
+    expect(nextState!.items).toEqual(['Item 1', 'Item 2']);
 
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    store.replaceState(nextState!);
 
-        // After redo, undo should be available again, redo should not
-        expect(plugin.canUndo(storeName)).toBeTrue();
-        expect(plugin.canRedo(storeName)).toBeFalse();
-    });
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
 
-    it('should support multiple undo/redo cycles', () => {
-        store.addItem('Item 2');
-        store.addItem('Item 3');
+    // After redo, undo should be available again, redo should not
+    expect(plugin.canUndo(storeName)).toBeTrue();
+    expect(plugin.canRedo(storeName)).toBeFalse();
+  });
 
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 3']);
+  it('should support multiple undo/redo cycles', () => {
+    store.addItem('Item 2');
+    store.addItem('Item 3');
 
-        // Undo once: Item 3 removed
-        const state1 = plugin.undo(storeName);
-        store.replaceState(state1!);
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
-        expect(plugin.canRedo(storeName)).toBeTrue();
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 3']);
 
-        // Undo again: Item 2 removed
-        const state2 = plugin.undo(storeName);
-        store.replaceState(state2!);
-        expect(store.getCurrentState().items).toEqual(['Item 1']);
-        expect(plugin.canRedo(storeName)).toBeTrue();
+    // Undo once: Item 3 removed
+    const state1 = plugin.undo(storeName);
+    store.replaceState(state1!);
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    expect(plugin.canRedo(storeName)).toBeTrue();
 
-        // Redo once: Item 2 back
-        const state3 = plugin.redo(storeName);
-        store.replaceState(state3!);
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
-        expect(plugin.canRedo(storeName)).toBeTrue();
-        expect(plugin.canUndo(storeName)).toBeTrue();
+    // Undo again: Item 2 removed
+    const state2 = plugin.undo(storeName);
+    store.replaceState(state2!);
+    expect(store.getCurrentState().items).toEqual(['Item 1']);
+    expect(plugin.canRedo(storeName)).toBeTrue();
 
-        // Redo again: Item 3 back
-        const state4 = plugin.redo(storeName);
-        store.replaceState(state4!);
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 3']);
-        expect(plugin.canRedo(storeName)).toBeFalse();
-        expect(plugin.canUndo(storeName)).toBeTrue();
-    });
+    // Redo once: Item 2 back
+    const state3 = plugin.redo(storeName);
+    store.replaceState(state3!);
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    expect(plugin.canRedo(storeName)).toBeTrue();
+    expect(plugin.canUndo(storeName)).toBeTrue();
 
-    it('should clear redo stack when new action is performed after undo', () => {
-        store.addItem('Item 2');
-        store.addItem('Item 3');
+    // Redo again: Item 3 back
+    const state4 = plugin.redo(storeName);
+    store.replaceState(state4!);
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 3']);
+    expect(plugin.canRedo(storeName)).toBeFalse();
+    expect(plugin.canUndo(storeName)).toBeTrue();
+  });
 
-        // Undo once
-        const prevState = plugin.undo(storeName);
-        store.replaceState(prevState!);
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
-        expect(plugin.canRedo(storeName)).toBeTrue();
+  it('should clear redo stack when new action is performed after undo', () => {
+    store.addItem('Item 2');
+    store.addItem('Item 3');
 
-        // New action should clear redo stack
-        store.addItem('Item 4');
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 4']);
-        expect(plugin.canRedo(storeName)).toBeFalse();
-        expect(plugin.canUndo(storeName)).toBeTrue();
-    });
+    // Undo once
+    const prevState = plugin.undo(storeName);
+    store.replaceState(prevState!);
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    expect(plugin.canRedo(storeName)).toBeTrue();
 
-    it('should handle undo when nothing to undo', () => {
-        expect(plugin.canUndo(storeName)).toBeFalse();
-        expect(plugin.undo(storeName)).toBeNull();
-    });
+    // New action should clear redo stack
+    store.addItem('Item 4');
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 4']);
+    expect(plugin.canRedo(storeName)).toBeFalse();
+    expect(plugin.canUndo(storeName)).toBeTrue();
+  });
 
-    it('should handle redo when nothing to redo', () => {
-        expect(plugin.canRedo(storeName)).toBeFalse();
-        expect(plugin.redo(storeName)).toBeNull();
-    });
+  it('should handle undo when nothing to undo', () => {
+    expect(plugin.canUndo(storeName)).toBeFalse();
+    expect(plugin.undo(storeName)).toBeNull();
+  });
 
-    it('should clear history', () => {
-        store.addItem('Item 2');
-        store.addItem('Item 3');
+  it('should handle redo when nothing to redo', () => {
+    expect(plugin.canRedo(storeName)).toBeFalse();
+    expect(plugin.redo(storeName)).toBeNull();
+  });
 
-        expect(plugin.canUndo(storeName)).toBeTrue();
+  it('should clear history', () => {
+    store.addItem('Item 2');
+    store.addItem('Item 3');
 
-        plugin.clearHistory(storeName);
+    expect(plugin.canUndo(storeName)).toBeTrue();
 
-        expect(plugin.canUndo(storeName)).toBeFalse();
-        expect(plugin.canRedo(storeName)).toBeFalse();
-    });
+    plugin.clearHistory(storeName);
 
-    // --- Reactive Signal Tests ---
+    expect(plugin.canUndo(storeName)).toBeFalse();
+    expect(plugin.canRedo(storeName)).toBeFalse();
+  });
 
-    it('selectCanUndo should be a reactive signal that updates on state changes', () => {
-        const canUndo = plugin.selectCanUndo(storeName);
+  // --- Reactive Signal Tests ---
 
-        expect(canUndo()).toBeFalse();
+  it('selectCanUndo should be a reactive signal that updates on state changes', () => {
+    const canUndo = plugin.selectCanUndo(storeName);
 
-        store.addItem('Item 2');
+    expect(canUndo()).toBeFalse();
 
-        expect(canUndo()).toBeTrue();
-    });
+    store.addItem('Item 2');
 
-    it('selectCanRedo should be a reactive signal that updates after undo', () => {
-        const canRedo = plugin.selectCanRedo(storeName);
+    expect(canUndo()).toBeTrue();
+  });
 
-        expect(canRedo()).toBeFalse();
+  it('selectCanRedo should be a reactive signal that updates after undo', () => {
+    const canRedo = plugin.selectCanRedo(storeName);
 
-        store.addItem('Item 2');
-        expect(canRedo()).toBeFalse();
+    expect(canRedo()).toBeFalse();
 
-        // Undo
-        const prevState = plugin.undo(storeName);
-        store.replaceState(prevState!);
+    store.addItem('Item 2');
+    expect(canRedo()).toBeFalse();
 
-        expect(canRedo()).toBeTrue();
+    // Undo
+    const prevState = plugin.undo(storeName);
+    store.replaceState(prevState!);
 
-        // Redo
-        const nextState = plugin.redo(storeName);
-        store.replaceState(nextState!);
+    expect(canRedo()).toBeTrue();
 
-        expect(canRedo()).toBeFalse();
-    });
+    // Redo
+    const nextState = plugin.redo(storeName);
+    store.replaceState(nextState!);
 
-    it('selectCanUndo/selectCanRedo should update correctly through full undo/redo cycle', () => {
-        const canUndo = plugin.selectCanUndo(storeName);
-        const canRedo = plugin.selectCanRedo(storeName);
+    expect(canRedo()).toBeFalse();
+  });
 
-        expect(canUndo()).toBeFalse();
-        expect(canRedo()).toBeFalse();
+  it('selectCanUndo/selectCanRedo should update correctly through full undo/redo cycle', () => {
+    const canUndo = plugin.selectCanUndo(storeName);
+    const canRedo = plugin.selectCanRedo(storeName);
 
-        // Add items
-        store.addItem('Item 2');
-        store.addItem('Item 3');
+    expect(canUndo()).toBeFalse();
+    expect(canRedo()).toBeFalse();
 
-        expect(canUndo()).toBeTrue();
-        expect(canRedo()).toBeFalse();
+    // Add items
+    store.addItem('Item 2');
+    store.addItem('Item 3');
 
-        // Undo
-        const state1 = plugin.undo(storeName);
-        store.replaceState(state1!);
+    expect(canUndo()).toBeTrue();
+    expect(canRedo()).toBeFalse();
 
-        expect(canUndo()).toBeTrue();
-        expect(canRedo()).toBeTrue();
+    // Undo
+    const state1 = plugin.undo(storeName);
+    store.replaceState(state1!);
 
-        // Undo again
-        const state2 = plugin.undo(storeName);
-        store.replaceState(state2!);
+    expect(canUndo()).toBeTrue();
+    expect(canRedo()).toBeTrue();
 
-        expect(canUndo()).toBeFalse();
-        expect(canRedo()).toBeTrue();
+    // Undo again
+    const state2 = plugin.undo(storeName);
+    store.replaceState(state2!);
 
-        // New action clears redo
-        store.addItem('Item 4');
+    expect(canUndo()).toBeFalse();
+    expect(canRedo()).toBeTrue();
 
-        expect(canUndo()).toBeTrue();
-        expect(canRedo()).toBeFalse();
-    });
+    // New action clears redo
+    store.addItem('Item 4');
 
-    it('clearHistory should reset selectCanUndo/selectCanRedo signals', () => {
-        const canUndo = plugin.selectCanUndo(storeName);
-        const canRedo = plugin.selectCanRedo(storeName);
+    expect(canUndo()).toBeTrue();
+    expect(canRedo()).toBeFalse();
+  });
 
-        store.addItem('Item 2');
-        expect(canUndo()).toBeTrue();
+  it('clearHistory should reset selectCanUndo/selectCanRedo signals', () => {
+    const canUndo = plugin.selectCanUndo(storeName);
+    const canRedo = plugin.selectCanRedo(storeName);
 
-        plugin.clearHistory(storeName);
+    store.addItem('Item 2');
+    expect(canUndo()).toBeTrue();
 
-        expect(canUndo()).toBeFalse();
-        expect(canRedo()).toBeFalse();
-    });
+    plugin.clearHistory(storeName);
+
+    expect(canUndo()).toBeFalse();
+    expect(canRedo()).toBeFalse();
+  });
 });
 
 // --- DI Token Injection Tests ---
 
 describe('NG_SIMPLE_STATE_UNDO_REDO Token Injection', () => {
+  it('should provide undoRedo plugin via NG_SIMPLE_STATE_UNDO_REDO token', () => {
+    const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
 
-    it('should provide undoRedo plugin via NG_SIMPLE_STATE_UNDO_REDO token', () => {
-        const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
-
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ plugins: [plugin] }),
-                ItemsStore
-            ]
-        });
-
-        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO);
-        expect(injected).toBeTruthy();
-        expect(injected).toBe(plugin);
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ plugins: [plugin] }), ItemsStore],
     });
 
-    it('should return the same instance from token and from the store plugins', () => {
-        const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
+    const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO);
+    expect(injected).toBeTruthy();
+    expect(injected).toBe(plugin);
+  });
 
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ plugins: [plugin] }),
-                ItemsStore
-            ]
-        });
+  it('should return the same instance from token and from the store plugins', () => {
+    const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
 
-        const store = TestBed.inject(ItemsStore);
-        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO);
-
-        // The injected token should be the same reference as what the store uses
-        const storePlugins = (store as any).plugins;
-        const undoRedoInStore = storePlugins.find((p: any) => p.name === 'undoRedo');
-        expect(injected).toBe(undoRedoInStore);
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ plugins: [plugin] }), ItemsStore],
     });
 
-    it('should allow injected plugin to perform undo/redo on a store', () => {
-        const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
+    const store = TestBed.inject(ItemsStore);
+    const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO);
 
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ plugins: [plugin] }),
-                ItemsStore
-            ]
-        });
+    // The injected token should be the same reference as what the store uses
+    const storePlugins = (store as any).plugins;
+    const undoRedoInStore = storePlugins.find((p: any) => p.name === 'undoRedo');
+    expect(injected).toBe(undoRedoInStore);
+  });
 
-        const store = TestBed.inject(ItemsStore);
-        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<ItemsState>;
-        const storeName = 'ItemsStore';
+  it('should allow injected plugin to perform undo/redo on a store', () => {
+    const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
 
-        store.addItem('Item 2');
-        expect(injected.canUndo(storeName)).toBeTrue();
-
-        const prevState = injected.undo(storeName);
-        store.replaceState(prevState!);
-        expect(store.getCurrentState().items).toEqual(['Item 1']);
-        expect(injected.canRedo(storeName)).toBeTrue();
-
-        const nextState = injected.redo(storeName);
-        store.replaceState(nextState!);
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ plugins: [plugin] }), ItemsStore],
     });
 
-    it('should provide reactive signals via the injected token', () => {
-        const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
+    const store = TestBed.inject(ItemsStore);
+    const injected = TestBed.inject(
+      NG_SIMPLE_STATE_UNDO_REDO,
+    ) as NgSimpleStateUndoRedoPlugin<ItemsState>;
+    const storeName = 'ItemsStore';
 
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ plugins: [plugin] }),
-                ItemsStore
-            ]
-        });
+    store.addItem('Item 2');
+    expect(injected.canUndo(storeName)).toBeTrue();
 
-        const store = TestBed.inject(ItemsStore);
-        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<ItemsState>;
-        const storeName = 'ItemsStore';
+    const prevState = injected.undo(storeName);
+    store.replaceState(prevState!);
+    expect(store.getCurrentState().items).toEqual(['Item 1']);
+    expect(injected.canRedo(storeName)).toBeTrue();
 
-        const canUndo = injected.selectCanUndo(storeName);
-        const canRedo = injected.selectCanRedo(storeName);
+    const nextState = injected.redo(storeName);
+    store.replaceState(nextState!);
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+  });
 
-        expect(canUndo()).toBeFalse();
-        expect(canRedo()).toBeFalse();
+  it('should provide reactive signals via the injected token', () => {
+    const plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
 
-        store.addItem('Item 2');
-        expect(canUndo()).toBeTrue();
-
-        const prevState = injected.undo(storeName);
-        store.replaceState(prevState!);
-        expect(canRedo()).toBeTrue();
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ plugins: [plugin] }), ItemsStore],
     });
 
-    it('should not provide NG_SIMPLE_STATE_UNDO_REDO if no undoRedo plugin is configured', () => {
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({}),
-                ItemsStore
-            ]
-        });
+    const store = TestBed.inject(ItemsStore);
+    const injected = TestBed.inject(
+      NG_SIMPLE_STATE_UNDO_REDO,
+    ) as NgSimpleStateUndoRedoPlugin<ItemsState>;
+    const storeName = 'ItemsStore';
 
-        expect(() => TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO))
-            .toThrowError(/No provider/);
+    const canUndo = injected.selectCanUndo(storeName);
+    const canRedo = injected.selectCanRedo(storeName);
+
+    expect(canUndo()).toBeFalse();
+    expect(canRedo()).toBeFalse();
+
+    store.addItem('Item 2');
+    expect(canUndo()).toBeTrue();
+
+    const prevState = injected.undo(storeName);
+    store.replaceState(prevState!);
+    expect(canRedo()).toBeTrue();
+  });
+
+  it('should not provide NG_SIMPLE_STATE_UNDO_REDO if no undoRedo plugin is configured', () => {
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({}), ItemsStore],
     });
+
+    expect(() => TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO)).toThrowError(/No provider/);
+  });
 });
 
 // --- forStore() Tests ---
 
 describe('undoRedoPlugin.forStore() Integration', () => {
+  let store: ItemsStore;
+  let plugin: NgSimpleStateUndoRedoPlugin<ItemsState>;
+  let history: NgSimpleStateUndoRedoForStore;
 
-    let store: ItemsStore;
-    let plugin: NgSimpleStateUndoRedoPlugin<ItemsState>;
-    let history: NgSimpleStateUndoRedoForStore;
+  beforeEach(() => {
+    plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
 
-    beforeEach(() => {
-        plugin = undoRedoPlugin<ItemsState>({ maxHistory: 10 });
-
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ plugins: [plugin] }),
-                ItemsStore
-            ]
-        });
-
-        store = TestBed.inject(ItemsStore);
-        history = plugin.forStore(store as any);
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ plugins: [plugin] }), ItemsStore],
     });
 
-    it('should bind to the correct store without needing a storeName string', () => {
-        expect(history.canUndo()).toBeFalse();
-        expect(history.canRedo()).toBeFalse();
+    store = TestBed.inject(ItemsStore);
+    history = plugin.forStore(store as any);
+  });
 
-        store.addItem('Item 2');
+  it('should bind to the correct store without needing a storeName string', () => {
+    expect(history.canUndo()).toBeFalse();
+    expect(history.canRedo()).toBeFalse();
 
-        expect(history.canUndo()).toBeTrue();
-        expect(history.canRedo()).toBeFalse();
-    });
+    store.addItem('Item 2');
 
-    it('undo() should replace state automatically and return true', () => {
-        store.addItem('Item 2');
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    expect(history.canUndo()).toBeTrue();
+    expect(history.canRedo()).toBeFalse();
+  });
 
-        const result = history.undo();
+  it('undo() should replace state automatically and return true', () => {
+    store.addItem('Item 2');
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
 
-        expect(result).toBeTrue();
-        expect(store.getCurrentState().items).toEqual(['Item 1']);
-    });
+    const result = history.undo();
 
-    it('undo() should return false when nothing to undo', () => {
-        expect(history.undo()).toBeFalse();
-    });
+    expect(result).toBeTrue();
+    expect(store.getCurrentState().items).toEqual(['Item 1']);
+  });
 
-    it('redo() should replace state automatically and return true', () => {
-        store.addItem('Item 2');
-        history.undo();
+  it('undo() should return false when nothing to undo', () => {
+    expect(history.undo()).toBeFalse();
+  });
 
-        expect(store.getCurrentState().items).toEqual(['Item 1']);
+  it('redo() should replace state automatically and return true', () => {
+    store.addItem('Item 2');
+    history.undo();
 
-        const result = history.redo();
+    expect(store.getCurrentState().items).toEqual(['Item 1']);
 
-        expect(result).toBeTrue();
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
-    });
+    const result = history.redo();
 
-    it('redo() should return false when nothing to redo', () => {
-        expect(history.redo()).toBeFalse();
-    });
+    expect(result).toBeTrue();
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+  });
 
-    it('should support multiple undo/redo cycles', () => {
-        store.addItem('Item 2');
-        store.addItem('Item 3');
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 3']);
+  it('redo() should return false when nothing to redo', () => {
+    expect(history.redo()).toBeFalse();
+  });
 
-        history.undo();
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+  it('should support multiple undo/redo cycles', () => {
+    store.addItem('Item 2');
+    store.addItem('Item 3');
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 3']);
 
-        history.undo();
-        expect(store.getCurrentState().items).toEqual(['Item 1']);
+    history.undo();
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
 
-        history.redo();
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+    history.undo();
+    expect(store.getCurrentState().items).toEqual(['Item 1']);
 
-        history.redo();
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 3']);
-        expect(history.canRedo()).toBeFalse();
-    });
+    history.redo();
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
 
-    it('should clear redo stack on new action after undo', () => {
-        store.addItem('Item 2');
-        store.addItem('Item 3');
+    history.redo();
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 3']);
+    expect(history.canRedo()).toBeFalse();
+  });
 
-        history.undo();
-        expect(history.canRedo()).toBeTrue();
+  it('should clear redo stack on new action after undo', () => {
+    store.addItem('Item 2');
+    store.addItem('Item 3');
 
-        store.addItem('Item 4');
-        expect(history.canRedo()).toBeFalse();
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 4']);
-    });
+    history.undo();
+    expect(history.canRedo()).toBeTrue();
 
-    it('selectCanUndo/selectCanRedo should be reactive signals', () => {
-        const canUndo = history.selectCanUndo();
-        const canRedo = history.selectCanRedo();
+    store.addItem('Item 4');
+    expect(history.canRedo()).toBeFalse();
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2', 'Item 4']);
+  });
 
-        expect(canUndo()).toBeFalse();
-        expect(canRedo()).toBeFalse();
+  it('selectCanUndo/selectCanRedo should be reactive signals', () => {
+    const canUndo = history.selectCanUndo();
+    const canRedo = history.selectCanRedo();
 
-        store.addItem('Item 2');
-        expect(canUndo()).toBeTrue();
+    expect(canUndo()).toBeFalse();
+    expect(canRedo()).toBeFalse();
 
-        history.undo();
-        expect(canRedo()).toBeTrue();
-        expect(canUndo()).toBeFalse();
+    store.addItem('Item 2');
+    expect(canUndo()).toBeTrue();
 
-        history.redo();
-        expect(canRedo()).toBeFalse();
-        expect(canUndo()).toBeTrue();
-    });
+    history.undo();
+    expect(canRedo()).toBeTrue();
+    expect(canUndo()).toBeFalse();
 
-    it('clearHistory should reset everything', () => {
-        store.addItem('Item 2');
-        store.addItem('Item 3');
+    history.redo();
+    expect(canRedo()).toBeFalse();
+    expect(canUndo()).toBeTrue();
+  });
 
-        const canUndo = history.selectCanUndo();
-        const canRedo = history.selectCanRedo();
+  it('clearHistory should reset everything', () => {
+    store.addItem('Item 2');
+    store.addItem('Item 3');
 
-        expect(canUndo()).toBeTrue();
+    const canUndo = history.selectCanUndo();
+    const canRedo = history.selectCanRedo();
 
-        history.clearHistory();
+    expect(canUndo()).toBeTrue();
 
-        expect(canUndo()).toBeFalse();
-        expect(canRedo()).toBeFalse();
-        expect(history.canUndo()).toBeFalse();
-        expect(history.canRedo()).toBeFalse();
-    });
+    history.clearHistory();
 
-    it('forStore via injected token should work the same way', () => {
-        const injected = TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO) as NgSimpleStateUndoRedoPlugin<ItemsState>;
-        const h = injected.forStore(store as any);
+    expect(canUndo()).toBeFalse();
+    expect(canRedo()).toBeFalse();
+    expect(history.canUndo()).toBeFalse();
+    expect(history.canRedo()).toBeFalse();
+  });
 
-        store.addItem('Item 2');
-        expect(h.canUndo()).toBeTrue();
+  it('forStore via injected token should work the same way', () => {
+    const injected = TestBed.inject(
+      NG_SIMPLE_STATE_UNDO_REDO,
+    ) as NgSimpleStateUndoRedoPlugin<ItemsState>;
+    const h = injected.forStore(store as any);
 
-        h.undo();
-        expect(store.getCurrentState().items).toEqual(['Item 1']);
-        expect(h.canRedo()).toBeTrue();
+    store.addItem('Item 2');
+    expect(h.canUndo()).toBeTrue();
 
-        h.redo();
-        expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
-    });
+    h.undo();
+    expect(store.getCurrentState().items).toEqual(['Item 1']);
+    expect(h.canRedo()).toBeTrue();
+
+    h.redo();
+    expect(store.getCurrentState().items).toEqual(['Item 1', 'Item 2']);
+  });
 });

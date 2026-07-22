@@ -11,11 +11,6 @@
     "sourceMap": true,
     "types": ["jasmine", "node"]
   },
-  "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "./**/files/**",
-    "./out/**"
-  ]
+  "include": ["./**/*.ts"],
+  "exclude": ["./**/files/**", "./out/**"]
 }

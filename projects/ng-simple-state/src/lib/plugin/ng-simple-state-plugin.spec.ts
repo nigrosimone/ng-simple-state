@@ -1,450 +1,441 @@
-import { 
-    NgSimpleStatePlugin, 
-    NgSimpleStatePluginContext, 
-    undoRedoPlugin, 
-    persistPlugin 
+import {
+  NgSimpleStatePlugin,
+  NgSimpleStatePluginContext,
+  undoRedoPlugin,
+  persistPlugin,
 } from './ng-simple-state-plugin';
 
 describe('NgSimpleStatePlugin: undoRedoPlugin', () => {
-    
-    let plugin: ReturnType<typeof undoRedoPlugin<{ count: number }>>;
-    
-    beforeEach(() => {
-        plugin = undoRedoPlugin<{ count: number }>({ maxHistory: 5 });
+  let plugin: ReturnType<typeof undoRedoPlugin<{ count: number }>>;
+
+  beforeEach(() => {
+    plugin = undoRedoPlugin<{ count: number }>({ maxHistory: 5 });
+  });
+
+  it('should have correct name', () => {
+    expect(plugin.name).toBe('undoRedo');
+  });
+
+  it('should initially have no undo history', () => {
+    expect(plugin.canUndo('TestStore')).toBeFalse();
+    expect(plugin.undo('TestStore')).toBeNull();
+  });
+
+  it('should initially have no redo history', () => {
+    expect(plugin.canRedo('TestStore')).toBeFalse();
+    expect(plugin.redo('TestStore')).toBeNull();
+  });
+
+  it('should track state changes for undo', () => {
+    const context: NgSimpleStatePluginContext<{ count: number }> = {
+      storeName: 'TestStore',
+      actionName: 'increment',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
+    };
+
+    plugin.onAfterStateChange!(context);
+
+    expect(plugin.canUndo('TestStore')).toBeTrue();
+    expect(plugin.undo('TestStore')).toEqual({ count: 0 });
+  });
+
+  it('should track multiple state changes', () => {
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'action1',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
 
-    it('should have correct name', () => {
-        expect(plugin.name).toBe('undoRedo');
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'action2',
+      prevState: { count: 1 },
+      nextState: { count: 2 },
+      timestamp: Date.now(),
     });
 
-    it('should initially have no undo history', () => {
-        expect(plugin.canUndo('TestStore')).toBeFalse();
-        expect(plugin.undo('TestStore')).toBeNull();
+    expect(plugin.canUndo('TestStore')).toBeTrue();
+    // Most recent undo should return previous state
+    expect(plugin.undo('TestStore')).toEqual({ count: 1 });
+  });
+
+  it('should respect maxHistory limit', () => {
+    // Dedicated plugin with a small limit to prove the oldest entries are trimmed.
+    const limited = undoRedoPlugin<{ count: number }>({ maxHistory: 2 });
+
+    // Add 5 changes: prevStates recorded are {0},{1},{2},{3},{4}.
+    // With maxHistory 2, only the last two prevStates ({3} and {4}) must survive.
+    for (let i = 0; i < 5; i++) {
+      limited.onAfterStateChange!({
+        storeName: 'TestStore',
+        actionName: `action${i}`,
+        prevState: { count: i },
+        nextState: { count: i + 1 },
+        timestamp: Date.now(),
+      });
+    }
+
+    // Exactly two undos are available (LIFO), oldest three were shifted out.
+    expect(limited.undo('TestStore')).toEqual({ count: 4 });
+    expect(limited.undo('TestStore')).toEqual({ count: 3 });
+    expect(limited.undo('TestStore')).toBeNull();
+    expect(limited.canUndo('TestStore')).toBeFalse();
+  });
+
+  it('should clear redo history on new action', () => {
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'action1',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
 
-    it('should initially have no redo history', () => {
-        expect(plugin.canRedo('TestStore')).toBeFalse();
-        expect(plugin.redo('TestStore')).toBeNull();
+    // New action should clear redo stack
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'action2',
+      prevState: { count: 1 },
+      nextState: { count: 2 },
+      timestamp: Date.now(),
     });
 
-    it('should track state changes for undo', () => {
-        const context: NgSimpleStatePluginContext<{ count: number }> = {
-            storeName: 'TestStore',
-            actionName: 'increment',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        };
-        
-        plugin.onAfterStateChange!(context);
-        
-        expect(plugin.canUndo('TestStore')).toBeTrue();
-        expect(plugin.undo('TestStore')).toEqual({ count: 0 });
+    expect(plugin.canRedo('TestStore')).toBeFalse();
+  });
+
+  it('should clear history for specific store', () => {
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'action1',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
 
-    it('should track multiple state changes', () => {
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'action1',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'action2',
-            prevState: { count: 1 },
-            nextState: { count: 2 },
-            timestamp: Date.now()
-        });
-        
-        expect(plugin.canUndo('TestStore')).toBeTrue();
-        // Most recent undo should return previous state
-        expect(plugin.undo('TestStore')).toEqual({ count: 1 });
+    plugin.clearHistory('TestStore');
+
+    expect(plugin.canUndo('TestStore')).toBeFalse();
+    expect(plugin.canRedo('TestStore')).toBeFalse();
+  });
+
+  it('should handle multiple stores independently', () => {
+    plugin.onAfterStateChange!({
+      storeName: 'Store1',
+      actionName: 'action1',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
 
-    it('should respect maxHistory limit', () => {
-        // Dedicated plugin with a small limit to prove the oldest entries are trimmed.
-        const limited = undoRedoPlugin<{ count: number }>({ maxHistory: 2 });
-
-        // Add 5 changes: prevStates recorded are {0},{1},{2},{3},{4}.
-        // With maxHistory 2, only the last two prevStates ({3} and {4}) must survive.
-        for (let i = 0; i < 5; i++) {
-            limited.onAfterStateChange!({
-                storeName: 'TestStore',
-                actionName: `action${i}`,
-                prevState: { count: i },
-                nextState: { count: i + 1 },
-                timestamp: Date.now()
-            });
-        }
-
-        // Exactly two undos are available (LIFO), oldest three were shifted out.
-        expect(limited.undo('TestStore')).toEqual({ count: 4 });
-        expect(limited.undo('TestStore')).toEqual({ count: 3 });
-        expect(limited.undo('TestStore')).toBeNull();
-        expect(limited.canUndo('TestStore')).toBeFalse();
+    plugin.onAfterStateChange!({
+      storeName: 'Store2',
+      actionName: 'action2',
+      prevState: { count: 10 },
+      nextState: { count: 20 },
+      timestamp: Date.now(),
     });
 
-    it('should clear redo history on new action', () => {
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'action1',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        // New action should clear redo stack
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'action2',
-            prevState: { count: 1 },
-            nextState: { count: 2 },
-            timestamp: Date.now()
-        });
-        
-        expect(plugin.canRedo('TestStore')).toBeFalse();
+    expect(plugin.undo('Store1')).toEqual({ count: 0 });
+    expect(plugin.undo('Store2')).toEqual({ count: 10 });
+  });
+
+  it('should clear history on store destroy', () => {
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'action1',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
 
-    it('should clear history for specific store', () => {
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'action1',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        plugin.clearHistory('TestStore');
-        
-        expect(plugin.canUndo('TestStore')).toBeFalse();
-        expect(plugin.canRedo('TestStore')).toBeFalse();
-    });
+    plugin.onStoreDestroy!('TestStore');
 
-    it('should handle multiple stores independently', () => {
-        plugin.onAfterStateChange!({
-            storeName: 'Store1',
-            actionName: 'action1',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        plugin.onAfterStateChange!({
-            storeName: 'Store2',
-            actionName: 'action2',
-            prevState: { count: 10 },
-            nextState: { count: 20 },
-            timestamp: Date.now()
-        });
-        
-        expect(plugin.undo('Store1')).toEqual({ count: 0 });
-        expect(plugin.undo('Store2')).toEqual({ count: 10 });
-    });
-
-    it('should clear history on store destroy', () => {
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'action1',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        plugin.onStoreDestroy!('TestStore');
-        
-        expect(plugin.canUndo('TestStore')).toBeFalse();
-    });
+    expect(plugin.canUndo('TestStore')).toBeFalse();
+  });
 });
-
 
 describe('NgSimpleStatePlugin: persistPlugin', () => {
-    
-    it('should call save on state change', () => {
-        const savedStates: Map<string, any> = new Map();
-        
-        const plugin = persistPlugin({
-            save: (storeName, state) => savedStates.set(storeName, state),
-            load: (storeName) => savedStates.get(storeName) || null
-        });
-        
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        expect(savedStates.get('TestStore')).toEqual({ count: 1 });
+  it('should call save on state change', () => {
+    const savedStates: Map<string, any> = new Map();
+
+    const plugin = persistPlugin({
+      save: (storeName, state) => savedStates.set(storeName, state),
+      load: (storeName) => savedStates.get(storeName) || null,
     });
 
-    it('should respect filter function', () => {
-        const savedStates: Map<string, any> = new Map();
-        
-        const plugin = persistPlugin({
-            save: (storeName, state) => savedStates.set(storeName, state),
-            load: (storeName) => savedStates.get(storeName) || null,
-            filter: (storeName) => storeName !== 'IgnoredStore'
-        });
-        
-        plugin.onAfterStateChange!({
-            storeName: 'IgnoredStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        expect(savedStates.has('IgnoredStore')).toBeFalse();
-        
-        plugin.onAfterStateChange!({
-            storeName: 'AllowedStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        expect(savedStates.get('AllowedStore')).toEqual({ count: 1 });
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
+
+    expect(savedStates.get('TestStore')).toEqual({ count: 1 });
+  });
+
+  it('should respect filter function', () => {
+    const savedStates: Map<string, any> = new Map();
+
+    const plugin = persistPlugin({
+      save: (storeName, state) => savedStates.set(storeName, state),
+      load: (storeName) => savedStates.get(storeName) || null,
+      filter: (storeName) => storeName !== 'IgnoredStore',
+    });
+
+    plugin.onAfterStateChange!({
+      storeName: 'IgnoredStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
+    });
+
+    expect(savedStates.has('IgnoredStore')).toBeFalse();
+
+    plugin.onAfterStateChange!({
+      storeName: 'AllowedStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
+    });
+
+    expect(savedStates.get('AllowedStore')).toEqual({ count: 1 });
+  });
 });
-
 
 describe('NgSimpleStatePlugin: Custom Plugin', () => {
-    
-    it('should allow custom plugin implementation', () => {
-        let beforeCount = 0;
-        let afterCount = 0;
-        let initCount = 0;
-        let destroyCount = 0;
-        
-        const customPlugin: NgSimpleStatePlugin = {
-            name: 'custom',
-            onBeforeStateChange() {
-                beforeCount++;
-            },
-            onAfterStateChange() {
-                afterCount++;
-            },
-            onStoreInit() {
-                initCount++;
-            },
-            onStoreDestroy() {
-                destroyCount++;
-            }
-        };
-        
-        customPlugin.onStoreInit!('TestStore', { count: 0 });
-        expect(initCount).toBe(1);
-        
-        customPlugin.onBeforeStateChange!({
-            storeName: 'TestStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        expect(beforeCount).toBe(1);
-        
-        customPlugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        expect(afterCount).toBe(1);
-        
-        customPlugin.onStoreDestroy!('TestStore');
-        expect(destroyCount).toBe(1);
+  it('should allow custom plugin implementation', () => {
+    let beforeCount = 0;
+    let afterCount = 0;
+    let initCount = 0;
+    let destroyCount = 0;
+
+    const customPlugin: NgSimpleStatePlugin = {
+      name: 'custom',
+      onBeforeStateChange() {
+        beforeCount++;
+      },
+      onAfterStateChange() {
+        afterCount++;
+      },
+      onStoreInit() {
+        initCount++;
+      },
+      onStoreDestroy() {
+        destroyCount++;
+      },
+    };
+
+    customPlugin.onStoreInit!('TestStore', { count: 0 });
+    expect(initCount).toBe(1);
+
+    customPlugin.onBeforeStateChange!({
+      storeName: 'TestStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
+    });
+    expect(beforeCount).toBe(1);
+
+    customPlugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
+    });
+    expect(afterCount).toBe(1);
+
+    customPlugin.onStoreDestroy!('TestStore');
+    expect(destroyCount).toBe(1);
+  });
+
+  it('should allow onBeforeStateChange to prevent state change', () => {
+    const blockingPlugin: NgSimpleStatePlugin = {
+      name: 'blocking',
+      onBeforeStateChange() {
+        return false; // Block all changes
+      },
+    };
+
+    const result = blockingPlugin.onBeforeStateChange!({
+      storeName: 'TestStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
 
-    it('should allow onBeforeStateChange to prevent state change', () => {
-        const blockingPlugin: NgSimpleStatePlugin = {
-            name: 'blocking',
-            onBeforeStateChange() {
-                return false; // Block all changes
-            }
-        };
-        
-        const result = blockingPlugin.onBeforeStateChange!({
-            storeName: 'TestStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        expect(result).toBeFalse();
-    });
+    expect(result).toBeFalse();
+  });
 });
-
 
 describe('persistPlugin', () => {
-    
-    it('should call save on state change', () => {
-        const savedStates: { storeName: string; state: any }[] = [];
-        
-        const plugin = persistPlugin<{ count: number }>({
-            save: (storeName, state) => {
-                savedStates.push({ storeName, state });
-            },
-            load: () => null
-        });
-        
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        expect(savedStates.length).toBe(1);
-        expect(savedStates[0].storeName).toBe('TestStore');
-        expect(savedStates[0].state).toEqual({ count: 1 });
+  it('should call save on state change', () => {
+    const savedStates: { storeName: string; state: any }[] = [];
+
+    const plugin = persistPlugin<{ count: number }>({
+      save: (storeName, state) => {
+        savedStates.push({ storeName, state });
+      },
+      load: () => null,
     });
-    
-    it('should respect filter function', () => {
-        const savedStates: string[] = [];
-        
-        const plugin = persistPlugin<{ count: number }>({
-            save: (storeName) => savedStates.push(storeName),
-            load: () => null,
-            filter: (storeName) => storeName.startsWith('Persist')
-        });
-        
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        plugin.onAfterStateChange!({
-            storeName: 'PersistStore',
-            actionName: 'test',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        expect(savedStates).toEqual(['PersistStore']);
+
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
+
+    expect(savedStates.length).toBe(1);
+    expect(savedStates[0].storeName).toBe('TestStore');
+    expect(savedStates[0].state).toEqual({ count: 1 });
+  });
+
+  it('should respect filter function', () => {
+    const savedStates: string[] = [];
+
+    const plugin = persistPlugin<{ count: number }>({
+      save: (storeName) => savedStates.push(storeName),
+      load: () => null,
+      filter: (storeName) => storeName.startsWith('Persist'),
+    });
+
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
+    });
+
+    plugin.onAfterStateChange!({
+      storeName: 'PersistStore',
+      actionName: 'test',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
+    });
+
+    expect(savedStates).toEqual(['PersistStore']);
+  });
 });
 
-
 describe('undoRedoPlugin edge cases', () => {
-    
-    it('should use default maxHistory when not specified', () => {
-        const plugin = undoRedoPlugin();
-        expect(plugin.name).toBe('undoRedo');
+  it('should use default maxHistory when not specified', () => {
+    const plugin = undoRedoPlugin();
+    expect(plugin.name).toBe('undoRedo');
+  });
+
+  it('should handle undo on empty store', () => {
+    const plugin = undoRedoPlugin();
+
+    expect(plugin.canUndo('EmptyStore')).toBeFalse();
+    expect(plugin.undo('EmptyStore')).toBeNull();
+  });
+
+  it('should handle redo on empty store', () => {
+    const plugin = undoRedoPlugin();
+
+    expect(plugin.canRedo('EmptyStore')).toBeFalse();
+    expect(plugin.redo('EmptyStore')).toBeNull();
+  });
+
+  it('should enable redo after undo workflow', () => {
+    const plugin = undoRedoPlugin<{ count: number }>();
+
+    // Initial action: count 0 -> 1
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'increment',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
-    
-    it('should handle undo on empty store', () => {
-        const plugin = undoRedoPlugin();
-        
-        expect(plugin.canUndo('EmptyStore')).toBeFalse();
-        expect(plugin.undo('EmptyStore')).toBeNull();
+
+    expect(plugin.canUndo('TestStore')).toBeTrue();
+    expect(plugin.canRedo('TestStore')).toBeFalse();
+
+    // Call undo to get previous state
+    const prevState = plugin.undo('TestStore');
+    expect(prevState).toEqual({ count: 0 });
+
+    // Simulate store applying the undo via replaceState
+    // This triggers onAfterStateChange with prevState = current, nextState = undone state
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'undo',
+      prevState: { count: 1 }, // state before undo
+      nextState: { count: 0 }, // state after undo
+      timestamp: Date.now(),
     });
-    
-    it('should handle redo on empty store', () => {
-        const plugin = undoRedoPlugin();
-        
-        expect(plugin.canRedo('EmptyStore')).toBeFalse();
-        expect(plugin.redo('EmptyStore')).toBeNull();
+
+    // Now redo should be available
+    expect(plugin.canRedo('TestStore')).toBeTrue();
+    expect(plugin.canUndo('TestStore')).toBeFalse();
+
+    // Call redo to get next state
+    const nextState = plugin.redo('TestStore');
+    expect(nextState).toEqual({ count: 1 });
+
+    // Simulate store applying the redo via replaceState
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'redo',
+      prevState: { count: 0 }, // state before redo
+      nextState: { count: 1 }, // state after redo
+      timestamp: Date.now(),
     });
-    
-    it('should enable redo after undo workflow', () => {
-        const plugin = undoRedoPlugin<{ count: number }>();
-        
-        // Initial action: count 0 -> 1
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'increment',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        expect(plugin.canUndo('TestStore')).toBeTrue();
-        expect(plugin.canRedo('TestStore')).toBeFalse();
-        
-        // Call undo to get previous state
-        const prevState = plugin.undo('TestStore');
-        expect(prevState).toEqual({ count: 0 });
-        
-        // Simulate store applying the undo via replaceState
-        // This triggers onAfterStateChange with prevState = current, nextState = undone state
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'undo',
-            prevState: { count: 1 },  // state before undo
-            nextState: { count: 0 },  // state after undo
-            timestamp: Date.now()
-        });
-        
-        // Now redo should be available
-        expect(plugin.canRedo('TestStore')).toBeTrue();
-        expect(plugin.canUndo('TestStore')).toBeFalse();
-        
-        // Call redo to get next state
-        const nextState = plugin.redo('TestStore');
-        expect(nextState).toEqual({ count: 1 });
-        
-        // Simulate store applying the redo via replaceState
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'redo',
-            prevState: { count: 0 },  // state before redo
-            nextState: { count: 1 },  // state after redo
-            timestamp: Date.now()
-        });
-        
-        // Now undo should be available again
-        expect(plugin.canUndo('TestStore')).toBeTrue();
-        expect(plugin.canRedo('TestStore')).toBeFalse();
+
+    // Now undo should be available again
+    expect(plugin.canUndo('TestStore')).toBeTrue();
+    expect(plugin.canRedo('TestStore')).toBeFalse();
+  });
+
+  it('should clear redo stack on new action after undo', () => {
+    const plugin = undoRedoPlugin<{ count: number }>();
+
+    // Action: 0 -> 1
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'increment',
+      prevState: { count: 0 },
+      nextState: { count: 1 },
+      timestamp: Date.now(),
     });
-    
-    it('should clear redo stack on new action after undo', () => {
-        const plugin = undoRedoPlugin<{ count: number }>();
-        
-        // Action: 0 -> 1
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'increment',
-            prevState: { count: 0 },
-            nextState: { count: 1 },
-            timestamp: Date.now()
-        });
-        
-        // Undo: get state 0
-        plugin.undo('TestStore');
-        
-        // Simulate store applying undo
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'undo',
-            prevState: { count: 1 },
-            nextState: { count: 0 },
-            timestamp: Date.now()
-        });
-        
-        expect(plugin.canRedo('TestStore')).toBeTrue();
-        
-        // New action (not undo/redo) should clear redo stack
-        plugin.onAfterStateChange!({
-            storeName: 'TestStore',
-            actionName: 'newAction',
-            prevState: { count: 0 },
-            nextState: { count: 5 },
-            timestamp: Date.now()
-        });
-        
-        expect(plugin.canRedo('TestStore')).toBeFalse();
+
+    // Undo: get state 0
+    plugin.undo('TestStore');
+
+    // Simulate store applying undo
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'undo',
+      prevState: { count: 1 },
+      nextState: { count: 0 },
+      timestamp: Date.now(),
     });
+
+    expect(plugin.canRedo('TestStore')).toBeTrue();
+
+    // New action (not undo/redo) should clear redo stack
+    plugin.onAfterStateChange!({
+      storeName: 'TestStore',
+      actionName: 'newAction',
+      prevState: { count: 0 },
+      nextState: { count: 5 },
+      timestamp: Date.now(),
+    });
+
+    expect(plugin.canRedo('TestStore')).toBeFalse();
+  });
 });

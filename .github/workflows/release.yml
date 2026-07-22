@@ -59,6 +59,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Lint
         run: npm run lint "$LIB"
 
@@ -114,6 +117,7 @@ jobs:
             --version "$VERSION" \
             --notes-out RELEASE_NOTES.md \
             --changelog CHANGELOG.md
+          npx prettier --write CHANGELOG.md
           cat RELEASE_NOTES.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build the library

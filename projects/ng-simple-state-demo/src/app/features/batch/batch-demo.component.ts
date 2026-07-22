@@ -7,7 +7,7 @@ import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 
   template: `
     <h3>Batch Updates Demo</h3>
     <p>Group multiple state updates into single emissions for better performance.</p>
-    
+
     <div class="demo-section">
       <h4>Current State</h4>
       <div class="state-grid">
@@ -28,7 +28,10 @@ import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 
           <span class="value">{{ sum() }}</span>
         </div>
       </div>
-      <p><strong>Update Count:</strong> {{ updateCount() }} | <strong>Last:</strong> {{ lastUpdate() }}</p>
+      <p>
+        <strong>Update Count:</strong> {{ updateCount() }} | <strong>Last:</strong>
+        {{ lastUpdate() }}
+      </p>
     </div>
 
     <div class="demo-section">
@@ -60,54 +63,56 @@ import { withTransaction, createThrottledUpdater, createDebouncedUpdater } from 
 
     <button (click)="store.resetCounters()" class="reset">Reset All</button>
   `,
-  styles: [`
-    .demo-section {
-      margin: 20px 0;
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .state-grid {
-      display: flex;
-      gap: 20px;
-      margin: 10px 0;
-    }
-    .state-item {
-      padding: 10px 20px;
-      background: #f0f0f0;
-      border-radius: 4px;
-    }
-    .state-item .label {
-      font-weight: bold;
-      margin-right: 5px;
-    }
-    .state-item .value {
-      font-size: 1.2em;
-      color: #007bff;
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    button {
-      padding: 8px 16px;
-      cursor: pointer;
-    }
-    button.reset {
-      margin-top: 20px;
-      background: #dc3545;
-      color: white;
-      border: none;
-    }
-    .info {
-      color: #666;
-      font-style: italic;
-    }
-  `],
+  styles: [
+    `
+      .demo-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .state-grid {
+        display: flex;
+        gap: 20px;
+        margin: 10px 0;
+      }
+      .state-item {
+        padding: 10px 20px;
+        background: #f0f0f0;
+        border-radius: 4px;
+      }
+      .state-item .label {
+        font-weight: bold;
+        margin-right: 5px;
+      }
+      .state-item .value {
+        font-size: 1.2em;
+        color: #007bff;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      button {
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+      button.reset {
+        margin-top: 20px;
+        background: #dc3545;
+        color: white;
+        border: none;
+      }
+      .info {
+        color: #666;
+        font-style: italic;
+      }
+    `,
+  ],
   imports: [],
   providers: [BatchStore],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BatchDemoComponent {
   store = inject(BatchStore);
@@ -127,7 +132,7 @@ export class BatchDemoComponent {
       await withTransaction(this.store, async (tx) => {
         this.store.incrementA();
         // Simulate async operation
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         this.store.incrementB();
         tx.commit();
       });
@@ -150,14 +155,16 @@ export class BatchDemoComponent {
       });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {
-      this.transactionStatus.set(`Transaction rolled back! State restored to: A=${beforeState.a}, B=${beforeState.b}`);
+      this.transactionStatus.set(
+        `Transaction rolled back! State restored to: A=${beforeState.a}, B=${beforeState.b}`,
+      );
     }
   }
 
   debouncedIncrement(): void {
     const { update } = createDebouncedUpdater<BatchState>(
       (state) => this.store.setState(state),
-      300
+      300,
     );
     for (let i = 1; i < 5; i++) {
       update({ b: i });
@@ -167,7 +174,7 @@ export class BatchDemoComponent {
   throttledIncrement(): void {
     const { update } = createThrottledUpdater<BatchState>(
       (state) => this.store.setState(state),
-      100
+      100,
     );
     for (let i = 1; i < 5; i++) {
       update({ b: i });

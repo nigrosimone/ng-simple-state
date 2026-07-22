@@ -38,8 +38,9 @@ and the `.tgz` tarball as an artifact, leaving npm and the repository untouched.
 ## What the workflow does
 
 1. refuses to run outside the default branch;
-2. installs with `npm ci`, then runs the linter, the library tests, the schematics tests and the
-   builds — a failure here aborts the release before anything is published;
+2. installs with `npm ci`, then runs the format check, the linter, the library tests, the
+   schematics tests and the builds — a failure here aborts the release before anything is
+   published;
 3. bumps the root `package.json` and the library `package.json` to the same version;
 4. fails if that version is already on npm;
 5. writes `RELEASE_NOTES.md` (release body) and prepends the same content to `CHANGELOG.md`;

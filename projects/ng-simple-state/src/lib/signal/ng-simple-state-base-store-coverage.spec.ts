@@ -10,949 +10,903 @@ import { provideNgSimpleState, provideNgSimpleStatePlugins } from '../ng-simple-
 import { NgSimpleStateDevTool } from '../tool/ng-simple-state-dev-tool';
 
 export interface CounterState {
-    count: number;
+  count: number;
 }
 
 /**
  * Custom storage implementation for testing
  */
 class CustomStorage extends NgSimpleStateStorage {
-    constructor() {
-        super(sessionStorage);
-    }
+  constructor() {
+    super(sessionStorage);
+  }
 }
 
 @Injectable()
 export class CounterStoreWithCustomStorage extends NgSimpleStateBaseSignalStore<CounterState> {
+  override storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      enableDevTool: true,
+      storeName: 'customStorageStoreSignal',
+      persistentStorage: new CustomStorage(),
+    };
+  }
 
-    override storeConfig(): NgSimpleStateStoreConfig {
-        return {
-            enableDevTool: true,
-            storeName: 'customStorageStoreSignal',
-            persistentStorage: new CustomStorage()
-        };
-    }
+  initialState(): CounterState {
+    return {
+      count: 1,
+    };
+  }
 
-    initialState(): CounterState {
-        return {
-            count: 1
-        };
-    }
+  selectCount(): Signal<number> {
+    return this.selectState((state) => state.count);
+  }
 
-    selectCount(): Signal<number> {
-        return this.selectState(state => state.count);
-    }
+  increment(increment: number = 1): boolean {
+    return this.setState((state) => ({ count: state.count + increment }), 'increment');
+  }
 
-    increment(increment: number = 1): boolean {
-        return this.setState(state => ({ count: state.count + increment }), 'increment');
-    }
-
-    decrement(decrement: number = 1): boolean {
-        return this.replaceState(state => ({ count: state.count - decrement }), 'decrement');
-    }
+  decrement(decrement: number = 1): boolean {
+    return this.replaceState((state) => ({ count: state.count - decrement }), 'decrement');
+  }
 }
 
 @Injectable()
 export class CounterStoreWithComparator extends NgSimpleStateBaseSignalStore<CounterState> {
+  override storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      enableDevTool: false,
+      storeName: 'comparatorStoreSignal',
+      comparator: (previous, current) => previous.count === current.count,
+    };
+  }
 
-    override storeConfig(): NgSimpleStateStoreConfig {
-        return {
-            enableDevTool: false,
-            storeName: 'comparatorStoreSignal',
-            comparator: (previous, current) => previous.count === current.count,
-        };
-    }
+  initialState(): CounterState {
+    return {
+      count: 1,
+    };
+  }
 
-    initialState(): CounterState {
-        return {
-            count: 1
-        };
-    }
+  selectCount(): Signal<number> {
+    return this.selectState((state) => state.count);
+  }
 
-    selectCount(): Signal<number> {
-        return this.selectState(state => state.count);
-    }
+  increment(increment: number = 1): boolean {
+    return this.setState((state) => ({ count: state.count + increment }));
+  }
 
-    increment(increment: number = 1): boolean {
-        return this.setState(state => ({ count: state.count + increment }));
-    }
+  decrement(decrement: number = 1): boolean {
+    return this.replaceState((state) => ({ count: state.count - decrement }));
+  }
 
-    decrement(decrement: number = 1): boolean {
-        return this.replaceState(state => ({ count: state.count - decrement }));
-    }
+  replaceWithSameCount(): boolean {
+    return this.replaceState((state) => ({ count: state.count }));
+  }
 
-    replaceWithSameCount(): boolean {
-        return this.replaceState(state => ({ count: state.count }));
-    }
-
-    replaceWithNewObject(): boolean {
-        const currentCount = this.getCurrentState().count;
-        return this.replaceState({ count: currentCount });
-    }
+  replaceWithNewObject(): boolean {
+    const currentCount = this.getCurrentState().count;
+    return this.replaceState({ count: currentCount });
+  }
 }
 
 @Injectable()
 export class CounterStoreWithCustomSerializer extends NgSimpleStateBaseSignalStore<CounterState> {
+  override storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      enableDevTool: false,
+      storeName: 'serializerStoreSignal',
+      persistentStorage: 'session',
+      serializeState: (state: CounterState) => `signal_${JSON.stringify(state)}`,
+      deserializeState: (state: string) => JSON.parse(state.replace('signal_', '')),
+    };
+  }
 
-    override storeConfig(): NgSimpleStateStoreConfig {
-        return {
-            enableDevTool: false,
-            storeName: 'serializerStoreSignal',
-            persistentStorage: 'session',
-            serializeState: (state: CounterState) => `signal_${JSON.stringify(state)}`,
-            deserializeState: (state: string) => JSON.parse(state.replace('signal_', ''))
-        };
-    }
+  initialState(): CounterState {
+    return {
+      count: 1,
+    };
+  }
 
-    initialState(): CounterState {
-        return {
-            count: 1
-        };
-    }
+  selectCount(): Signal<number> {
+    return this.selectState((state) => state.count);
+  }
 
-    selectCount(): Signal<number> {
-        return this.selectState(state => state.count);
-    }
-
-    increment(increment: number = 1): boolean {
-        return this.setState(state => ({ count: state.count + increment }));
-    }
+  increment(increment: number = 1): boolean {
+    return this.setState((state) => ({ count: state.count + increment }));
+  }
 }
 
-
 describe('NgSimpleStateBaseSignalStore: Custom Storage', () => {
+  let service: CounterStoreWithCustomStorage;
 
-    let service: CounterStoreWithCustomStorage;
+  beforeEach(() => {
+    sessionStorage.clear();
+    (window as any)['devToolsExtension'] = new DevToolsExtension();
 
-    beforeEach(() => {
-        sessionStorage.clear();
-        (window as any)['devToolsExtension'] = new DevToolsExtension();
-
-        TestBed.configureTestingModule({
-            providers: [CounterStoreWithCustomStorage]
-        });
-
-        service = TestBed.inject(CounterStoreWithCustomStorage);
+    TestBed.configureTestingModule({
+      providers: [CounterStoreWithCustomStorage],
     });
 
-    afterEach(() => {
-        sessionStorage.clear();
+    service = TestBed.inject(CounterStoreWithCustomStorage);
+  });
+
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
+  it('should use custom storage object', () => {
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+    expect(service.increment()).toBeTrue();
+
+    const value = service.selectCount();
+    expect(value()).toBe(2);
+    expect(sessionStorage.getItem(BASE_KEY + 'customStorageStoreSignal')).toBe(
+      JSON.stringify({ count: 2 }),
+    );
+  });
+
+  it('should load from custom storage', () => {
+    sessionStorage.setItem(BASE_KEY + 'customStorageStoreSignal', JSON.stringify({ count: 88 }));
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [CounterStoreWithCustomStorage],
     });
 
-    it('should use custom storage object', () => {
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-        expect(service.increment()).toBeTrue();
-        
-        const value = service.selectCount();
-        expect(value()).toBe(2);
-        expect(sessionStorage.getItem(BASE_KEY + 'customStorageStoreSignal')).toBe(JSON.stringify({ count: 2 }));
-    });
-
-    it('should load from custom storage', () => {
-        sessionStorage.setItem(BASE_KEY + 'customStorageStoreSignal', JSON.stringify({ count: 88 }));
-        
-        TestBed.resetTestingModule();
-        TestBed.configureTestingModule({
-            providers: [CounterStoreWithCustomStorage]
-        });
-        
-        const newService = TestBed.inject(CounterStoreWithCustomStorage);
-        expect(newService.getFirstState()).toEqual({ count: 88 });
-    });
+    const newService = TestBed.inject(CounterStoreWithCustomStorage);
+    expect(newService.getFirstState()).toEqual({ count: 88 });
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: Comparator with replaceState', () => {
+  let service: CounterStoreWithComparator;
 
-    let service: CounterStoreWithComparator;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [CounterStoreWithComparator]
-        });
-
-        service = TestBed.inject(CounterStoreWithComparator);
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [CounterStoreWithComparator],
     });
 
-    it('should block replaceState when comparator returns true', () => {
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-        
-        expect(service.replaceWithSameCount()).toBeFalse();
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-    });
+    service = TestBed.inject(CounterStoreWithComparator);
+  });
 
-    it('should block replaceState with new object but same value', () => {
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-        
-        expect(service.replaceWithNewObject()).toBeFalse();
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-    });
+  it('should block replaceState when comparator returns true', () => {
+    expect(service.getCurrentState()).toEqual({ count: 1 });
 
-    it('should allow replaceState when value changes', () => {
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-        
-        expect(service.decrement()).toBeTrue();
-        expect(service.getCurrentState()).toEqual({ count: 0 });
-    });
+    expect(service.replaceWithSameCount()).toBeFalse();
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+  });
+
+  it('should block replaceState with new object but same value', () => {
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+
+    expect(service.replaceWithNewObject()).toBeFalse();
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+  });
+
+  it('should allow replaceState when value changes', () => {
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+
+    expect(service.decrement()).toBeTrue();
+    expect(service.getCurrentState()).toEqual({ count: 0 });
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: Custom Serializer', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
 
-    beforeEach(() => {
-        sessionStorage.clear();
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
+  it('should use custom serializeState', () => {
+    TestBed.configureTestingModule({
+      providers: [CounterStoreWithCustomSerializer],
     });
 
-    afterEach(() => {
-        sessionStorage.clear();
+    const service = TestBed.inject(CounterStoreWithCustomSerializer);
+    expect(service.increment()).toBeTrue();
+
+    const value = service.selectCount();
+    expect(value()).toBe(2);
+    const stored = sessionStorage.getItem(BASE_KEY + 'serializerStoreSignal');
+    expect(stored).toBe('signal_{"count":2}');
+  });
+
+  it('should use custom deserializeState', () => {
+    sessionStorage.setItem(BASE_KEY + 'serializerStoreSignal', 'signal_{"count":77}');
+
+    TestBed.configureTestingModule({
+      providers: [CounterStoreWithCustomSerializer],
     });
 
-    it('should use custom serializeState', () => {
-        TestBed.configureTestingModule({
-            providers: [CounterStoreWithCustomSerializer]
-        });
-
-        const service = TestBed.inject(CounterStoreWithCustomSerializer);
-        expect(service.increment()).toBeTrue();
-        
-        const value = service.selectCount();
-        expect(value()).toBe(2);
-        const stored = sessionStorage.getItem(BASE_KEY + 'serializerStoreSignal');
-        expect(stored).toBe('signal_{"count":2}');
-    });
-
-    it('should use custom deserializeState', () => {
-        sessionStorage.setItem(BASE_KEY + 'serializerStoreSignal', 'signal_{"count":77}');
-        
-        TestBed.configureTestingModule({
-            providers: [CounterStoreWithCustomSerializer]
-        });
-
-        const service = TestBed.inject(CounterStoreWithCustomSerializer);
-        expect(service.getFirstState()).toEqual({ count: 77 });
-    });
+    const service = TestBed.inject(CounterStoreWithCustomSerializer);
+    expect(service.getFirstState()).toEqual({ count: 77 });
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: deepFreeze edge cases', () => {
+  let service: CounterStoreWithComparator;
 
-    let service: CounterStoreWithComparator;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [CounterStoreWithComparator]
-        });
-
-        service = TestBed.inject(CounterStoreWithComparator);
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [CounterStoreWithComparator],
     });
 
-    it('deepFreeze with already frozen object', () => {
-        const frozenState = Object.freeze({ count: 5 });
-        
-        const result = (service as any)._deepFreeze(frozenState);
-        
-        expect(result).toEqual({ count: 5 });
-        expect(Object.isFrozen(result)).toBeTrue();
-    });
+    service = TestBed.inject(CounterStoreWithComparator);
+  });
 
-    it('deepFreeze with null/undefined in dev mode', () => {
-        expect((service as any)._devMode).toBeTrue();
-        
-        const nullResult = (service as any)._deepFreeze(null);
-        expect(nullResult).toBeNull();
-        
-        const undefinedResult = (service as any)._deepFreeze(undefined);
-        expect(undefinedResult).toBeUndefined();
-    });
+  it('deepFreeze with already frozen object', () => {
+    const frozenState = Object.freeze({ count: 5 });
 
-    it('deepFreeze with nested objects', () => {
-        const nestedState = { 
-            count: 1, 
-            nested: { 
-                value: 2,
-                deep: {
-                    innerValue: 3
-                }
-            } 
-        };
-        
-        const result = (service as any)._deepFreeze(nestedState);
-        
-        expect(Object.isFrozen(result)).toBeTrue();
-        expect(Object.isFrozen(result.nested)).toBeTrue();
-        expect(Object.isFrozen(result.nested.deep)).toBeTrue();
-    });
+    const result = (service as any)._deepFreeze(frozenState);
 
-    it('deepFreeze with array containing objects', () => {
-        const arrayState = [
-            { id: 1, name: 'test1' },
-            { id: 2, name: 'test2' }
-        ];
-        
-        const result = (service as any)._deepFreeze(arrayState);
-        
-        expect(Object.isFrozen(result)).toBeTrue();
-        expect(Object.isFrozen(result[0])).toBeTrue();
-        expect(Object.isFrozen(result[1])).toBeTrue();
-    });
+    expect(result).toEqual({ count: 5 });
+    expect(Object.isFrozen(result)).toBeTrue();
+  });
+
+  it('deepFreeze with null/undefined in dev mode', () => {
+    expect((service as any)._devMode).toBeTrue();
+
+    const nullResult = (service as any)._deepFreeze(null);
+    expect(nullResult).toBeNull();
+
+    const undefinedResult = (service as any)._deepFreeze(undefined);
+    expect(undefinedResult).toBeUndefined();
+  });
+
+  it('deepFreeze with nested objects', () => {
+    const nestedState = {
+      count: 1,
+      nested: {
+        value: 2,
+        deep: {
+          innerValue: 3,
+        },
+      },
+    };
+
+    const result = (service as any)._deepFreeze(nestedState);
+
+    expect(Object.isFrozen(result)).toBeTrue();
+    expect(Object.isFrozen(result.nested)).toBeTrue();
+    expect(Object.isFrozen(result.nested.deep)).toBeTrue();
+  });
+
+  it('deepFreeze with array containing objects', () => {
+    const arrayState = [
+      { id: 1, name: 'test1' },
+      { id: 2, name: 'test2' },
+    ];
+
+    const result = (service as any)._deepFreeze(arrayState);
+
+    expect(Object.isFrozen(result)).toBeTrue();
+    expect(Object.isFrozen(result[0])).toBeTrue();
+    expect(Object.isFrozen(result[1])).toBeTrue();
+  });
 });
-
 
 @Injectable()
 export class CounterStoreDevToolNoActionName extends NgSimpleStateBaseSignalStore<CounterState> {
+  override storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      enableDevTool: true,
+      storeName: 'devToolNoActionNameStoreSignal',
+    };
+  }
 
-    override storeConfig(): NgSimpleStateStoreConfig {
-        return {
-            enableDevTool: true,
-            storeName: 'devToolNoActionNameStoreSignal'
-        };
-    }
+  initialState(): CounterState {
+    return { count: 1 };
+  }
 
-    initialState(): CounterState {
-        return { count: 1 };
-    }
+  // Note: no explicit actionName passed to setState/replaceState.
+  incrementNoName(): boolean {
+    return this.setState((state) => ({ count: state.count + 1 }));
+  }
 
-    // Note: no explicit actionName passed to setState/replaceState.
-    incrementNoName(): boolean {
-        return this.setState(state => ({ count: state.count + 1 }));
-    }
-
-    replaceNoName(): boolean {
-        return this.replaceState(state => ({ count: state.count + 1 }));
-    }
+  replaceNoName(): boolean {
+    return this.replaceState((state) => ({ count: state.count + 1 }));
+  }
 }
 
 describe('NgSimpleStateBaseSignalStore: __REDUX_DEVTOOLS_EXTENSION__', () => {
+  beforeEach(() => {
+    (window as any)['devToolsExtension'] = undefined;
+    (window as any)['__REDUX_DEVTOOLS_EXTENSION__'] = new DevToolsExtension();
+    sessionStorage.clear();
+  });
 
-    beforeEach(() => {
-        (window as any)['devToolsExtension'] = undefined;
-        (window as any)['__REDUX_DEVTOOLS_EXTENSION__'] = new DevToolsExtension();
-        sessionStorage.clear();
+  afterEach(() => {
+    (window as any)['__REDUX_DEVTOOLS_EXTENSION__'] = undefined;
+    sessionStorage.clear();
+  });
+
+  it('should use __REDUX_DEVTOOLS_EXTENSION__ when available', () => {
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ enableDevTool: true }), CounterStoreWithCustomStorage],
     });
 
-    afterEach(() => {
-        (window as any)['__REDUX_DEVTOOLS_EXTENSION__'] = undefined;
-        sessionStorage.clear();
+    const service = TestBed.inject(CounterStoreWithCustomStorage);
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+
+    expect(service.increment()).toBeTrue();
+    expect((window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name).toBe(
+      'customStorageStoreSignal.increment',
+    );
+  });
+
+  it('should infer the action name from the calling method when DevTools is enabled and no actionName is passed (setState)', () => {
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ enableDevTool: true }), CounterStoreDevToolNoActionName],
     });
 
-    it('should use __REDUX_DEVTOOLS_EXTENSION__ when available', () => {
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ enableDevTool: true }),
-                CounterStoreWithCustomStorage
-            ]
-        });
+    const service = TestBed.inject(CounterStoreDevToolNoActionName);
+    expect(service.incrementNoName()).toBeTrue();
 
-        const service = TestBed.inject(CounterStoreWithCustomStorage);
-        expect(service.getCurrentState()).toEqual({ count: 1 });
+    const sentAction = (window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name;
+    expect(sentAction).not.toBe('devToolNoActionNameStoreSignal.no-action-needed');
+    expect(sentAction).toBe('devToolNoActionNameStoreSignal.incrementNoName');
+  });
 
-        expect(service.increment()).toBeTrue();
-        expect((window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name).toBe('customStorageStoreSignal.increment');
+  it('should infer the action name from the calling method when DevTools is enabled and no actionName is passed (replaceState)', () => {
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ enableDevTool: true }), CounterStoreDevToolNoActionName],
     });
 
-    it('should infer the action name from the calling method when DevTools is enabled and no actionName is passed (setState)', () => {
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ enableDevTool: true }),
-                CounterStoreDevToolNoActionName
-            ]
-        });
+    const service = TestBed.inject(CounterStoreDevToolNoActionName);
+    expect(service.replaceNoName()).toBeTrue();
 
-        const service = TestBed.inject(CounterStoreDevToolNoActionName);
-        expect(service.incrementNoName()).toBeTrue();
-
-        const sentAction = (window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name;
-        expect(sentAction).not.toBe('devToolNoActionNameStoreSignal.no-action-needed');
-        expect(sentAction).toBe('devToolNoActionNameStoreSignal.incrementNoName');
-    });
-
-    it('should infer the action name from the calling method when DevTools is enabled and no actionName is passed (replaceState)', () => {
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ enableDevTool: true }),
-                CounterStoreDevToolNoActionName
-            ]
-        });
-
-        const service = TestBed.inject(CounterStoreDevToolNoActionName);
-        expect(service.replaceNoName()).toBeTrue();
-
-        const sentAction = (window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name;
-        expect(sentAction).not.toBe('devToolNoActionNameStoreSignal.no-action-needed');
-        expect(sentAction).toBe('devToolNoActionNameStoreSignal.replaceNoName');
-    });
+    const sentAction = (window as any)['__REDUX_DEVTOOLS_EXTENSION__'].name;
+    expect(sentAction).not.toBe('devToolNoActionNameStoreSignal.no-action-needed');
+    expect(sentAction).toBe('devToolNoActionNameStoreSignal.replaceNoName');
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: setState with direct object', () => {
+  let service: CounterStoreWithComparator;
 
-    let service: CounterStoreWithComparator;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [CounterStoreWithComparator]
-        });
-
-        service = TestBed.inject(CounterStoreWithComparator);
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [CounterStoreWithComparator],
     });
 
-    it('setState with object (not function)', () => {
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-        
-        const result = service.setState({ count: 5 });
-        expect(result).toBeTrue();
-        expect(service.getCurrentState()).toEqual({ count: 5 });
-    });
+    service = TestBed.inject(CounterStoreWithComparator);
+  });
 
-    it('setState with same object should not change', () => {
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-        
-        const result = service.setState({ count: 1 });
-        expect(result).toBeFalse();
-    });
+  it('setState with object (not function)', () => {
+    expect(service.getCurrentState()).toEqual({ count: 1 });
 
-    it('replaceState with direct object (not function)', () => {
-        expect(service.getCurrentState()).toEqual({ count: 1 });
-        
-        const result = service.replaceState({ count: 10 });
-        expect(result).toBeTrue();
-        expect(service.getCurrentState()).toEqual({ count: 10 });
-    });
+    const result = service.setState({ count: 5 });
+    expect(result).toBeTrue();
+    expect(service.getCurrentState()).toEqual({ count: 5 });
+  });
 
-    it('selectState with custom comparator', () => {
-        const customComparator = (a: number, b: number) => a === b;
-        const value = service.selectState(state => state.count, customComparator);
-        expect(value()).toBe(1);
-    });
+  it('setState with same object should not change', () => {
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+
+    const result = service.setState({ count: 1 });
+    expect(result).toBeFalse();
+  });
+
+  it('replaceState with direct object (not function)', () => {
+    expect(service.getCurrentState()).toEqual({ count: 1 });
+
+    const result = service.replaceState({ count: 10 });
+    expect(result).toBeTrue();
+    expect(service.getCurrentState()).toEqual({ count: 10 });
+  });
+
+  it('selectState with custom comparator', () => {
+    const customComparator = (a: number, b: number) => a === b;
+    const value = service.selectState((state) => state.count, customComparator);
+    expect(value()).toBe(1);
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: PROD mode (devMode=false)', () => {
+  let service: CounterStoreWithComparator;
 
-    let service: CounterStoreWithComparator;
-
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [CounterStoreWithComparator]
-        });
-
-        service = TestBed.inject(CounterStoreWithComparator);
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [CounterStoreWithComparator],
     });
 
-    it('getCurrentState in PROD mode should not freeze', () => {
-        // Set devMode to false to simulate production
-        (service as any)._devMode = false;
-        
-        const state = service.getCurrentState();
-        expect(state).toEqual({ count: 1 });
-        
-        // In PROD mode, objects are not frozen
-        expect(Object.isFrozen(state)).toBeFalse();
-        
-        // Reset
-        (service as any)._devMode = true;
-    });
+    service = TestBed.inject(CounterStoreWithComparator);
+  });
+
+  it('getCurrentState in PROD mode should not freeze', () => {
+    // Set devMode to false to simulate production
+    (service as any)._devMode = false;
+
+    const state = service.getCurrentState();
+    expect(state).toEqual({ count: 1 });
+
+    // In PROD mode, objects are not frozen
+    expect(Object.isFrozen(state)).toBeFalse();
+
+    // Reset
+    (service as any)._devMode = true;
+  });
 });
-
 
 describe('provideNgSimpleState without arguments (Signal)', () => {
-
-    it('should return empty array when called without config', () => {
-        const result = provideNgSimpleState();
-        expect(result).toEqual([]);
-    });
+  it('should return empty array when called without config', () => {
+    const result = provideNgSimpleState();
+    expect(result).toEqual([]);
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: produce method', () => {
-
-    @Injectable()
-    class ProduceTestStore extends NgSimpleStateBaseSignalStore<{ items: { id: number; name: string }[] }> {
-
-        storeConfig(): NgSimpleStateStoreConfig {
-            return { storeName: 'ProduceTestStore' };
-        }
-
-        initialState() {
-            return {
-                items: [
-                    { id: 1, name: 'Item 1' },
-                    { id: 2, name: 'Item 2' }
-                ]
-            };
-        }
-
-        updateItemName(id: number, name: string): boolean {
-            return this.produce(draft => {
-                const item = draft.items.find(i => i.id === id);
-                if (item) {
-                    item.name = name;
-                }
-            });
-        }
-
-        addItem(name: string): boolean {
-            return this.produce(draft => {
-                draft.items.push({ id: Date.now(), name });
-            });
-        }
+  @Injectable()
+  class ProduceTestStore extends NgSimpleStateBaseSignalStore<{
+    items: { id: number; name: string }[];
+  }> {
+    storeConfig(): NgSimpleStateStoreConfig {
+      return { storeName: 'ProduceTestStore' };
     }
 
-    let service: ProduceTestStore;
+    initialState() {
+      return {
+        items: [
+          { id: 1, name: 'Item 1' },
+          { id: 2, name: 'Item 2' },
+        ],
+      };
+    }
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [ProduceTestStore]
-        });
-        service = TestBed.inject(ProduceTestStore);
-    });
+    updateItemName(id: number, name: string): boolean {
+      return this.produce((draft) => {
+        const item = draft.items.find((i) => i.id === id);
+        if (item) {
+          item.name = name;
+        }
+      });
+    }
 
-    it('should update nested item with produce', () => {
-        expect(service.updateItemName(1, 'Updated Item 1')).toBeTrue();
-        
-        const state = service.getCurrentState();
-        expect(state.items[0].name).toBe('Updated Item 1');
-        expect(state.items[1].name).toBe('Item 2');
-    });
+    addItem(name: string): boolean {
+      return this.produce((draft) => {
+        draft.items.push({ id: Date.now(), name });
+      });
+    }
+  }
 
-    it('should add item with produce', () => {
-        expect(service.addItem('New Item')).toBeTrue();
-        
-        const state = service.getCurrentState();
-        expect(state.items.length).toBe(3);
-        expect(state.items[2].name).toBe('New Item');
-    });
+  let service: ProduceTestStore;
 
-    it('should produce with custom action name', () => {
-        const result = (service as any).produce((draft: any) => {
-            draft.items[0].name = 'Custom Action';
-        }, 'customAction');
-        
-        expect(result).toBeTrue();
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ProduceTestStore],
     });
+    service = TestBed.inject(ProduceTestStore);
+  });
+
+  it('should update nested item with produce', () => {
+    expect(service.updateItemName(1, 'Updated Item 1')).toBeTrue();
+
+    const state = service.getCurrentState();
+    expect(state.items[0].name).toBe('Updated Item 1');
+    expect(state.items[1].name).toBe('Item 2');
+  });
+
+  it('should add item with produce', () => {
+    expect(service.addItem('New Item')).toBeTrue();
+
+    const state = service.getCurrentState();
+    expect(state.items.length).toBe(3);
+    expect(state.items[2].name).toBe('New Item');
+  });
+
+  it('should produce with custom action name', () => {
+    const result = (service as any).produce((draft: any) => {
+      draft.items[0].name = 'Custom Action';
+    }, 'customAction');
+
+    expect(result).toBeTrue();
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: linkedState method', () => {
-
-    @Injectable()
-    class LinkedStateTestStore extends NgSimpleStateBaseSignalStore<{ count: number; multiplier: number }> {
-
-        storeConfig(): NgSimpleStateStoreConfig {
-            return { storeName: 'LinkedStateTestStore' };
-        }
-
-        initialState() {
-            return { count: 5, multiplier: 2 };
-        }
-
-        setCount(count: number): void {
-            this.setState({ count });
-        }
-
-        getDoubledCount() {
-            return this.linkedState({
-                source: state => state.count,
-                computation: (count) => count * 2
-            });
-        }
-
-        getCountWithMultiplier() {
-            return this.linkedState({
-                source: state => state.count * state.multiplier
-            });
-        }
-
-        getDoubledCountAlwaysEqual() {
-            return this.linkedState({
-                source: state => state.count,
-                computation: (count) => count * 2,
-                // Custom equality: treat every recomputation as "unchanged"
-                equal: () => true
-            });
-        }
+  @Injectable()
+  class LinkedStateTestStore extends NgSimpleStateBaseSignalStore<{
+    count: number;
+    multiplier: number;
+  }> {
+    storeConfig(): NgSimpleStateStoreConfig {
+      return { storeName: 'LinkedStateTestStore' };
     }
 
-    let service: LinkedStateTestStore;
+    initialState() {
+      return { count: 5, multiplier: 2 };
+    }
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [LinkedStateTestStore]
-        });
-        service = TestBed.inject(LinkedStateTestStore);
+    setCount(count: number): void {
+      this.setState({ count });
+    }
+
+    getDoubledCount() {
+      return this.linkedState({
+        source: (state) => state.count,
+        computation: (count) => count * 2,
+      });
+    }
+
+    getCountWithMultiplier() {
+      return this.linkedState({
+        source: (state) => state.count * state.multiplier,
+      });
+    }
+
+    getDoubledCountAlwaysEqual() {
+      return this.linkedState({
+        source: (state) => state.count,
+        computation: (count) => count * 2,
+        // Custom equality: treat every recomputation as "unchanged"
+        equal: () => true,
+      });
+    }
+  }
+
+  let service: LinkedStateTestStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [LinkedStateTestStore],
     });
+    service = TestBed.inject(LinkedStateTestStore);
+  });
 
-    it('should create linked signal with computation', () => {
-        const doubled = service.getDoubledCount();
-        expect(doubled()).toBe(10);
-    });
+  it('should create linked signal with computation', () => {
+    const doubled = service.getDoubledCount();
+    expect(doubled()).toBe(10);
+  });
 
-    it('should create linked signal without computation', () => {
-        const result = service.getCountWithMultiplier();
-        expect(result()).toBe(10);
-    });
+  it('should create linked signal without computation', () => {
+    const result = service.getCountWithMultiplier();
+    expect(result()).toBe(10);
+  });
 
-    it('should update linked signal when source changes', () => {
-        const doubled = service.getDoubledCount();
-        expect(doubled()).toBe(10);
+  it('should update linked signal when source changes', () => {
+    const doubled = service.getDoubledCount();
+    expect(doubled()).toBe(10);
 
-        service.setCount(10);
-        expect(doubled()).toBe(20);
-    });
+    service.setCount(10);
+    expect(doubled()).toBe(20);
+  });
 
-    it('should honor the custom equal option', () => {
-        const doubled = service.getDoubledCountAlwaysEqual();
-        expect(doubled()).toBe(10);
+  it('should honor the custom equal option', () => {
+    const doubled = service.getDoubledCountAlwaysEqual();
+    expect(doubled()).toBe(10);
 
-        // With equal: () => true, recomputations are treated as unchanged,
-        // so the value must stay at the initial 10 even after the source changes.
-        service.setCount(50);
-        expect(doubled()).toBe(10);
-    });
+    // With equal: () => true, recomputations are treated as unchanged,
+    // so the value must stay at the initial 10 even after the source changes.
+    service.setCount(50);
+    expect(doubled()).toBe(10);
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: effects cleanup', () => {
-
-    @Injectable()
-    class EffectsCleanupStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
-
-        storeConfig(): NgSimpleStateStoreConfig {
-            return { storeName: 'EffectsCleanupStore' };
-        }
-
-        initialState() {
-            return { count: 0 };
-        }
+  @Injectable()
+  class EffectsCleanupStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
+    storeConfig(): NgSimpleStateStoreConfig {
+      return { storeName: 'EffectsCleanupStore' };
     }
 
-    let service: EffectsCleanupStore;
+    initialState() {
+      return { count: 0 };
+    }
+  }
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [EffectsCleanupStore]
-        });
-        service = TestBed.inject(EffectsCleanupStore);
-    });
+  let service: EffectsCleanupStore;
 
-    it('should get effect names', () => {
-        expect(service.getEffectNames()).toEqual([]);
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [EffectsCleanupStore],
     });
+    service = TestBed.inject(EffectsCleanupStore);
+  });
+
+  it('should get effect names', () => {
+    expect(service.getEffectNames()).toEqual([]);
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: plugin blocking', () => {
-
-    @Injectable()
-    class PluginBlockTestStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
-
-        storeConfig(): NgSimpleStateStoreConfig {
-            return { 
-                storeName: 'PluginBlockTestStore',
-                plugins: [{
-                    name: 'blocker',
-                    onBeforeStateChange: (context) => {
-                        // Block any change where count > 5
-                        return (context.nextState as any).count <= 5;
-                    }
-                }]
-            };
-        }
-
-        initialState() {
-            return { count: 0 };
-        }
-
-        setCount(count: number): boolean {
-            return this.setState({ count });
-        }
+  @Injectable()
+  class PluginBlockTestStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
+    storeConfig(): NgSimpleStateStoreConfig {
+      return {
+        storeName: 'PluginBlockTestStore',
+        plugins: [
+          {
+            name: 'blocker',
+            onBeforeStateChange: (context) => {
+              // Block any change where count > 5
+              return (context.nextState as any).count <= 5;
+            },
+          },
+        ],
+      };
     }
 
-    let service: PluginBlockTestStore;
+    initialState() {
+      return { count: 0 };
+    }
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [PluginBlockTestStore]
-        });
-        service = TestBed.inject(PluginBlockTestStore);
-    });
+    setCount(count: number): boolean {
+      return this.setState({ count });
+    }
+  }
 
-    it('should allow state change when plugin returns true', () => {
-        expect(service.setCount(3)).toBeTrue();
-        expect(service.getCurrentState().count).toBe(3);
-    });
+  let service: PluginBlockTestStore;
 
-    it('should block state change when plugin returns false', () => {
-        expect(service.setCount(10)).toBeFalse();
-        expect(service.getCurrentState().count).toBe(0);
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [PluginBlockTestStore],
     });
+    service = TestBed.inject(PluginBlockTestStore);
+  });
 
-    it('should allow edge case (count = 5)', () => {
-        expect(service.setCount(5)).toBeTrue();
-        expect(service.getCurrentState().count).toBe(5);
-    });
+  it('should allow state change when plugin returns true', () => {
+    expect(service.setCount(3)).toBeTrue();
+    expect(service.getCurrentState().count).toBe(3);
+  });
+
+  it('should block state change when plugin returns false', () => {
+    expect(service.setCount(10)).toBeFalse();
+    expect(service.getCurrentState().count).toBe(0);
+  });
+
+  it('should allow edge case (count = 5)', () => {
+    expect(service.setCount(5)).toBeTrue();
+    expect(service.getCurrentState().count).toBe(5);
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: Immer with custom produce', () => {
-
-    @Injectable()
-    class ImmerProduceStore extends NgSimpleStateBaseSignalStore<{ items: number[] }> {
-
-        storeConfig(): NgSimpleStateStoreConfig {
-            return { 
-                storeName: 'ImmerProduceStore',
-                immerProduce: <T>(state: T, producer: (draft: T) => void): T => {
-                    // Mock Immer produce - just clone and apply
-                    const draft = structuredClone(state);
-                    producer(draft);
-                    return draft;
-                }
-            };
-        }
-
-        initialState() {
-            return { items: [1, 2, 3] };
-        }
-
-        addItem(item: number): boolean {
-            return this.produce(draft => {
-                draft.items.push(item);
-            });
-        }
+  @Injectable()
+  class ImmerProduceStore extends NgSimpleStateBaseSignalStore<{ items: number[] }> {
+    storeConfig(): NgSimpleStateStoreConfig {
+      return {
+        storeName: 'ImmerProduceStore',
+        immerProduce: <T>(state: T, producer: (draft: T) => void): T => {
+          // Mock Immer produce - just clone and apply
+          const draft = structuredClone(state);
+          producer(draft);
+          return draft;
+        },
+      };
     }
 
-    let service: ImmerProduceStore;
+    initialState() {
+      return { items: [1, 2, 3] };
+    }
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [ImmerProduceStore]
-        });
-        service = TestBed.inject(ImmerProduceStore);
-    });
+    addItem(item: number): boolean {
+      return this.produce((draft) => {
+        draft.items.push(item);
+      });
+    }
+  }
 
-    it('should use custom immerProduce function', () => {
-        expect(service.addItem(4)).toBeTrue();
-        expect(service.getCurrentState().items).toEqual([1, 2, 3, 4]);
+  let service: ImmerProduceStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ImmerProduceStore],
     });
+    service = TestBed.inject(ImmerProduceStore);
+  });
+
+  it('should use custom immerProduce function', () => {
+    expect(service.addItem(4)).toBeTrue();
+    expect(service.getCurrentState().items).toEqual([1, 2, 3, 4]);
+  });
 });
-
 
 describe('NgSimpleStateBaseSignalStore: replaceState', () => {
-
-    @Injectable()
-    class ReplaceStateStore extends NgSimpleStateBaseSignalStore<{ count: number; name: string }> {
-
-        storeConfig(): NgSimpleStateStoreConfig {
-            return { storeName: 'ReplaceStateStore' };
-        }
-
-        initialState() {
-            return { count: 0, name: 'initial' };
-        }
-
-        replaceWithNew(): boolean {
-            return this.replaceState({ count: 100, name: 'replaced' });
-        }
-
-        replaceWithFn(): boolean {
-            return this.replaceState(state => ({ count: state.count * 2, name: 'doubled' }));
-        }
+  @Injectable()
+  class ReplaceStateStore extends NgSimpleStateBaseSignalStore<{ count: number; name: string }> {
+    storeConfig(): NgSimpleStateStoreConfig {
+      return { storeName: 'ReplaceStateStore' };
     }
 
-    let service: ReplaceStateStore;
+    initialState() {
+      return { count: 0, name: 'initial' };
+    }
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [ReplaceStateStore]
-        });
-        service = TestBed.inject(ReplaceStateStore);
-    });
+    replaceWithNew(): boolean {
+      return this.replaceState({ count: 100, name: 'replaced' });
+    }
 
-    it('should replace state with object', () => {
-        expect(service.replaceWithNew()).toBeTrue();
-        expect(service.getCurrentState()).toEqual({ count: 100, name: 'replaced' });
-    });
+    replaceWithFn(): boolean {
+      return this.replaceState((state) => ({ count: state.count * 2, name: 'doubled' }));
+    }
+  }
 
-    it('should replace state with function', () => {
-        service.replaceWithNew();
-        expect(service.replaceWithFn()).toBeTrue();
-        expect(service.getCurrentState()).toEqual({ count: 200, name: 'doubled' });
+  let service: ReplaceStateStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ReplaceStateStore],
     });
+    service = TestBed.inject(ReplaceStateStore);
+  });
+
+  it('should replace state with object', () => {
+    expect(service.replaceWithNew()).toBeTrue();
+    expect(service.getCurrentState()).toEqual({ count: 100, name: 'replaced' });
+  });
+
+  it('should replace state with function', () => {
+    service.replaceWithNew();
+    expect(service.replaceWithFn()).toBeTrue();
+    expect(service.getCurrentState()).toEqual({ count: 200, name: 'doubled' });
+  });
 });
 
-
 describe('NgSimpleStateBaseSignalStore: comparator', () => {
-
-    @Injectable()
-    class ComparatorStore extends NgSimpleStateBaseSignalStore<{ count: number; timestamp: number }> {
-
-        storeConfig() {
-            return { 
-                storeName: 'ComparatorStore',
-                comparator: (prev, curr) => prev.count === curr.count
-            } satisfies NgSimpleStateStoreConfig<{ count: number; timestamp: number }>;
-        }
-
-        initialState() {
-            return { count: 0, timestamp: Date.now() };
-        }
-
-        setCount(count: number): boolean {
-            return this.setState({ count, timestamp: Date.now() });
-        }
+  @Injectable()
+  class ComparatorStore extends NgSimpleStateBaseSignalStore<{ count: number; timestamp: number }> {
+    storeConfig() {
+      return {
+        storeName: 'ComparatorStore',
+        comparator: (prev, curr) => prev.count === curr.count,
+      } satisfies NgSimpleStateStoreConfig<{ count: number; timestamp: number }>;
     }
 
-    let service: ComparatorStore;
+    initialState() {
+      return { count: 0, timestamp: Date.now() };
+    }
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [ComparatorStore]
-        });
-        service = TestBed.inject(ComparatorStore);
-    });
+    setCount(count: number): boolean {
+      return this.setState({ count, timestamp: Date.now() });
+    }
+  }
 
-    it('should detect change when count changes', () => {
-        expect(service.setCount(5)).toBeTrue();
-        expect(service.getCurrentState().count).toBe(5);
-    });
+  let service: ComparatorStore;
 
-    it('should detect no change when count stays same', () => {
-        service.setCount(5);
-        // Setting same count should return false due to comparator
-        expect(service.setCount(5)).toBeFalse();
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ComparatorStore],
     });
+    service = TestBed.inject(ComparatorStore);
+  });
+
+  it('should detect change when count changes', () => {
+    expect(service.setCount(5)).toBeTrue();
+    expect(service.getCurrentState().count).toBe(5);
+  });
+
+  it('should detect no change when count stays same', () => {
+    service.setCount(5);
+    // Setting same count should return false due to comparator
+    expect(service.setCount(5)).toBeFalse();
+  });
 });
 
 describe('provideNgSimpleStatePlugins', () => {
+  it('should provide plugins separately', () => {
+    const plugins: NgSimpleStatePlugin[] = [
+      {
+        name: 'testPlugin',
+        onBeforeStateChange: () => true,
+      },
+    ];
 
-    it('should provide plugins separately', () => {
-        const plugins: NgSimpleStatePlugin[] = [
-            {
-                name: 'testPlugin',
-                onBeforeStateChange: () => true
-            }
-        ];
-        
-        const result = provideNgSimpleStatePlugins(plugins);
-        expect(result).toBeDefined();
-    });
+    const result = provideNgSimpleStatePlugins(plugins);
+    expect(result).toBeDefined();
+  });
 });
 
 describe('NgSimpleStateBaseSignalStore: Plugin lifecycle hooks', () => {
+  let onStoreInitSpy: Mock;
+  let onStoreDestroySpy: Mock;
+  let lifecyclePlugin: NgSimpleStatePlugin;
 
-    let onStoreInitSpy: Mock;
-    let onStoreDestroySpy: Mock;
-    let lifecyclePlugin: NgSimpleStatePlugin;
-
-    @Injectable()
-    class LifecyclePluginStore extends NgSimpleStateBaseSignalStore<{ value: number }> {
-
-        storeConfig(): NgSimpleStateStoreConfig {
-            return { storeName: 'LifecyclePluginStore' };
-        }
-
-        initialState() {
-            return { value: 0 };
-        }
-
-        setValue(value: number): boolean {
-            return this.setState({ value });
-        }
+  @Injectable()
+  class LifecyclePluginStore extends NgSimpleStateBaseSignalStore<{ value: number }> {
+    storeConfig(): NgSimpleStateStoreConfig {
+      return { storeName: 'LifecyclePluginStore' };
     }
 
-    beforeEach(() => {
-        onStoreInitSpy = vi.fn();
-        onStoreDestroySpy = vi.fn();
-        
-        lifecyclePlugin = {
-            name: 'lifecyclePlugin',
-            onStoreInit: onStoreInitSpy,
-            onStoreDestroy: onStoreDestroySpy,
-            onBeforeStateChange: () => true
-        };
+    initialState() {
+      return { value: 0 };
+    }
 
-        TestBed.configureTestingModule({
-            providers: [
-                provideNgSimpleState({ plugins: [lifecyclePlugin] }),
-                LifecyclePluginStore
-            ]
-        });
-    });
+    setValue(value: number): boolean {
+      return this.setState({ value });
+    }
+  }
 
-    it('should call onStoreInit when store is created', () => {
-        TestBed.inject(LifecyclePluginStore);
-        expect(onStoreInitSpy).toHaveBeenCalledWith('LifecyclePluginStore', { value: 0 });
+  beforeEach(() => {
+    onStoreInitSpy = vi.fn();
+    onStoreDestroySpy = vi.fn();
+
+    lifecyclePlugin = {
+      name: 'lifecyclePlugin',
+      onStoreInit: onStoreInitSpy,
+      onStoreDestroy: onStoreDestroySpy,
+      onBeforeStateChange: () => true,
+    };
+
+    TestBed.configureTestingModule({
+      providers: [provideNgSimpleState({ plugins: [lifecyclePlugin] }), LifecyclePluginStore],
     });
+  });
+
+  it('should call onStoreInit when store is created', () => {
+    TestBed.inject(LifecyclePluginStore);
+    expect(onStoreInitSpy).toHaveBeenCalledWith('LifecyclePluginStore', { value: 0 });
+  });
 });
 
 describe('NgSimpleStateBaseSignalStore: DevTool time-travel', () => {
+  let mockDevTool: any;
+  let applyStateSpy: Mock;
+  let getInitialStateSpy: Mock;
 
-    let mockDevTool: any;
-    let applyStateSpy: Mock;
-    let getInitialStateSpy: Mock;
-
-    @Injectable()
-    class TimeTravelStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
-
-        storeConfig(): NgSimpleStateStoreConfig {
-            return { storeName: 'TimeTravelStore', enableDevTool: true };
-        }
-
-        initialState() {
-            return { count: 0 };
-        }
-
-        increment(): boolean {
-            return this.setState(s => ({ count: s.count + 1 }));
-        }
-
-        applyTestState(state: { count: number }): void {
-            (this as any)._applyDevToolState(state);
-        }
+  @Injectable()
+  class TimeTravelStore extends NgSimpleStateBaseSignalStore<{ count: number }> {
+    storeConfig(): NgSimpleStateStoreConfig {
+      return { storeName: 'TimeTravelStore', enableDevTool: true };
     }
 
-    beforeEach(() => {
-        applyStateSpy = vi.fn();
-        getInitialStateSpy = vi.fn();
-        
-        mockDevTool = {
-            send: vi.fn().mockReturnValue(true),
-            registerStore: vi.fn().mockImplementation(
-                (storeName: string, callbacks: { applyState: (s: unknown) => void, getInitialState: () => unknown }) => {
-                    applyStateSpy.mockImplementation(callbacks.applyState);
-                    getInitialStateSpy.mockImplementation(callbacks.getInitialState);
-                }
-            ),
-            unregisterStore: vi.fn()
-        };
+    initialState() {
+      return { count: 0 };
+    }
 
-        TestBed.configureTestingModule({
-            providers: [
-                { provide: NgSimpleStateDevTool, useValue: mockDevTool },
-                TimeTravelStore
-            ]
-        });
-    });
+    increment(): boolean {
+      return this.setState((s) => ({ count: s.count + 1 }));
+    }
 
-    it('should register applyState callback with DevTool', () => {
-        const service = TestBed.inject(TimeTravelStore);
-        expect(mockDevTool.registerStore).toHaveBeenCalled();
-        
-        // Simulate DevTool calling applyState (time-travel)
-        service.increment();
-        expect(service.getCurrentState().count).toBe(1);
-        
-        service.applyTestState({ count: 10 });
-        expect(service.getCurrentState().count).toBe(10);
-    });
+    applyTestState(state: { count: number }): void {
+      (this as any)._applyDevToolState(state);
+    }
+  }
 
-    it('should register getInitialState callback with DevTool', () => {
-        TestBed.inject(TimeTravelStore);
-        expect(mockDevTool.registerStore).toHaveBeenCalled();
-        
-        const initialState = getInitialStateSpy();
-        expect(initialState).toEqual({ count: 0 });
+  beforeEach(() => {
+    applyStateSpy = vi.fn();
+    getInitialStateSpy = vi.fn();
+
+    mockDevTool = {
+      send: vi.fn().mockReturnValue(true),
+      registerStore: vi
+        .fn()
+        .mockImplementation(
+          (
+            storeName: string,
+            callbacks: { applyState: (s: unknown) => void; getInitialState: () => unknown },
+          ) => {
+            applyStateSpy.mockImplementation(callbacks.applyState);
+            getInitialStateSpy.mockImplementation(callbacks.getInitialState);
+          },
+        ),
+      unregisterStore: vi.fn(),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [{ provide: NgSimpleStateDevTool, useValue: mockDevTool }, TimeTravelStore],
     });
+  });
+
+  it('should register applyState callback with DevTool', () => {
+    const service = TestBed.inject(TimeTravelStore);
+    expect(mockDevTool.registerStore).toHaveBeenCalled();
+
+    // Simulate DevTool calling applyState (time-travel)
+    service.increment();
+    expect(service.getCurrentState().count).toBe(1);
+
+    service.applyTestState({ count: 10 });
+    expect(service.getCurrentState().count).toBe(10);
+  });
+
+  it('should register getInitialState callback with DevTool', () => {
+    TestBed.inject(TimeTravelStore);
+    expect(mockDevTool.registerStore).toHaveBeenCalled();
+
+    const initialState = getInitialStateSpy();
+    expect(initialState).toEqual({ count: 0 });
+  });
 });
-

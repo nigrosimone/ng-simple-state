@@ -10,7 +10,7 @@ import {
   move,
   url,
   strings,
-  noop
+  noop,
 } from '@angular-devkit/schematics';
 export interface StoreOptions {
   name: string;
@@ -37,9 +37,7 @@ export function store(options: StoreOptions): Rule {
     const path = buildPath(options);
 
     const templateSource = apply(url('./files'), [
-      options.skipTests
-        ? filter(filePath => !/\.spec\.ts(\.template)?$/.test(filePath))
-        : noop(),
+      options.skipTests ? filter((filePath) => !/\.spec\.ts(\.template)?$/.test(filePath)) : noop(),
       applyTemplates({
         ...strings,
         ...options,
@@ -53,13 +51,12 @@ export function store(options: StoreOptions): Rule {
         isSignal: options.type === 'signal',
         isRxjs: options.type === 'rxjs',
         hasPersistentStorage: options.persistentStorage && options.persistentStorage !== 'none',
-        persistentStorageValue: options.persistentStorage === 'none' ? undefined : options.persistentStorage
+        persistentStorageValue:
+          options.persistentStorage === 'none' ? undefined : options.persistentStorage,
       }),
-      move(path)
+      move(path),
     ]);
 
-    return chain([
-      mergeWith(templateSource)
-    ])(tree, context);
+    return chain([mergeWith(templateSource)])(tree, context);
   };
 }

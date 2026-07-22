@@ -29,9 +29,7 @@
           "options": {
             "tsConfig": "projects/ng-simple-state/tsconfig.spec.json",
             "runner": "vitest",
-            "setupFiles": [
-              "projects/ng-simple-state/src/test-setup.ts"
-            ]
+            "setupFiles": ["projects/ng-simple-state/src/test-setup.ts"]
           }
         },
         "lint": {
@@ -72,9 +70,7 @@
               "projects/ng-simple-state-demo/src/favicon.ico",
               "projects/ng-simple-state-demo/src/assets"
             ],
-            "styles": [
-              "projects/ng-simple-state-demo/src/styles.scss"
-            ],
+            "styles": ["projects/ng-simple-state-demo/src/styles.scss"],
             "scripts": [],
             "browser": "projects/ng-simple-state-demo/src/main.ts"
           },
@@ -141,9 +137,7 @@
     }
   },
   "cli": {
-    "schematicCollections": [
-      "@angular-eslint/schematics"
-    ]
+    "schematicCollections": ["@angular-eslint/schematics"]
   },
   "schematics": {
     "@schematics/angular:component": {

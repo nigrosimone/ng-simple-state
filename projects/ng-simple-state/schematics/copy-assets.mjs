@@ -18,15 +18,15 @@ const schematicsDir = dirname(fileURLToPath(import.meta.url));
  * @param {string} outDir directory holding the compiled schematics
  */
 export function copySchematicsAssets(outDir) {
-    mkdirSync(join(outDir, 'store'), { recursive: true });
-    cpSync(join(schematicsDir, 'collection.json'), join(outDir, 'collection.json'));
-    cpSync(join(schematicsDir, 'store/schema.json'), join(outDir, 'store/schema.json'));
-    cpSync(join(schematicsDir, 'store/files'), join(outDir, 'store/files'), { recursive: true });
+  mkdirSync(join(outDir, 'store'), { recursive: true });
+  cpSync(join(schematicsDir, 'collection.json'), join(outDir, 'collection.json'));
+  cpSync(join(schematicsDir, 'store/schema.json'), join(outDir, 'store/schema.json'));
+  cpSync(join(schematicsDir, 'store/files'), join(outDir, 'store/files'), { recursive: true });
 }
 
 // also usable straight from an npm script: `node copy-assets.mjs <outDir>`
 const outDirArgument = process.argv[2];
 if (outDirArgument) {
-    copySchematicsAssets(resolve(outDirArgument));
-    console.log('Schematics assets copied into', outDirArgument);
+  copySchematicsAssets(resolve(outDirArgument));
+  console.log('Schematics assets copied into', outDirArgument);
 }

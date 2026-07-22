@@ -8,59 +8,58 @@ export interface PluginsState {
 
 @Injectable()
 export class PluginsStore extends NgSimpleStateBaseSignalStore<PluginsState> {
-  
   storeConfig(): NgSimpleStateStoreConfig<PluginsState> {
     return {
-      storeName: 'PluginsStore'
+      storeName: 'PluginsStore',
     };
   }
 
   initialState(): PluginsState {
     return {
       items: ['Item 1', 'Item 2'],
-      lastAction: 'init'
+      lastAction: 'init',
     };
   }
 
   // Selectors
   selectItems(): Signal<string[]> {
-    return this.selectState(state => state.items);
+    return this.selectState((state) => state.items);
   }
 
   selectLastAction(): Signal<string> {
-    return this.selectState(state => state.lastAction);
+    return this.selectState((state) => state.lastAction);
   }
 
   selectItemCount(): Signal<number> {
-    return this.selectState(state => state.items.length);
+    return this.selectState((state) => state.items.length);
   }
 
   // Actions
   addItem(item: string): void {
-    this.setState(state => ({
+    this.setState((state) => ({
       items: [...state.items, item],
-      lastAction: `addItem("${item}")`
+      lastAction: `addItem("${item}")`,
     }));
   }
 
   removeItem(index: number): void {
-    this.setState(state => ({
+    this.setState((state) => ({
       items: state.items.filter((_, i) => i !== index),
-      lastAction: `removeItem(${index})`
+      lastAction: `removeItem(${index})`,
     }));
   }
 
   clearItems(): void {
     this.setState({
       items: [],
-      lastAction: 'clearItems'
+      lastAction: 'clearItems',
     });
   }
 
   shuffleItems(): void {
-    this.setState(state => ({
+    this.setState((state) => ({
       items: [...state.items].sort(() => Math.random() - 0.5),
-      lastAction: 'shuffleItems'
+      lastAction: 'shuffleItems',
     }));
   }
 }
