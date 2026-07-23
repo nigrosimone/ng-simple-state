@@ -7,6 +7,11 @@ import prettier from 'eslint-config-prettier/flat';
 
 export default tseslint.config(
   {
+    // `examples/` holds standalone apps with their own package.json and tsconfig:
+    // they are built on their own, not by this workspace.
+    ignores: ['examples/**'],
+  },
+  {
     files: ['**/*.ts'],
     extends: [
       eslint.configs.recommended,
