@@ -1,29 +1,63 @@
-import { Injectable, Signal } from '@angular/core';
-import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+import { Service, Signal } from '@angular/core';
+import {
+  NgSimpleStateBaseSignalStore,
+  type NgSimpleStateStoreConfig,
+} from 'ng-simple-state';
 
 export interface CounterState {
+  step: number;
   count: number;
 }
 
-@Injectable()
+@Service()
 export class CounterStore extends NgSimpleStateBaseSignalStore<CounterState> {
-  storeConfig(): NgSimpleStateStoreConfig<CounterState> {
-    return { storeName: 'CounterStore' };
+  constructor() {
+    super();
+
+    this.createEffect('logger', (state) => {
+      console.log('[CounterStoreSignal] State updated:', state);
+    });
+  }
+
+  storeConfig(): NgSimpleStateStoreConfig {
+    return {
+      storeName: 'CounterStoreSignal',
+    };
   }
 
   initialState(): CounterState {
-    return { count: 0 };
+    return {
+      step: 1,
+      count: 0,
+    };
   }
 
   selectCount(): Signal<number> {
     return this.selectState((state) => state.count);
   }
 
-  increment(step = 1): void {
-    this.setState((state) => ({ count: state.count + step }));
+  selectStep(): Signal<number> {
+    return this.selectState((state) => state.step);
   }
 
-  decrement(step = 1): void {
-    this.setState((state) => ({ count: state.count - step }));
+  increment(increment: number = 1): void {
+    this.setState((state: CounterState) => ({
+      ...state,
+      count: state.count + increment,
+    }));
+  }
+
+  decrement(decrement: number = 1): void {
+    this.setState((state: CounterState) => ({
+      ...state,
+      count: state.count - decrement,
+    }));
+  }
+
+  setStep(step: number = 1): void {
+    this.setState((state: CounterState) => ({
+      ...state,
+      step,
+    }));
   }
 }
