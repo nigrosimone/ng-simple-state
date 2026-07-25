@@ -23,6 +23,7 @@ Simple state management in Angular with only Services and Signal.
 - [Redux DevTools Integration](#redux-devtools-integration)
 - [Integration with ng-http-caching](#integration-with-ng-http-caching)
 - [WebMCP](#webmcp)
+- [Server-side rendering (SSR)](#server-side-rendering-ssr)
 - [RxJS Store](#rxjs-store)
   - [Manage component state without service](#manage-component-state-without-service-1)
   - [Override global config](#override-global-config-1)
@@ -61,6 +62,7 @@ npm i ng-simple-state
 | *plugins*              | Array of plugins to extend store functionality.                                                 | `[]`             |
 | *immerProduce*         | Custom Immer produce function for immutable updates.                                            | `undefined`      |
 | *webMcp*               | Enable experimental WebMCP tool integration.                                                    | `false`          |
+| *transferState*        | Transfer the state rendered on the server to the browser (see "Server-side rendering (SSR)").   | `false`          |
 
 _Side note: each store can be override the global configuration implementing `storeConfig()` method (see "Override global config")._
 
@@ -1205,6 +1207,47 @@ export class UsersStore extends NgSimpleStateBaseSignalStore<UsersState> {
   }
 }
 ```
+
+## Server-side rendering (SSR)
+
+The library runs as is on the server: every browser only feature it can use is skipped when there is no DOM, so nothing throws and nothing leaks from one rendered page to the next.
+
+| Option              | Server side behaviour                                                                                                                  |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| *persistentStorage* | An in-memory storage is used instead of `localStorage`/`sessionStorage`: the store starts from `initialState()` and writes go nowhere. |
+| *enableDevTool*     | Disabled: the `Redux DevTools` extension only exists in the browser.                                                                   |
+| *webMcp*            | Disabled: the WebMCP registry is a browser API.                                                                                        |
+
+Stores keep working as usual, so anything the server renders comes from `initialState()` (or from the state your resolvers/effects produce during the render).
+
+### Transferring the rendered state to the browser
+
+Set `transferState: true` to hand the state used by the server over to the browser through Angular [`TransferState`](https://angular.dev/api/core/TransferState). During hydration the store starts from the state the page was rendered with, instead of recomputing it:
+
+```ts
+import { Injectable } from '@angular/core';
+import { NgSimpleStateBaseSignalStore, NgSimpleStateStoreConfig } from 'ng-simple-state';
+
+export interface UsersState {
+  users: User[];
+}
+
+@Injectable({ providedIn: 'root' })
+export class UsersStore extends NgSimpleStateBaseSignalStore<UsersState> {
+
+  storeConfig(): NgSimpleStateStoreConfig<UsersState> {
+    return { storeName: 'UsersStore', transferState: true };
+  }
+
+  initialState(): UsersState {
+    return { users: [] };
+  }
+}
+```
+
+The transferred state is consumed once, by the first store built in the browser, and then dropped: it describes the page that has just been hydrated. It also wins over `persistentStorage`, otherwise the hydrated state would disagree with the server rendered DOM. In an application without server-side rendering the option does nothing.
+
+_Side note: a plugin instance passed to `provideNgSimpleState` is created once per server process, not once per request (`undoRedoPlugin` keeps its history there, and a custom plugin may keep other state). Give the plugins per-request state only if you build them in a per-request provider factory._
 
 ## RxJS Store
 

@@ -5,9 +5,12 @@ import {
   inject,
   DestroyRef,
   declareExperimentalWebMcpTool,
+  TransferState,
+  makeStateKey,
 } from '@angular/core';
 import { NgSimpleStateDevTool } from './tool/ng-simple-state-dev-tool';
-import type { NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
+import { BASE_KEY, type NgSimpleStateStorage } from './storage/ng-simple-state-browser-storage';
+import { isServerPlatform } from './ng-simple-state-platform';
 import { NgSimpleStateLocalStorage } from './storage/ng-simple-state-local-storage';
 import { NgSimpleStateSessionStorage } from './storage/ng-simple-state-session-storage';
 import {
@@ -52,6 +55,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
   private readonly pendingCommits: { prevState: S; nextState: S; actionName: string }[] = [];
   /** True while `_afterCommit` is draining the queue */
   private isFlushingCommits: boolean = false;
+  /** True when the store is built server side (server side rendering) */
+  private readonly isServer: boolean;
 
   /**
    * Apply state directly from DevTools time-travel (bypasses devtool send and plugins).
@@ -68,6 +73,8 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     const storeConfig = this.storeConfig();
     const config = { ...globalConfig, ...storeConfig };
 
+    this.isServer = isServerPlatform();
+
     if (config.persistentStorage === 'local') {
       this.storage = new NgSimpleStateLocalStorage(config);
     } else if (config.persistentStorage === 'session') {
@@ -80,7 +87,10 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
       );
     }
 
-    if (config.enableDevTool) {
+    // the Redux DevTools extension only exists in the browser: server side the
+    // dev tool has nothing to talk to, and would just log every state change
+    // of every request to the server console
+    if (config.enableDevTool && !this.isServer) {
       this.devTool = inject(NgSimpleStateDevTool);
     }
 
@@ -111,6 +121,13 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
       }
     }
 
+    if (config.transferState) {
+      // after the storage on purpose: when the page has been rendered on the
+      // server, hydrating from anything else than what it rendered would make
+      // the DOM and the state disagree
+      this.setupTransferState();
+    }
+
     this.initState = this.initialState();
     if (!this._firstState) {
       this._firstState = this.initState;
@@ -139,7 +156,9 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
     this.isArray = Array.isArray(this._firstState);
 
-    if (config.webMcp) {
+    // WebMCP is a browser API (it is read from `document`/`navigator`):
+    // declaring a tool server side would throw
+    if (config.webMcp && !this.isServer) {
       const serialize = config.serializeState || JSON.stringify;
       declareExperimentalWebMcpTool({
         name: `${this.storeName}_getCurrentState`,
@@ -168,6 +187,32 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
 
       this.destroyAllEffects();
     });
+  }
+
+  /**
+   * Bridge the state rendered on the server to the browser.
+   *
+   * Server side the state is read when Angular serializes the page, so what
+   * travels is the last state the render produced. Browser side it is consumed
+   * as the first state of the store, and dropped right after: it describes the
+   * page that has just been hydrated, not the ones the user will navigate to.
+   *
+   * Does nothing in an application without server side rendering, where no key
+   * is ever transferred.
+   */
+  private setupTransferState(): void {
+    const transferState = inject(TransferState);
+    const key = makeStateKey<S>(BASE_KEY + this.storeName);
+
+    if (this.isServer) {
+      transferState.onSerialize(key, () => this.getCurrentState() as S);
+      return;
+    }
+
+    if (transferState.hasKey(key)) {
+      this._firstState = transferState.get(key, this._firstState);
+      transferState.remove(key);
+    }
   }
 
   /**

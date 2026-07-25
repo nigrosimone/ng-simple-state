@@ -61,6 +61,13 @@ export interface NgSimpleStateConfig<K = any> {
    * Enable experimental WebMCP tool integration (only read current state)
    */
   webMcp?: boolean;
+  /**
+   * if `true` the state rendered on the server is transferred to the browser
+   * (through Angular `TransferState`) and becomes the first state of the store
+   * during hydration, instead of being recomputed from `initialState()`.
+   * Has no effect in an application without server side rendering.
+   */
+  transferState?: boolean;
 }
 
 /**

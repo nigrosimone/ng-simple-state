@@ -1,4 +1,5 @@
 import { inject, Injectable, NgZone, Signal, signal, WritableSignal } from '@angular/core';
+import { hasDom } from '../ng-simple-state-platform';
 
 /**
  * State history entry for time-travel debugging
@@ -66,8 +67,8 @@ interface ReduxDevTools {
 }
 
 function getReduxDevTools(): ReduxDevTools | undefined {
-  // `window` is absent during server side rendering
-  if (typeof window === 'undefined') {
+  // the extension lives in the browser: `window` is absent server side
+  if (!hasDom()) {
     return undefined;
   }
   const win = window as unknown as {

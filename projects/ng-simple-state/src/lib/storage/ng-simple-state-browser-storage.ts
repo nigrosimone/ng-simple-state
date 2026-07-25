@@ -1,4 +1,5 @@
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
+import { hasDom } from '../ng-simple-state-platform';
 
 export const BASE_KEY = 'NgSimpleState::';
 
@@ -29,10 +30,17 @@ function createMemoryStorage(): Storage {
  * Falls back to an in-memory storage when it is unavailable: server side
  * rendering, storage disabled by the user, or a sandboxed iframe (which throws
  * a `SecurityError` on access).
+ *
+ * Outside a browser the global one is never used even when it exists: Node
+ * exposes a `localStorage` of its own, and being a process wide singleton it
+ * would leak the state of a rendered page into the next request.
  * @param kind the global storage name to resolve
  * @returns the browser storage, or an in-memory stand-in
  */
 export function resolveBrowserStorage(kind: 'localStorage' | 'sessionStorage'): Storage {
+  if (!hasDom()) {
+    return createMemoryStorage();
+  }
   try {
     const storage = (globalThis as unknown as Record<string, Storage | undefined>)[kind];
     if (storage) {
