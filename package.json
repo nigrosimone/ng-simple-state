@@ -27,6 +27,7 @@
     "build:lib": "ng build ng-simple-state",
     "build:schematics": "node projects/ng-simple-state/schematics/build.mjs",
     "test": "ng test",
+    "test:ci": "ng test ng-simple-state --coverage --no-watch",
     "test:schematics": "tsc -p projects/ng-simple-state/schematics/tsconfig.schematics.json && node projects/ng-simple-state/schematics/copy-assets.mjs projects/ng-simple-state/schematics/out && jasmine projects/ng-simple-state/schematics/out/store/index.spec.js",
     "lint": "ng lint",
     "format": "prettier --write .",

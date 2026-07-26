@@ -1,17 +1,29 @@
 name: Node.js CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [main, master]
+    branches: [main]
+
+# a new push to a pull request supersedes the runs still in flight for it
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     strategy:
+      # keep checking the other runtimes when one of them fails
+      fail-fast: false
       matrix:
-        node-version: [24.x]
+        node-version: [22.x, 24.x, 26.x]
 
     steps:
       - uses: actions/checkout@v7
@@ -19,12 +31,29 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install --force
+          cache: npm
+      - run: npm ci
       - name: Check formatting
         run: npm run format:check
       - name: Lint
-        run: npm run lint ng-simple-state
+        run: npm run lint
       - name: Test
-        run: npm run test ng-simple-state -- --coverage --no-watch
+        run: npm run test:ci
       - name: Test schematics
         run: npm run test:schematics
+      - name: Build library
+        run: npm run build:lib
+      - name: Build the schematics
+        # ng-packagr does not bundle them: without this the "schematics" entry of
+        # package.json would point at a collection missing from the package
+        run: npm run build:schematics
+      - name: Build demo app
+        run: npm run build ng-simple-state-demo
+      - name: Upload coverage
+        if: matrix.node-version == '24.x'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: warn
+          retention-days: 7
