@@ -1,8 +1,5 @@
 import { Service, Signal } from '@angular/core';
-import {
-  NgSimpleStateBaseSignalStore,
-  type NgSimpleStateStoreConfig,
-} from 'ng-simple-state';
+import { NgSimpleStateBaseSignalStore, type NgSimpleStateStoreConfig } from 'ng-simple-state';
 
 export interface CounterState {
   step: number;
