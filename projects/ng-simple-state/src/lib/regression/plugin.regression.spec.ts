@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-store';
 import { NgSimpleStateBaseRxjsStore } from '../rxjs/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
+import { NgSimpleStateModule } from '../ng-simple-state.module';
 import { provideNgSimpleState, provideNgSimpleStatePlugins } from '../ng-simple-state-provider';
 import {
   NgSimpleStatePlugin,
@@ -232,6 +233,48 @@ describe('Regression: plugin providers', () => {
     TestBed.inject(CombinedStore).increment();
 
     expect(undoRedo.canUndo('CombinedProvidersStore')).toBeTrue();
+  });
+
+  it('should register the plugins declared through NgSimpleStateModule.forRoot()', () => {
+    // the deprecated entry point only provided the config object, while stores
+    // read the plugins from their own token: they were silently never called
+    const seen: string[] = [];
+    const recorder: NgSimpleStatePlugin<CounterState> = {
+      name: 'recorder',
+      onAfterStateChange: (context) => {
+        seen.push(context.actionName);
+      },
+    };
+
+    @Injectable()
+    class ModuleStore extends NgSimpleStateBaseSignalStore<CounterState> {
+      protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+        return { storeName: 'ModulePluginsStore' };
+      }
+      initialState(): CounterState {
+        return { count: 0, name: 'a' };
+      }
+      increment(): boolean {
+        return this.setState((state) => ({ count: state.count + 1 }), 'increment');
+      }
+    }
+
+    TestBed.configureTestingModule({
+      imports: [NgSimpleStateModule.forRoot({ plugins: [recorder as NgSimpleStatePlugin] })],
+      providers: [ModuleStore],
+    });
+    TestBed.inject(ModuleStore).increment();
+
+    expect(seen).toEqual(['increment']);
+  });
+
+  it('should expose NG_SIMPLE_STATE_UNDO_REDO from NgSimpleStateModule.forRoot()', () => {
+    const plugin = undoRedoPlugin();
+    TestBed.configureTestingModule({
+      imports: [NgSimpleStateModule.forRoot({ plugins: [plugin] })],
+    });
+
+    expect(TestBed.inject(NG_SIMPLE_STATE_UNDO_REDO, null)).toBe(plugin);
   });
 });
 

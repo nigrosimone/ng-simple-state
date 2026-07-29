@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { vi } from 'vitest';
 import { NgSimpleStateBaseSignalStore } from '../signal/ng-simple-state-base-store';
 import { NgSimpleStateStoreConfig } from '../ng-simple-state-models';
 import { NgSimpleStateDevTool } from '../tool/ng-simple-state-dev-tool';
 import { BASE_KEY } from '../storage/ng-simple-state-browser-storage';
+import { DevToolsExtension } from '../tool/dev-tools-extension.mock';
 
 interface CounterState {
   count: number;
@@ -90,5 +92,73 @@ describe('Regression: DevTool time-travel and persistence', () => {
 
     expect(store.getCurrentState()).toEqual({ count: 1 });
     expect(localStorage.getItem(BASE_KEY + 'TravelStore')).toBe(JSON.stringify({ count: 1 }));
+  });
+});
+
+describe('Regression: DevTool paused recording', () => {
+  let extension: DevToolsExtension;
+
+  beforeEach(() => {
+    extension = new DevToolsExtension();
+    (window as unknown as Record<string, unknown>)['__REDUX_DEVTOOLS_EXTENSION__'] = extension;
+  });
+
+  afterEach(() => {
+    delete (window as unknown as Record<string, unknown>)['__REDUX_DEVTOOLS_EXTENSION__'];
+  });
+
+  @Injectable()
+  class PausedStore extends NgSimpleStateBaseSignalStore<CounterState> {
+    protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+      return { storeName: 'PausedStore', enableDevTool: true };
+    }
+    initialState(): CounterState {
+      return { count: 0 };
+    }
+    increment(): boolean {
+      return this.setState((state) => ({ count: state.count + 1 }), 'increment');
+    }
+  }
+
+  it('should stay silent when the panel recording is paused', () => {
+    TestBed.configureTestingModule({ providers: [PausedStore] });
+    const store = TestBed.inject(PausedStore);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    try {
+      store.increment();
+      expect(extension.sent.length).toBeGreaterThan(0);
+      expect(log).not.toHaveBeenCalled();
+
+      // the user presses "pause recording" in the Redux DevTools panel
+      extension.dispatch('PAUSE_RECORDING');
+
+      const sentBefore = extension.sent.length;
+      store.increment();
+      store.increment();
+
+      // muting the panel must not reroute every state change to the console
+      expect(extension.sent.length).toBe(sentBefore);
+      expect(log).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
+
+    expect(store.getCurrentState()).toEqual({ count: 3 });
+  });
+
+  it('should fall back to the console when the extension is not installed', () => {
+    delete (window as unknown as Record<string, unknown>)['__REDUX_DEVTOOLS_EXTENSION__'];
+
+    TestBed.configureTestingModule({ providers: [PausedStore] });
+    const store = TestBed.inject(PausedStore);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    try {
+      store.increment();
+      expect(log).toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
   });
 });

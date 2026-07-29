@@ -169,4 +169,77 @@ describe('Regression: storage resilience', () => {
     expect(TestBed.inject(CustomSerializerStore).getCurrentState()).toEqual({ count: 1 });
     expect(deserialized).toBeGreaterThan(0);
   });
+
+  it('should keep a custom storage in charge when the store also declares serializers', () => {
+    // a custom storage puts its own logic in getItem/setItem: binding the store
+    // serializers to it must not hand the persistence back to the base
+    // implementation, or every write would bypass the custom storage entirely
+    const written = new Map<string, string>();
+    const calls: string[] = [];
+    // what the base implementation would write to, and must not
+    const bypassed = new Map<string, string>();
+
+    class AuditedStorage extends NgSimpleStateStorage<CounterState> {
+      constructor() {
+        super({
+          length: 0,
+          clear: () => bypassed.clear(),
+          getItem: (key: string) => bypassed.get(key) ?? null,
+          key: () => null,
+          removeItem: (key: string) => {
+            bypassed.delete(key);
+          },
+          setItem: (key: string, value: string) => {
+            bypassed.set(key, value);
+          },
+        } as Storage);
+      }
+      override setItem(key: string, state: CounterState): boolean {
+        calls.push('setItem');
+        written.set(key, this.serializeState(state));
+        return true;
+      }
+      override getItem(key: string): CounterState | null {
+        calls.push('getItem');
+        const raw = written.get(key);
+        return raw ? this.deserializeState(raw) : null;
+      }
+    }
+
+    const audited = new AuditedStorage();
+    const config: NgSimpleStateStoreConfig<CounterState> = {
+      storeName: 'AuditedStore',
+      persistentStorage: audited,
+      serializeState: (state) => `v1:${JSON.stringify(state)}`,
+      deserializeState: (raw) => JSON.parse(raw.replace(/^v1:/, '')),
+    };
+
+    @Injectable()
+    class AuditedStore extends NgSimpleStateBaseSignalStore<CounterState> {
+      protected storeConfig(): NgSimpleStateStoreConfig<CounterState> {
+        return config;
+      }
+      initialState(): CounterState {
+        return { count: 0 };
+      }
+      increment(): boolean {
+        return this.setState((state) => ({ count: state.count + 1 }));
+      }
+    }
+
+    TestBed.configureTestingModule({ providers: [AuditedStore] });
+    TestBed.inject(AuditedStore).increment();
+
+    expect(calls).toContain('setItem');
+    // the custom storage received the state, serialized the store way
+    expect(written.get('AuditedStore')).toBe('v1:{"count":1}');
+    // and nothing went around it, straight to the underlying Storage
+    expect(bypassed.size).toBe(0);
+
+    // a second store instance must read it back through the custom storage too
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [AuditedStore] });
+    expect(TestBed.inject(AuditedStore).getCurrentState()).toEqual({ count: 1 });
+    expect(calls).toContain('getItem');
+  });
 });

@@ -77,6 +77,11 @@ export abstract class NgSimpleStateStorage<K = unknown> {
    * several stores, so the serializers declared by one store must not be
    * applied to the others: when they differ, a bound view is returned instead
    * of mutating this instance.
+   *
+   * The view delegates to this very instance — it only shadows the two
+   * serializers — so a custom storage keeps whatever it overrides
+   * (`setItem`/`getItem`/…) instead of silently falling back to the base
+   * implementation over the underlying `Storage`.
    * @param config the store configuration
    * @returns this instance, or a view honouring the config serializers
    */
@@ -84,7 +89,7 @@ export abstract class NgSimpleStateStorage<K = unknown> {
     if (!config.serializeState && !config.deserializeState) {
       return this;
     }
-    const view = new NgSimpleStateStorageView<K>(this.storage);
+    const view: NgSimpleStateStorage<K> = Object.create(this);
     view.serializeState = config.serializeState ?? this.serializeState;
     view.deserializeState = config.deserializeState ?? this.deserializeState;
     return view;
@@ -157,15 +162,5 @@ export abstract class NgSimpleStateStorage<K = unknown> {
     } catch {
       return false;
     }
-  }
-}
-
-/**
- * Concrete storage sharing an underlying browser storage.
- * Only used by `NgSimpleStateStorage.withConfig` to bind per store serializers.
- */
-class NgSimpleStateStorageView<K = unknown> extends NgSimpleStateStorage<K> {
-  constructor(storage: Storage) {
-    super(storage);
   }
 }

@@ -631,8 +631,13 @@ export abstract class NgSimpleStateBaseCommonStore<S extends object | Array<unkn
     if (!this.devTool) {
       return false;
     }
-    if (!this.devTool.send(this.storeName, actionName, newState, prevState)) {
-      /* istanbul ignore next */
+    if (
+      !this.devTool.send(this.storeName, actionName, newState, prevState) &&
+      // the console is the fallback for a missing extension only: a change the
+      // extension itself declined (recording paused, time-travel in progress)
+      // must stay just as silent as the panel the user just muted
+      !this.devTool.isActive()
+    ) {
       console.log(this.storeName + '.' + actionName, newState);
     }
     return true;
